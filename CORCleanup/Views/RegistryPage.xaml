@@ -1,0 +1,211 @@
+<Page x:Class="CORCleanup.Views.RegistryPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      Title="Registry">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TabControl Grid.Row="0"
+                    SelectedIndex="{Binding ViewModel.SelectedTabIndex}">
+
+            <!-- Registry Scanner Tab -->
+            <TabItem Header="Registry Scanner">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Action buttons -->
+                    <WrapPanel Grid.Row="0" Margin="0,0,0,12">
+                        <ui:Button Content="Scan Registry"
+                                   Appearance="Primary"
+                                   Command="{Binding ViewModel.ScanRegistryCommand}"
+                                   MinWidth="130"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Content="Stop"
+                                   Appearance="Danger"
+                                   Command="{Binding ViewModel.StopScanCommand}"
+                                   Visibility="{Binding ViewModel.IsScanning, Converter={StaticResource BoolToVis}}"
+                                   MinWidth="70"
+                                   Margin="0,0,16,0" />
+                        <ui:Button Content="Fix Selected"
+                                   Appearance="Success"
+                                   Command="{Binding ViewModel.FixSelectedCommand}"
+                                   Visibility="{Binding ViewModel.HasScanned, Converter={StaticResource BoolToVis}}"
+                                   MinWidth="110"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Content="Select All"
+                                   Command="{Binding ViewModel.SelectAllCommand}"
+                                   Visibility="{Binding ViewModel.HasScanned, Converter={StaticResource BoolToVis}}"
+                                   MinWidth="80"
+                                   Margin="0,0,4,0" />
+                        <ui:Button Content="Safe Only"
+                                   Command="{Binding ViewModel.SelectSafeOnlyCommand}"
+                                   Visibility="{Binding ViewModel.HasScanned, Converter={StaticResource BoolToVis}}"
+                                   MinWidth="80"
+                                   Margin="0,0,4,0" />
+                        <ui:Button Content="Select None"
+                                   Command="{Binding ViewModel.SelectNoneCommand}"
+                                   Visibility="{Binding ViewModel.HasScanned, Converter={StaticResource BoolToVis}}"
+                                   MinWidth="90" />
+                    </WrapPanel>
+
+                    <!-- Scan progress text -->
+                    <TextBlock Grid.Row="1"
+                               Text="{Binding ViewModel.ScanProgress}"
+                               Visibility="{Binding ViewModel.ScanProgress, Converter={StaticResource StringToVis}}"
+                               Opacity="0.7"
+                               Margin="0,0,0,8" />
+
+                    <!-- Results summary card -->
+                    <ui:Card Grid.Row="2"
+                             Padding="12"
+                             Margin="0,0,0,12"
+                             Visibility="{Binding ViewModel.HasScanned, Converter={StaticResource BoolToVis}}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="{Binding ViewModel.ResultsSummary}"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <!-- Risk legend -->
+                                <Border Background="#2D7D46" CornerRadius="3"
+                                        Padding="8,2" Margin="0,0,6,0">
+                                    <TextBlock Text="Safe" FontSize="11"
+                                               Foreground="White" />
+                                </Border>
+                                <Border Background="#B8860B" CornerRadius="3"
+                                        Padding="8,2" Margin="0,0,6,0">
+                                    <TextBlock Text="Review" FontSize="11"
+                                               Foreground="White" />
+                                </Border>
+                                <Border Background="#C41E3A" CornerRadius="3"
+                                        Padding="8,2">
+                                    <TextBlock Text="Caution" FontSize="11"
+                                               Foreground="White" />
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </ui:Card>
+
+                    <!-- Issues DataGrid -->
+                    <DataGrid Grid.Row="3"
+                              ItemsSource="{Binding ViewModel.Issues}"
+                              IsReadOnly="False"
+                              SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Header=""
+                                                     Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
+                                                     Width="35" />
+                            <DataGridTextColumn Header="Risk"
+                                                Binding="{Binding RiskDisplayName}"
+                                                Width="65" />
+                            <DataGridTextColumn Header="Category"
+                                                Binding="{Binding CategoryDisplayName}"
+                                                Width="180" />
+                            <DataGridTextColumn Header="Description"
+                                                Binding="{Binding Description}"
+                                                Width="*" />
+                            <DataGridTextColumn Header="Registry Path"
+                                                Binding="{Binding KeyPath}"
+                                                Width="300" />
+                        </DataGrid.Columns>
+
+                        <!-- Row styling based on risk level -->
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Risk}" Value="Safe">
+                                        <Setter Property="Foreground" Value="#7DBF8E" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Risk}" Value="Review">
+                                        <Setter Property="Foreground" Value="#D4A843" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Risk}" Value="Caution">
+                                        <Setter Property="Foreground" Value="#E06666" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- Backup Management Tab -->
+            <TabItem Header="Backups">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Backup action buttons -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                        <ui:Button Content="Load Backups"
+                                   Appearance="Primary"
+                                   Command="{Binding ViewModel.LoadBackupsCommand}"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Content="Restore Selected"
+                                   Appearance="Success"
+                                   Command="{Binding ViewModel.RestoreBackupCommand}"
+                                   MinWidth="120"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Content="Delete Selected"
+                                   Appearance="Danger"
+                                   Command="{Binding ViewModel.DeleteBackupCommand}"
+                                   MinWidth="120"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Content="Open Folder"
+                                   Command="{Binding ViewModel.OpenBackupFolderCommand}"
+                                   MinWidth="100" />
+                    </StackPanel>
+
+                    <!-- Backups DataGrid -->
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding ViewModel.Backups}"
+                              SelectedItem="{Binding ViewModel.SelectedBackup}"
+                              SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="File Name"
+                                                Binding="{Binding FileName}"
+                                                Width="250" />
+                            <DataGridTextColumn Header="Created"
+                                                Binding="{Binding CreatedFormatted}"
+                                                Width="150" />
+                            <DataGridTextColumn Header="Size"
+                                                Binding="{Binding SizeFormatted}"
+                                                Width="100" />
+                            <DataGridTextColumn Header="Issues"
+                                                Binding="{Binding IssueCount}"
+                                                Width="70" />
+                            <DataGridTextColumn Header="Full Path"
+                                                Binding="{Binding FilePath}"
+                                                Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- Status bar -->
+        <TextBlock Grid.Row="1"
+                   Text="{Binding ViewModel.StatusText}"
+                   Opacity="0.6"
+                   FontSize="12"
+                   Margin="0,8,0,0" />
+    </Grid>
+</Page>

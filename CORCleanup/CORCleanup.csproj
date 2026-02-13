@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>COR Cleanup</AssemblyName>
+    <RootNamespace>CORCleanup</RootNamespace>
+    <Version>1.0.0</Version>
+    <Company>COR Intelligence</Company>
+    <Product>COR Cleanup</Product>
+    <Description>All-in-one Windows 11 MSP technician tool by COR Intelligence</Description>
+    <Copyright>Copyright © COR Intelligence 2026</Copyright>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WPF-UI" Version="4.2.0" />
+    <PackageReference Include="WPF-UI.DependencyInjection" Version="4.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CORCleanup.Core\CORCleanup.Core.csproj" />
+  </ItemGroup>
+
+</Project>

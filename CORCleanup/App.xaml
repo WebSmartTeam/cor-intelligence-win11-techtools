@@ -1,0 +1,34 @@
+<Application x:Class="CORCleanup.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:converters="clr-namespace:CORCleanup.Converters"
+             ShutdownMode="OnMainWindowClose"
+             DispatcherUnhandledException="OnDispatcherUnhandledException">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ui:ThemesDictionary Theme="Dark" />
+                <ui:ControlsDictionary />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Global converters (shared across all pages) -->
+            <BooleanToVisibilityConverter x:Key="BoolToVis" />
+            <converters:StringToVisibilityConverter x:Key="StringToVis" />
+            <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
+            <converters:IntEqualsToVisibilityConverter x:Key="IntEqualsToVis" />
+            <converters:NullToVisibilityConverter x:Key="NullToVis" />
+
+            <!-- Implicit DataGrid style — Fluent defaults for all grids -->
+            <Style TargetType="DataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
+                <Setter Property="AutoGenerateColumns" Value="False" />
+                <Setter Property="HeadersVisibility" Value="Column" />
+                <Setter Property="GridLinesVisibility" Value="Horizontal" />
+                <Setter Property="CanUserSortColumns" Value="True" />
+                <Setter Property="IsReadOnly" Value="True" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="BorderBrush" Value="{DynamicResource ControlElevationBorderBrush}" />
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

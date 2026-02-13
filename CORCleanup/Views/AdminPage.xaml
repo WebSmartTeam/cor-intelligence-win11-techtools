@@ -1,0 +1,522 @@
+<Page x:Class="CORCleanup.Views.AdminPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      Title="Admin">
+
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TabControl Grid.Row="0"
+                    SelectedIndex="{Binding ViewModel.SelectedTabIndex}">
+
+            <!-- ============================================================ -->
+            <!-- TAB 1: Startup Items -->
+            <!-- ============================================================ -->
+            <TabItem Header="Startup Items">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                        <ui:Button Content="Load Startup Items"
+                                   Command="{Binding ViewModel.LoadStartupItemsCommand}"
+                                   Appearance="Primary"
+                                   Margin="0,0,12,0" />
+                        <CheckBox Content="Hide Microsoft entries"
+                                  IsChecked="{Binding ViewModel.HideMicrosoftEntries}"
+                                  VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding ViewModel.FilteredStartupEntries}"
+                              SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Enabled" Binding="{Binding IsEnabled}" Width="65" />
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="200" />
+                            <DataGridTextColumn Header="Publisher" Binding="{Binding Publisher}" Width="150" />
+                            <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="100" />
+                            <DataGridTextColumn Header="Impact" Binding="{Binding Impact}" Width="70" />
+                            <DataGridTextColumn Header="File Path" Binding="{Binding FilePath}" Width="*" />
+                        </DataGrid.Columns>
+
+                        <DataGrid.InputBindings>
+                            <MouseBinding Gesture="LeftDoubleClick"
+                                          Command="{Binding DataContext.ViewModel.ToggleStartupItemCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                          CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+                        </DataGrid.InputBindings>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================ -->
+            <!-- TAB 2: Services -->
+            <!-- ============================================================ -->
+            <TabItem Header="Services">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <ui:Button Grid.Column="0"
+                                   Content="Load Services"
+                                   Command="{Binding ViewModel.LoadServicesCommand}"
+                                   Appearance="Primary"
+                                   Margin="0,0,12,0" />
+
+                        <ui:TextBox Grid.Column="1"
+                                    PlaceholderText="Filter services..."
+                                    Text="{Binding ViewModel.ServiceFilter, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <ui:Button Grid.Column="2"
+                                   Content="Start"
+                                   Appearance="Success"
+                                   Command="{Binding ViewModel.StartServiceCommand}"
+                                   MinWidth="70"
+                                   Margin="12,0,4,0" />
+                        <ui:Button Grid.Column="3"
+                                   Content="Stop"
+                                   Appearance="Danger"
+                                   Command="{Binding ViewModel.StopServiceCommand}"
+                                   MinWidth="70"
+                                   Margin="0,0,4,0" />
+                        <ui:Button Grid.Column="4"
+                                   Content="Restart"
+                                   Appearance="Info"
+                                   Command="{Binding ViewModel.RestartServiceCommand}"
+                                   MinWidth="70" />
+                    </Grid>
+
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding ViewModel.FilteredServices}"
+                              SelectedItem="{Binding ViewModel.SelectedService}"
+                              SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Display Name" Binding="{Binding DisplayName}" Width="220" />
+                            <DataGridTextColumn Header="Service Name" Binding="{Binding ServiceName}" Width="180" />
+                            <DataGridTextColumn Header="Status" Binding="{Binding StatusText}" Width="80" />
+                            <DataGridTextColumn Header="Start Type" Binding="{Binding StartType}" Width="90" />
+                            <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="110" />
+                            <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================ -->
+            <!-- TAB 3: Event Log -->
+            <!-- ============================================================ -->
+            <TabItem Header="Event Log">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                        <ui:Button Content="Load Events"
+                                   Command="{Binding ViewModel.LoadEventLogCommand}"
+                                   Appearance="Primary"
+                                   Margin="0,0,12,0" />
+                        <TextBlock Text="Last" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <ui:NumberBox Value="{Binding ViewModel.EventLogDays}"
+                                      Minimum="1" Maximum="90"
+                                      SpinButtonPlacementMode="Compact"
+                                      Width="100"
+                                      Margin="0,0,6,0" />
+                        <TextBlock Text="days" VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding ViewModel.EventLogEntries}"
+                              SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Time" Binding="{Binding TimeFormatted}" Width="150" />
+                            <DataGridTextColumn Header="Severity" Binding="{Binding Severity}" Width="80" />
+                            <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="160" />
+                            <DataGridTextColumn Header="Event ID" Binding="{Binding EventId}" Width="70" />
+                            <DataGridTextColumn Header="Log" Binding="{Binding LogName}" Width="80" />
+                            <DataGridTextColumn Header="Explanation" Binding="{Binding HumanReadableExplanation}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================ -->
+            <!-- TAB 4: System Repair -->
+            <!-- ============================================================ -->
+            <TabItem Header="System Repair">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
+                    <StackPanel Margin="16">
+                        <TextBlock Text="Run Windows repair tools (requires administrator privileges)"
+                                   Opacity="0.7" Margin="0,0,0,16" />
+
+                        <!-- Repair buttons -->
+                        <WrapPanel Margin="0,0,0,16">
+                            <ui:Button Content="SFC Scan"
+                                       Appearance="Primary"
+                                       Command="{Binding ViewModel.RunSfcScanCommand}"
+                                       MinWidth="140"
+                                       Margin="0,0,8,8"
+                                       ToolTip="System File Checker — scans and repairs protected system files" />
+                            <ui:Button Content="DISM Repair"
+                                       Appearance="Primary"
+                                       Command="{Binding ViewModel.RunDismRepairCommand}"
+                                       MinWidth="140"
+                                       Margin="0,0,8,8"
+                                       ToolTip="DISM Restore Health — repairs the Windows component store" />
+                            <ui:Button Content="Network Reset"
+                                       Command="{Binding ViewModel.RunNetworkResetCommand}"
+                                       MinWidth="140"
+                                       Margin="0,0,8,8"
+                                       ToolTip="Resets Winsock, TCP/IP, DNS cache, and TCP settings" />
+                            <ui:Button Content="Flush DNS"
+                                       Command="{Binding ViewModel.RunDnsFlushCommand}"
+                                       MinWidth="110"
+                                       Margin="0,0,8,8"
+                                       ToolTip="Flushes the DNS resolver cache" />
+                            <ui:Button Content="WU Reset"
+                                       Command="{Binding ViewModel.RunWindowsUpdateResetCommand}"
+                                       MinWidth="110"
+                                       Margin="0,0,8,8"
+                                       ToolTip="Stops and restarts Windows Update services (BITS, wuauserv, cryptSvc, msiserver)" />
+                        </WrapPanel>
+
+                        <!-- Progress indicator -->
+                        <ProgressBar IsIndeterminate="True"
+                                     Height="4"
+                                     Margin="0,0,0,12"
+                                     Visibility="{Binding ViewModel.IsRepairing, Converter={StaticResource BoolToVis}}" />
+
+                        <!-- Live output -->
+                        <ui:Card Padding="0" Margin="0,0,0,16">
+                            <TextBox Text="{Binding ViewModel.RepairOutput, Mode=OneWay}"
+                                     IsReadOnly="True"
+                                     FontFamily="Consolas"
+                                     FontSize="11"
+                                     TextWrapping="Wrap"
+                                     VerticalScrollBarVisibility="Auto"
+                                     MaxHeight="300"
+                                     Padding="12"
+                                     BorderThickness="0" />
+                        </ui:Card>
+
+                        <!-- History -->
+                        <TextBlock Text="Repair History"
+                                   FontWeight="SemiBold" Margin="0,0,0,8" />
+                        <DataGrid ItemsSource="{Binding ViewModel.RepairResults}"
+                                  MaxHeight="200">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Operation" Binding="{Binding OperationName}" Width="180" />
+                                <DataGridTextColumn Header="Status" Binding="{Binding StatusDisplay}" Width="160" />
+                                <DataGridTextColumn Header="Duration" Binding="{Binding DurationFormatted}" Width="80" />
+                                <DataGridTextColumn Header="Command" Binding="{Binding Command}" Width="*">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="FontFamily" Value="Consolas" />
+                                            <Setter Property="FontSize" Value="11" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ============================================================ -->
+            <!-- TAB 5: Printer Management -->
+            <!-- ============================================================ -->
+            <TabItem Header="Printers">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Controls -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                        <ui:Button Content="Load Printers"
+                                   Appearance="Primary"
+                                   Command="{Binding ViewModel.LoadPrintersCommand}"
+                                   MinWidth="130"
+                                   Margin="0,0,12,0" />
+                        <ui:Button Content="Clear Spooler"
+                                   Appearance="Info"
+                                   Command="{Binding ViewModel.ClearSpoolerCommand}"
+                                   MinWidth="110"
+                                   Margin="0,0,12,0"
+                                   ToolTip="Stops the print spooler, clears the queue, then restarts" />
+                        <ui:Button Content="Set Default"
+                                   Command="{Binding ViewModel.SetDefaultPrinterCommand}"
+                                   MinWidth="100"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Content="Test Page"
+                                   Command="{Binding ViewModel.PrintTestPageCommand}"
+                                   MinWidth="90"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Content="Remove"
+                                   Appearance="Danger"
+                                   Command="{Binding ViewModel.RemovePrinterCommand}"
+                                   MinWidth="80" />
+                    </StackPanel>
+
+                    <!-- Printer list -->
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding ViewModel.Printers}"
+                              SelectedItem="{Binding ViewModel.SelectedPrinter}"
+                              SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
+                            <DataGridTextColumn Header="Driver" Binding="{Binding DriverName}" Width="200" />
+                            <DataGridTextColumn Header="Port" Binding="{Binding PortName}" Width="120" />
+                            <DataGridTextColumn Header="Type" Binding="{Binding TypeDisplay}" Width="80" />
+                            <DataGridTextColumn Header="Default" Binding="{Binding DefaultDisplay}" Width="65" />
+                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="90" />
+                            <DataGridTextColumn Header="Jobs" Binding="{Binding JobCountDisplay}" Width="55" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================ -->
+            <!-- TAB 6: Hosts File Editor -->
+            <!-- ============================================================ -->
+            <TabItem Header="Hosts File">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Controls -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                        <ui:Button Content="Load Hosts File"
+                                   Appearance="Primary"
+                                   Command="{Binding ViewModel.LoadHostsFileCommand}"
+                                   MinWidth="140"
+                                   Margin="0,0,12,0" />
+                        <ui:Button Content="Toggle"
+                                   Command="{Binding ViewModel.ToggleHostEntryCommand}"
+                                   MinWidth="80"
+                                   Margin="0,0,8,0"
+                                   ToolTip="Enable or disable the selected host entry" />
+                        <ui:Button Content="Remove"
+                                   Appearance="Danger"
+                                   Command="{Binding ViewModel.RemoveHostEntryCommand}"
+                                   MinWidth="80"
+                                   Margin="0,0,16,0" />
+                        <TextBlock Text="Edits C:\Windows\System32\drivers\etc\hosts (requires administrator)"
+                                   VerticalAlignment="Center" Opacity="0.5" FontSize="11" />
+                    </StackPanel>
+
+                    <!-- Add new entry -->
+                    <ui:Card Grid.Row="1" Padding="12" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="140" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <ui:TextBox Grid.Column="0"
+                                        PlaceholderText="IP Address"
+                                        Text="{Binding ViewModel.NewHostIp, UpdateSourceTrigger=PropertyChanged}"
+                                        FontFamily="Consolas"
+                                        Margin="0,0,8,0" />
+                            <ui:TextBox Grid.Column="1"
+                                        PlaceholderText="Hostname (e.g. example.com)"
+                                        Text="{Binding ViewModel.NewHostHostname, UpdateSourceTrigger=PropertyChanged}"
+                                        Margin="0,0,8,0" />
+                            <ui:TextBox Grid.Column="2"
+                                        PlaceholderText="Comment (optional)"
+                                        Text="{Binding ViewModel.NewHostComment, UpdateSourceTrigger=PropertyChanged}"
+                                        Margin="0,0,8,0" />
+                            <ui:Button Grid.Column="3"
+                                       Content="Add Entry"
+                                       Appearance="Primary"
+                                       Command="{Binding ViewModel.AddHostEntryCommand}"
+                                       MinWidth="100" />
+                        </Grid>
+                    </ui:Card>
+
+                    <!-- Hosts list -->
+                    <DataGrid Grid.Row="2"
+                              ItemsSource="{Binding ViewModel.HostsEntries}"
+                              SelectedItem="{Binding ViewModel.SelectedHostEntry}"
+                              SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Status" Binding="{Binding StatusDisplay}" Width="70" />
+                            <DataGridTextColumn Header="IP Address" Binding="{Binding IpAddress}" Width="160">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontFamily" Value="Consolas" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Hostname" Binding="{Binding Hostname}" Width="*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontFamily" Value="Consolas" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Comment" Binding="{Binding Comment}" Width="200" />
+                            <DataGridTextColumn Header="Line" Binding="{Binding LineNumber}" Width="50" />
+                        </DataGrid.Columns>
+
+                        <!-- Dim disabled entries -->
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding StatusDisplay}" Value="Disabled">
+                                        <Setter Property="Opacity" Value="0.5" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            <!-- ============================================================ -->
+            <!-- TAB 7: Debloat / Bloatware Removal -->
+            <!-- ============================================================ -->
+            <TabItem Header="Debloat">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Toolbar -->
+                    <WrapPanel Grid.Row="0" Margin="0,0,0,12">
+                        <ui:Button Content="Scan for Bloatware"
+                                   Appearance="Primary"
+                                   Command="{Binding ViewModel.ScanBloatwareCommand}"
+                                   MinWidth="160"
+                                   Margin="0,0,8,4" />
+                        <ui:Button Content="Select All Safe"
+                                   Command="{Binding ViewModel.SelectAllSafeBloatwareCommand}"
+                                   MinWidth="120"
+                                   Margin="0,0,8,4"
+                                   ToolTip="Select all packages rated Safe (green) for removal" />
+                        <ui:Button Content="Deselect All"
+                                   Command="{Binding ViewModel.DeselectAllBloatwareCommand}"
+                                   MinWidth="100"
+                                   Margin="0,0,8,4" />
+                        <ui:Button Content="Remove Selected"
+                                   Appearance="Danger"
+                                   Command="{Binding ViewModel.RemoveSelectedBloatwareCommand}"
+                                   MinWidth="140"
+                                   Margin="0,0,16,4"
+                                   ToolTip="Remove selected packages for all users and deprovision" />
+
+                        <TextBlock Text="Filter:" VerticalAlignment="Center" Margin="0,0,6,4" />
+                        <ComboBox ItemsSource="{Binding ViewModel.DebloatCategories}"
+                                  SelectedItem="{Binding ViewModel.DebloatCategoryFilter}"
+                                  Width="160" Margin="0,0,0,4" />
+                    </WrapPanel>
+
+                    <!-- Quick Actions -->
+                    <ui:Card Grid.Row="1" Padding="12" Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="Quick Actions (Registry Policies)"
+                                       FontWeight="SemiBold" Margin="0,0,0,8" />
+                            <WrapPanel>
+                                <ui:Button Content="Disable Copilot"
+                                           Appearance="Caution"
+                                           Command="{Binding ViewModel.DisableCopilotCommand}"
+                                           MinWidth="140"
+                                           Margin="0,0,8,4"
+                                           ToolTip="Removes Copilot AppX package and disables via registry policies" />
+                                <ui:Button Content="Disable Recall"
+                                           Appearance="Caution"
+                                           Command="{Binding ViewModel.DisableRecallCommand}"
+                                           MinWidth="140"
+                                           Margin="0,0,8,4"
+                                           ToolTip="Disables Windows Recall on 24H2 Copilot+ PCs via registry" />
+                                <ui:Button Content="Apply Privacy Tweaks"
+                                           Command="{Binding ViewModel.ApplyPrivacyTweaksCommand}"
+                                           MinWidth="170"
+                                           Margin="0,0,8,4"
+                                           ToolTip="Disables telemetry, advertising ID, Start suggestions, Bing search, lock screen ads" />
+                            </WrapPanel>
+                        </StackPanel>
+                    </ui:Card>
+
+                    <!-- Package list -->
+                    <DataGrid Grid.Row="2"
+                              ItemsSource="{Binding ViewModel.FilteredBloatwarePackages}"
+                              IsReadOnly="False"
+                              SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Header="" Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" Width="35" />
+                            <DataGridTextColumn Header="Name" Binding="{Binding FriendlyName}" Width="180" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Category" Binding="{Binding CategoryDisplay}" Width="120" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Safety" Binding="{Binding SafetyDisplay}" Width="70" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Status" Binding="{Binding StatusDisplay}" Width="90" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Package" Binding="{Binding PackageName}" Width="220" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontFamily" Value="Consolas" />
+                                        <Setter Property="FontSize" Value="11" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*" IsReadOnly="True" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Output log -->
+                    <ui:Card Grid.Row="3" Padding="0" Margin="0,12,0,0"
+                             Visibility="{Binding ViewModel.IsLoadingBloatware, Converter={StaticResource BoolToVis}}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <ProgressBar Grid.Row="0" IsIndeterminate="True" Height="4" />
+                            <TextBox Grid.Row="1"
+                                     Text="{Binding ViewModel.DebloatOutput, Mode=OneWay}"
+                                     IsReadOnly="True"
+                                     FontFamily="Consolas"
+                                     FontSize="11"
+                                     TextWrapping="Wrap"
+                                     VerticalScrollBarVisibility="Auto"
+                                     MaxHeight="150"
+                                     Padding="12"
+                                     BorderThickness="0" />
+                        </Grid>
+                    </ui:Card>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- Status bar -->
+        <TextBlock Grid.Row="1"
+                   Text="{Binding ViewModel.StatusText}"
+                   Opacity="0.6"
+                   FontSize="12"
+                   Margin="0,8,0,0" />
+    </Grid>
+</Page>
