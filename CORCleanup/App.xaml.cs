@@ -47,6 +47,7 @@ public partial class App : Application
             services.AddSingleton<Core.Interfaces.ISystemInfoService, Core.Services.Hardware.SystemInfoService>();
             services.AddSingleton<Core.Interfaces.ICleanupService, Core.Services.Cleanup.SystemCleanupService>();
             services.AddSingleton<Core.Interfaces.IWifiService, Core.Services.Network.WifiService>();
+            services.AddSingleton<Core.Interfaces.IWifiScannerService, Core.Services.Network.WifiScannerService>();
             services.AddSingleton<Core.Interfaces.IUninstallService, Core.Services.UninstallService>();
             services.AddSingleton<Core.Interfaces.IStartupService, Core.Services.Admin.StartupService>();
             services.AddSingleton<Core.Interfaces.IServicesManagerService, Core.Services.Admin.ServicesManagerService>();

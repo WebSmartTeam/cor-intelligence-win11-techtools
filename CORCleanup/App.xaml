@@ -18,6 +18,9 @@
             <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
             <converters:IntEqualsToVisibilityConverter x:Key="IntEqualsToVis" />
             <converters:NullToVisibilityConverter x:Key="NullToVis" />
+            <converters:PercentToHeightConverter x:Key="PercentToHeight" />
+            <converters:SignalToBrushConverter x:Key="SignalToBrush" />
+            <converters:IntGreaterThanZeroToVisibilityConverter x:Key="IntGreaterThanZeroToVis" />
 
             <!-- Implicit DataGrid style — Fluent defaults for all grids -->
             <Style TargetType="DataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">

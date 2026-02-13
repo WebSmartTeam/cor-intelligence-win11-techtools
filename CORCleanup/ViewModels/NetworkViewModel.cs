@@ -17,10 +17,12 @@ public partial class NetworkViewModel : ObservableObject
     private readonly INetworkInfoService _networkInfoService;
     private readonly ISubnetCalculatorService _subnetCalculatorService;
     private readonly IWifiService _wifiService;
+    private readonly IWifiScannerService _wifiScannerService;
 
     private CancellationTokenSource? _pingCts;
     private CancellationTokenSource? _traceCts;
     private CancellationTokenSource? _portScanCts;
+    private CancellationTokenSource? _signalCts;
 
     [ObservableProperty] private string _pageTitle = "Network Tools";
     [ObservableProperty] private int _selectedTabIndex;
@@ -120,7 +122,34 @@ public partial class NetworkViewModel : ObservableObject
     [ObservableProperty] private string _sameSubnetResult = "";
 
     // ================================================================
-    // Wi-Fi Passwords
+    // Wi-Fi Scanner
+    // ================================================================
+
+    [ObservableProperty] private bool _isScanningWifi;
+    [ObservableProperty] private string _wifiScanStatus = "";
+    [ObservableProperty] private int _wifiSubTabIndex;
+
+    public ObservableCollection<WifiNetwork> WifiNetworks { get; } = new();
+    public ObservableCollection<ChannelUsageInfo> ChannelUsage { get; } = new();
+
+    // ================================================================
+    // Wi-Fi Signal Monitor
+    // ================================================================
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(StartSignalMonitorCommand))]
+    [NotifyCanExecuteChangedFor(nameof(StopSignalMonitorCommand))]
+    private bool _isMonitoringSignal;
+
+    [ObservableProperty] private string _monitorSsid = "—";
+    [ObservableProperty] private int _monitorSignal;
+    [ObservableProperty] private string _monitorChannel = "—";
+    [ObservableProperty] private string _monitorLinkSpeed = "—";
+
+    public ObservableCollection<WifiSignalReading> SignalHistory { get; } = new();
+
+    // ================================================================
+    // Wi-Fi Saved Profiles
     // ================================================================
 
     [ObservableProperty] private bool _isLoadingWifi;
@@ -138,7 +167,8 @@ public partial class NetworkViewModel : ObservableObject
         IPortScannerService portScannerService,
         INetworkInfoService networkInfoService,
         ISubnetCalculatorService subnetCalculatorService,
-        IWifiService wifiService)
+        IWifiService wifiService,
+        IWifiScannerService wifiScannerService)
     {
         _pingService = pingService;
         _tracerouteService = tracerouteService;
@@ -147,6 +177,7 @@ public partial class NetworkViewModel : ObservableObject
         _networkInfoService = networkInfoService;
         _subnetCalculatorService = subnetCalculatorService;
         _wifiService = wifiService;
+        _wifiScannerService = wifiScannerService;
     }
 
     // ================================================================
@@ -579,7 +610,96 @@ public partial class NetworkViewModel : ObservableObject
     }
 
     // ================================================================
-    // Wi-Fi Commands
+    // Wi-Fi Scanner Commands
+    // ================================================================
+
+    [RelayCommand]
+    private async Task ScanWifiAsync()
+    {
+        IsScanningWifi = true;
+        WifiNetworks.Clear();
+        ChannelUsage.Clear();
+        WifiScanStatus = "Scanning for nearby networks...";
+        StatusText = WifiScanStatus;
+
+        try
+        {
+            var networks = await _wifiScannerService.ScanNetworksAsync();
+
+            foreach (var network in networks)
+                WifiNetworks.Add(network);
+
+            var channelUsage = _wifiScannerService.GetChannelUsage(networks);
+            foreach (var usage in channelUsage)
+                ChannelUsage.Add(usage);
+
+            var bands = networks.Select(n => n.Band).Distinct().ToList();
+            WifiScanStatus = $"{networks.Count} AP(s) found across {channelUsage.Count} channel(s) — {string.Join(", ", bands)}";
+            StatusText = WifiScanStatus;
+        }
+        catch (Exception ex)
+        {
+            WifiScanStatus = $"Scan error: {ex.Message}";
+            StatusText = WifiScanStatus;
+        }
+        finally
+        {
+            IsScanningWifi = false;
+        }
+    }
+
+    // ================================================================
+    // Wi-Fi Signal Monitor Commands
+    // ================================================================
+
+    private bool CanStartSignalMonitor() => !IsMonitoringSignal;
+    private bool CanStopSignalMonitor() => IsMonitoringSignal;
+
+    [RelayCommand(CanExecute = nameof(CanStartSignalMonitor))]
+    private async Task StartSignalMonitorAsync()
+    {
+        _signalCts = new CancellationTokenSource();
+        IsMonitoringSignal = true;
+        SignalHistory.Clear();
+        MonitorSsid = "Connecting...";
+        MonitorSignal = 0;
+        MonitorChannel = "—";
+        MonitorLinkSpeed = "—";
+        StatusText = "Monitoring Wi-Fi signal...";
+
+        try
+        {
+            await foreach (var reading in _wifiScannerService.MonitorSignalAsync(1000, _signalCts.Token))
+            {
+                MonitorSsid = reading.Ssid ?? "—";
+                MonitorSignal = reading.SignalPercent;
+                MonitorChannel = reading.Channel?.ToString() ?? "—";
+                MonitorLinkSpeed = reading.LinkSpeedMbps is not null
+                    ? $"{reading.LinkSpeedMbps} Mbps"
+                    : "—";
+
+                SignalHistory.Add(reading);
+
+                // Keep last 120 readings (2 minutes at 1s interval)
+                while (SignalHistory.Count > 120)
+                    SignalHistory.RemoveAt(0);
+            }
+        }
+        catch (OperationCanceledException) { }
+        finally
+        {
+            IsMonitoringSignal = false;
+            StatusText = $"Signal monitor stopped — {SignalHistory.Count} reading(s) captured";
+            _signalCts?.Dispose();
+            _signalCts = null;
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanStopSignalMonitor))]
+    private void StopSignalMonitor() => _signalCts?.Cancel();
+
+    // ================================================================
+    // Wi-Fi Saved Profile Commands
     // ================================================================
 
     [RelayCommand]
