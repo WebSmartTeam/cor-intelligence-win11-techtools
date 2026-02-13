@@ -9,7 +9,7 @@ namespace CORCleanup.Core.Services.Cleanup;
 /// Uses whitelist approach — only deletes from known-safe locations.
 /// </summary>
 [SupportedOSPlatform("windows")]
-public sealed class SystemCleanupService : ICleanupService
+public sealed partial class SystemCleanupService : ICleanupService
 {
     private static readonly Dictionary<CleanupCategory, CleanupTarget> Targets = new()
     {
