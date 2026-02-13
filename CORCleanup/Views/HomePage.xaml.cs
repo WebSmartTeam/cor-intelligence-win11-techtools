@@ -1,5 +1,5 @@
+using Wpf.Ui.Abstractions.Controls;
 using CORCleanup.ViewModels;
-using Wpf.Ui.Controls;
 
 namespace CORCleanup.Views;
 
