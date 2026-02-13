@@ -38,49 +38,50 @@
             <!-- About                                                   -->
             <!-- ====================================================== -->
             <ui:Card Margin="0,0,0,16">
-                <StackPanel Spacing="12">
+                <StackPanel>
                     <StackPanel>
                         <ui:TextBlock FontTypography="BodyStrong" Text="About" />
                         <ui:TextBlock FontTypography="Caption" Text="Application and company information" Opacity="0.6" />
                     </StackPanel>
 
                     <!-- App Identity -->
-                    <StackPanel>
+                    <StackPanel Margin="0,12,0,0">
                         <ui:TextBlock FontTypography="Subtitle" Text="{Binding ViewModel.AppName}" />
                         <ui:TextBlock FontTypography="Body" Text="{Binding ViewModel.AppVersion}" Opacity="0.7" />
                         <ui:TextBlock FontTypography="Caption" Text="All-in-one Windows system administration toolkit" Opacity="0.6" Margin="0,4,0,0" />
                     </StackPanel>
 
-                    <Separator Opacity="0.3" />
+                    <Separator Opacity="0.3" Margin="0,12,0,0" />
 
                     <!-- Company Details -->
-                    <StackPanel Spacing="4">
+                    <StackPanel Margin="0,12,0,0">
                         <ui:TextBlock FontTypography="BodyStrong" Text="{Binding ViewModel.CompanyName}" />
-                        <ui:TextBlock FontTypography="Body" Text="{Binding ViewModel.TradingAs}" Opacity="0.7" />
-                        <ui:TextBlock FontTypography="Caption" Text="{Binding ViewModel.CompanyNumber}" Opacity="0.6" />
-                        <ui:TextBlock FontTypography="Caption" Text="{Binding ViewModel.VatNumber}" Opacity="0.6" />
+                        <ui:TextBlock FontTypography="Body" Text="{Binding ViewModel.TradingAs}" Opacity="0.7" Margin="0,4,0,0" />
+                        <ui:TextBlock FontTypography="Caption" Text="{Binding ViewModel.CompanyNumber}" Opacity="0.6" Margin="0,4,0,0" />
+                        <ui:TextBlock FontTypography="Caption" Text="{Binding ViewModel.VatNumber}" Opacity="0.6" Margin="0,4,0,0" />
                     </StackPanel>
 
-                    <StackPanel Spacing="4">
+                    <StackPanel Margin="0,12,0,0">
                         <ui:TextBlock FontTypography="Caption" Text="{Binding ViewModel.CompanyAddress}" Opacity="0.6" />
-                        <ui:TextBlock FontTypography="Caption" Text="{Binding ViewModel.CompanyPhone}" Opacity="0.6" />
+                        <ui:TextBlock FontTypography="Caption" Text="{Binding ViewModel.CompanyPhone}" Opacity="0.6" Margin="0,4,0,0" />
                     </StackPanel>
 
                     <!-- Action Buttons -->
-                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                    <WrapPanel Margin="0,12,0,0">
                         <ui:Button Appearance="Primary"
                                    Content="Visit Website"
                                    Icon="{ui:SymbolIcon Globe24}"
-                                   Command="{Binding ViewModel.OpenWebsiteCommand}" />
+                                   Command="{Binding ViewModel.OpenWebsiteCommand}"
+                                   Margin="0,0,8,0" />
                         <ui:Button Content="Contact Us"
                                    Icon="{ui:SymbolIcon Mail24}"
                                    Command="{Binding ViewModel.OpenEmailCommand}" />
-                    </StackPanel>
+                    </WrapPanel>
 
-                    <Separator Opacity="0.3" />
+                    <Separator Opacity="0.3" Margin="0,12,0,0" />
 
                     <!-- Copyright -->
-                    <ui:TextBlock FontTypography="Caption" Text="{Binding ViewModel.AppCopyright}" Opacity="0.5" />
+                    <ui:TextBlock FontTypography="Caption" Text="{Binding ViewModel.AppCopyright}" Opacity="0.5" Margin="0,12,0,0" />
                 </StackPanel>
             </ui:Card>
 
