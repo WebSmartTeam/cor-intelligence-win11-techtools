@@ -1,8 +1,8 @@
+using System;
 using System.Windows;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
-using Wpf.Ui.DependencyInjection;
 using CORCleanup.ViewModels;
 
 namespace CORCleanup;
@@ -15,7 +15,7 @@ public partial class MainWindow : FluentWindow
 
     public MainWindow(
         MainWindowViewModel viewModel,
-        INavigationViewPageProvider pageProvider,
+        IServiceProvider serviceProvider,
         INavigationService navigationService)
     {
         ViewModel = viewModel;
@@ -27,7 +27,7 @@ public partial class MainWindow : FluentWindow
         ApplicationThemeManager.Apply(this);
         SystemThemeWatcher.Watch(this);
 
-        NavigationView.SetPageProviderService(pageProvider);
+        NavigationView.SetServiceProvider(serviceProvider);
         navigationService.SetNavigationControl(NavigationView);
 
         Loaded += OnLoaded;
