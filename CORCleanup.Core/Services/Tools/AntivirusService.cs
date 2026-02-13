@@ -40,7 +40,7 @@ public sealed class AntivirusService : IAntivirusService
 
         new("AVG", ["avgwd", "AVGSvc", "avgsvcx", "avgfws"],
             [@"AVG", @"AVG\Antivirus"],
-            ["AVG", "AVG\Antivirus"],
+            ["AVG", @"AVG\Antivirus"],
             "https://support.avg.com/SupportArticleView?l=en&urlName=avg-clear"),
 
         new("Avast", ["avast! Antivirus", "AvastSvc", "aswbIDSAgent", "avast! Firewall"],
