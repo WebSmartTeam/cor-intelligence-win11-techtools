@@ -16,14 +16,10 @@
             <!-- Appearance                                              -->
             <!-- ====================================================== -->
             <ui:Card Margin="0,0,0,16">
-                <ui:Card.Header>
-                    <StackPanel>
-                        <ui:TextBlock FontTypography="BodyStrong" Text="Appearance" />
-                        <ui:TextBlock FontTypography="Caption" Text="Customise the look and feel of the application" Opacity="0.6" />
-                    </StackPanel>
-                </ui:Card.Header>
+                <StackPanel>
+                    <ui:TextBlock FontTypography="BodyStrong" Text="Appearance" />
+                    <ui:TextBlock FontTypography="Caption" Text="Customise the look and feel of the application" Opacity="0.6" Margin="0,0,0,12" />
 
-                <StackPanel Margin="0,8,0,0">
                     <DockPanel>
                         <StackPanel DockPanel.Dock="Left">
                             <ui:TextBlock FontTypography="Body" Text="Dark Theme" />
@@ -42,14 +38,12 @@
             <!-- About                                                   -->
             <!-- ====================================================== -->
             <ui:Card Margin="0,0,0,16">
-                <ui:Card.Header>
+                <StackPanel Spacing="12">
                     <StackPanel>
                         <ui:TextBlock FontTypography="BodyStrong" Text="About" />
                         <ui:TextBlock FontTypography="Caption" Text="Application and company information" Opacity="0.6" />
                     </StackPanel>
-                </ui:Card.Header>
 
-                <StackPanel Margin="0,8,0,0" Spacing="12">
                     <!-- App Identity -->
                     <StackPanel>
                         <ui:TextBlock FontTypography="Subtitle" Text="{Binding ViewModel.AppName}" />
@@ -94,52 +88,46 @@
             <!-- Terms and Conditions                                    -->
             <!-- ====================================================== -->
             <ui:Card Margin="0,0,0,16">
-                <ui:Card.Header>
-                    <StackPanel>
-                        <ui:TextBlock FontTypography="BodyStrong" Text="Terms and Conditions" />
-                        <ui:TextBlock FontTypography="Caption" Text="Terms of use for COR Cleanup" Opacity="0.6" />
-                    </StackPanel>
-                </ui:Card.Header>
+                <StackPanel>
+                    <ui:TextBlock FontTypography="BodyStrong" Text="Terms and Conditions" />
+                    <ui:TextBlock FontTypography="Caption" Text="Terms of use for COR Cleanup" Opacity="0.6" Margin="0,0,0,8" />
 
-                <Border Background="{DynamicResource ControlFillColorDefaultBrush}"
-                        CornerRadius="4"
-                        Padding="16"
-                        Margin="0,8,0,0">
-                    <ScrollViewer MaxHeight="400" VerticalScrollBarVisibility="Auto">
-                        <TextBlock Text="{Binding ViewModel.TermsAndConditions}"
-                                   TextWrapping="Wrap"
-                                   FontFamily="Segoe UI"
-                                   FontSize="12"
-                                   LineHeight="18"
-                                   Opacity="0.8" />
-                    </ScrollViewer>
-                </Border>
+                    <Border Background="{DynamicResource ControlFillColorDefaultBrush}"
+                            CornerRadius="4"
+                            Padding="16">
+                        <ScrollViewer MaxHeight="400" VerticalScrollBarVisibility="Auto">
+                            <TextBlock Text="{Binding ViewModel.TermsAndConditions}"
+                                       TextWrapping="Wrap"
+                                       FontFamily="Segoe UI"
+                                       FontSize="12"
+                                       LineHeight="18"
+                                       Opacity="0.8" />
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
             </ui:Card>
 
             <!-- ====================================================== -->
             <!-- Privacy Policy                                          -->
             <!-- ====================================================== -->
             <ui:Card Margin="0,0,0,16">
-                <ui:Card.Header>
-                    <StackPanel>
-                        <ui:TextBlock FontTypography="BodyStrong" Text="Privacy Policy" />
-                        <ui:TextBlock FontTypography="Caption" Text="How COR Cleanup handles your data" Opacity="0.6" />
-                    </StackPanel>
-                </ui:Card.Header>
+                <StackPanel>
+                    <ui:TextBlock FontTypography="BodyStrong" Text="Privacy Policy" />
+                    <ui:TextBlock FontTypography="Caption" Text="How COR Cleanup handles your data" Opacity="0.6" Margin="0,0,0,8" />
 
-                <Border Background="{DynamicResource ControlFillColorDefaultBrush}"
-                        CornerRadius="4"
-                        Padding="16"
-                        Margin="0,8,0,0">
-                    <ScrollViewer MaxHeight="400" VerticalScrollBarVisibility="Auto">
-                        <TextBlock Text="{Binding ViewModel.PrivacyPolicy}"
-                                   TextWrapping="Wrap"
-                                   FontFamily="Segoe UI"
-                                   FontSize="12"
-                                   LineHeight="18"
-                                   Opacity="0.8" />
-                    </ScrollViewer>
-                </Border>
+                    <Border Background="{DynamicResource ControlFillColorDefaultBrush}"
+                            CornerRadius="4"
+                            Padding="16">
+                        <ScrollViewer MaxHeight="400" VerticalScrollBarVisibility="Auto">
+                            <TextBlock Text="{Binding ViewModel.PrivacyPolicy}"
+                                       TextWrapping="Wrap"
+                                       FontFamily="Segoe UI"
+                                       FontSize="12"
+                                       LineHeight="18"
+                                       Opacity="0.8" />
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
             </ui:Card>
 
         </StackPanel>
