@@ -25,11 +25,11 @@ jobs:
       - name: Run tests
         run: dotnet test --no-restore --verbosity normal
 
-      - name: Publish (self-contained x64)
-        run: dotnet publish CORCleanup/CORCleanup.csproj -c Release -r win-x64 --self-contained -o ./publish
+      - name: Publish (single-file x64)
+        run: dotnet publish CORCleanup/CORCleanup.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o ./publish
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: CORCleanup-win-x64
-          path: ./publish/
+          path: ./publish/COR Cleanup.exe
