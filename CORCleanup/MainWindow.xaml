@@ -12,68 +12,106 @@
                  ExtendsContentIntoTitleBar="True"
                  WindowBackdropType="Mica">
 
-    <ui:NavigationView x:Name="NavigationView"
-                       PaneDisplayMode="Left"
-                       IsBackButtonVisible="Collapsed"
-                       IsPaneToggleVisible="True"
-                       OpenPaneLength="220">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
 
-        <!-- Branding header in the pane -->
-        <ui:NavigationView.Header>
-            <Border Padding="16,8" Background="Transparent">
-                <DockPanel>
-                    <ui:SymbolIcon Symbol="WrenchScrewdriver24"
-                                  DockPanel.Dock="Left"
-                                  FontSize="18"
-                                  Margin="0,0,10,0"
-                                  Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" />
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="COR Cleanup"
-                                   FontSize="14"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                        <TextBlock Text="v1.0.0"
-                                   FontSize="10"
-                                   Opacity="0.4"
-                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                    </StackPanel>
-                </DockPanel>
-            </Border>
-        </ui:NavigationView.Header>
+        <ui:NavigationView x:Name="NavigationView"
+                           Grid.Row="0"
+                           PaneDisplayMode="Left"
+                           IsBackButtonVisible="Collapsed"
+                           IsPaneToggleVisible="True"
+                           OpenPaneLength="200">
 
-        <ui:NavigationView.MenuItems>
-            <ui:NavigationViewItem Content="Home"
-                                   Icon="{ui:SymbolIcon Home24}"
-                                   TargetPageType="{x:Type views:HomePage}" />
-            <ui:NavigationViewItem Content="Network"
-                                   Icon="{ui:SymbolIcon Globe24}"
-                                   TargetPageType="{x:Type views:NetworkPage}" />
-            <ui:NavigationViewItem Content="Cleanup"
-                                   Icon="{ui:SymbolIcon Broom24}"
-                                   TargetPageType="{x:Type views:CleanupPage}" />
-            <ui:NavigationViewItem Content="Registry"
-                                   Icon="{ui:SymbolIcon Key24}"
-                                   TargetPageType="{x:Type views:RegistryPage}" />
-            <ui:NavigationViewItem Content="Uninstaller"
-                                   Icon="{ui:SymbolIcon AppsList24}"
-                                   TargetPageType="{x:Type views:UninstallerPage}" />
-            <ui:NavigationViewItem Content="Hardware"
-                                   Icon="{ui:SymbolIcon Desktop24}"
-                                   TargetPageType="{x:Type views:HardwarePage}" />
-            <ui:NavigationViewItem Content="Tools"
-                                   Icon="{ui:SymbolIcon Wrench24}"
-                                   TargetPageType="{x:Type views:ToolsPage}" />
-            <ui:NavigationViewItem Content="Admin"
-                                   Icon="{ui:SymbolIcon ShieldTask24}"
-                                   TargetPageType="{x:Type views:AdminPage}" />
-        </ui:NavigationView.MenuItems>
+            <ui:NavigationView.Header>
+                <Border Padding="12,6" Background="Transparent">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Left"
+                                Width="28" Height="28"
+                                CornerRadius="6"
+                                Margin="0,0,10,0"
+                                Background="{DynamicResource SystemAccentColorPrimaryBrush}">
+                            <ui:SymbolIcon Symbol="WrenchScrewdriver24"
+                                          FontSize="14"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          Foreground="White" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="COR Cleanup"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                            <TextBlock Text="COR Intelligence"
+                                       FontSize="9"
+                                       Opacity="0.4"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+            </ui:NavigationView.Header>
 
-        <ui:NavigationView.FooterMenuItems>
-            <ui:NavigationViewItem Content="Settings"
-                                   Icon="{ui:SymbolIcon Settings24}"
-                                   TargetPageType="{x:Type views:SettingsPage}" />
-        </ui:NavigationView.FooterMenuItems>
+            <ui:NavigationView.MenuItems>
+                <ui:NavigationViewItem Content="Home"
+                                       Icon="{ui:SymbolIcon Home24}"
+                                       TargetPageType="{x:Type views:HomePage}" />
+                <ui:NavigationViewItem Content="Network"
+                                       Icon="{ui:SymbolIcon Globe24}"
+                                       TargetPageType="{x:Type views:NetworkPage}" />
+                <ui:NavigationViewItem Content="Cleanup"
+                                       Icon="{ui:SymbolIcon Broom24}"
+                                       TargetPageType="{x:Type views:CleanupPage}" />
+                <ui:NavigationViewItem Content="Registry"
+                                       Icon="{ui:SymbolIcon Key24}"
+                                       TargetPageType="{x:Type views:RegistryPage}" />
+                <ui:NavigationViewItem Content="Uninstaller"
+                                       Icon="{ui:SymbolIcon AppsList24}"
+                                       TargetPageType="{x:Type views:UninstallerPage}" />
+                <ui:NavigationViewItem Content="Hardware"
+                                       Icon="{ui:SymbolIcon Desktop24}"
+                                       TargetPageType="{x:Type views:HardwarePage}" />
+                <ui:NavigationViewItem Content="Tools"
+                                       Icon="{ui:SymbolIcon Wrench24}"
+                                       TargetPageType="{x:Type views:ToolsPage}" />
+                <ui:NavigationViewItem Content="Admin"
+                                       Icon="{ui:SymbolIcon ShieldTask24}"
+                                       TargetPageType="{x:Type views:AdminPage}" />
+            </ui:NavigationView.MenuItems>
 
-    </ui:NavigationView>
+            <ui:NavigationView.FooterMenuItems>
+                <ui:NavigationViewItem Content="Settings"
+                                       Icon="{ui:SymbolIcon Settings24}"
+                                       TargetPageType="{x:Type views:SettingsPage}" />
+            </ui:NavigationView.FooterMenuItems>
+
+        </ui:NavigationView>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="1"
+                Padding="12,4"
+                Background="{DynamicResource ControlFillColorDefaultBrush}"
+                BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource ControlElevationBorderBrush}">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Ellipse Width="7" Height="7" Fill="#4CAF50" Margin="0,0,6,0" />
+                    <TextBlock Text="Ready"
+                               FontSize="10.5"
+                               Opacity="0.6"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+                <TextBlock DockPanel.Dock="Right"
+                           Text="v1.0.1"
+                           FontSize="10.5"
+                           Opacity="0.4"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Right"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+            </DockPanel>
+        </Border>
+    </Grid>
 
 </ui:FluentWindow>

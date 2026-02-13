@@ -9,236 +9,303 @@
       mc:Ignorable="d"
       Title="Home">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24">
-        <StackPanel MaxWidth="900" Margin="0,0,0,24">
+    <Grid Margin="12,8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-            <!-- ====================================================== -->
-            <!-- Hero Branding                                          -->
-            <!-- ====================================================== -->
-            <Border Margin="0,8,0,24"
-                    Padding="32"
-                    CornerRadius="8"
-                    Background="{DynamicResource ControlFillColorDefaultBrush}">
-                <StackPanel HorizontalAlignment="Center">
-                    <!-- App Icon -->
-                    <ui:SymbolIcon Symbol="WrenchScrewdriver24"
-                                  FontSize="48"
-                                  HorizontalAlignment="Center"
-                                  Foreground="{DynamicResource SystemAccentColorPrimaryBrush}"
-                                  Margin="0,0,0,16" />
+        <!-- ====================================================== -->
+        <!-- Row 0: System Health Overview — 4 metric tiles          -->
+        <!-- ====================================================== -->
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-                    <!-- App Title -->
-                    <ui:TextBlock Text="COR Cleanup"
-                                 FontTypography="TitleLarge"
-                                 HorizontalAlignment="Center" />
-
-                    <!-- Tagline -->
-                    <ui:TextBlock Text="All-in-one Windows System Administration Toolkit"
-                                 FontTypography="Body"
-                                 Opacity="0.7"
-                                 HorizontalAlignment="Center"
-                                 Margin="0,4,0,0" />
-
-                    <!-- Version + Company -->
-                    <ui:TextBlock Text="{Binding VersionLine}"
-                                 FontTypography="Caption"
-                                 Opacity="0.5"
-                                 HorizontalAlignment="Center"
-                                 Margin="0,8,0,0" />
-                </StackPanel>
-            </Border>
-
-            <!-- ====================================================== -->
-            <!-- Feature Cards Grid                                     -->
-            <!-- ====================================================== -->
-            <ui:TextBlock Text="Tools"
-                         FontTypography="Subtitle"
-                         Margin="0,0,0,12" />
-
-            <UniformGrid Columns="2" Margin="0,0,0,16">
-
-                <!-- Network -->
-                <ui:CardAction Margin="0,0,8,8"
-                               Command="{Binding NavigateCommand}"
-                               CommandParameter="Network">
-                    <StackPanel Margin="8">
-                        <DockPanel>
-                            <ui:SymbolIcon Symbol="Globe24"
-                                          DockPanel.Dock="Left"
-                                          FontSize="24"
-                                          Margin="0,0,12,0"
-                                          Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" />
-                            <StackPanel>
-                                <ui:TextBlock FontTypography="BodyStrong" Text="Network" />
-                                <ui:TextBlock FontTypography="Caption" Opacity="0.6"
-                                             Text="Ping, Traceroute, DNS, Port Scanner, Wi-Fi" />
-                            </StackPanel>
-                        </DockPanel>
-                    </StackPanel>
-                </ui:CardAction>
-
-                <!-- Cleanup -->
-                <ui:CardAction Margin="8,0,0,8"
-                               Command="{Binding NavigateCommand}"
-                               CommandParameter="Cleanup">
-                    <StackPanel Margin="8">
-                        <DockPanel>
-                            <ui:SymbolIcon Symbol="Broom24"
-                                          DockPanel.Dock="Left"
-                                          FontSize="24"
-                                          Margin="0,0,12,0"
-                                          Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" />
-                            <StackPanel>
-                                <ui:TextBlock FontTypography="BodyStrong" Text="Cleanup" />
-                                <ui:TextBlock FontTypography="Caption" Opacity="0.6"
-                                             Text="Temp files, caches, browser data" />
-                            </StackPanel>
-                        </DockPanel>
-                    </StackPanel>
-                </ui:CardAction>
-
-                <!-- Registry -->
-                <ui:CardAction Margin="0,0,8,8"
-                               Command="{Binding NavigateCommand}"
-                               CommandParameter="Registry">
-                    <StackPanel Margin="8">
-                        <DockPanel>
-                            <ui:SymbolIcon Symbol="Key24"
-                                          DockPanel.Dock="Left"
-                                          FontSize="24"
-                                          Margin="0,0,12,0"
-                                          Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" />
-                            <StackPanel>
-                                <ui:TextBlock FontTypography="BodyStrong" Text="Registry" />
-                                <ui:TextBlock FontTypography="Caption" Opacity="0.6"
-                                             Text="Invalid paths, orphaned keys, cleanup" />
-                            </StackPanel>
-                        </DockPanel>
-                    </StackPanel>
-                </ui:CardAction>
-
-                <!-- Uninstaller -->
-                <ui:CardAction Margin="8,0,0,8"
-                               Command="{Binding NavigateCommand}"
-                               CommandParameter="Uninstaller">
-                    <StackPanel Margin="8">
-                        <DockPanel>
-                            <ui:SymbolIcon Symbol="AppsList24"
-                                          DockPanel.Dock="Left"
-                                          FontSize="24"
-                                          Margin="0,0,12,0"
-                                          Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" />
-                            <StackPanel>
-                                <ui:TextBlock FontTypography="BodyStrong" Text="Uninstaller" />
-                                <ui:TextBlock FontTypography="Caption" Opacity="0.6"
-                                             Text="Remove programs, silent uninstall" />
-                            </StackPanel>
-                        </DockPanel>
-                    </StackPanel>
-                </ui:CardAction>
-
-                <!-- Hardware -->
-                <ui:CardAction Margin="0,0,8,8"
-                               Command="{Binding NavigateCommand}"
-                               CommandParameter="Hardware">
-                    <StackPanel Margin="8">
-                        <DockPanel>
-                            <ui:SymbolIcon Symbol="Desktop24"
-                                          DockPanel.Dock="Left"
-                                          FontSize="24"
-                                          Margin="0,0,12,0"
-                                          Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" />
-                            <StackPanel>
-                                <ui:TextBlock FontTypography="BodyStrong" Text="Hardware" />
-                                <ui:TextBlock FontTypography="Caption" Opacity="0.6"
-                                             Text="System info, RAM, disks, battery" />
-                            </StackPanel>
-                        </DockPanel>
-                    </StackPanel>
-                </ui:CardAction>
-
-                <!-- Tools -->
-                <ui:CardAction Margin="8,0,0,8"
-                               Command="{Binding NavigateCommand}"
-                               CommandParameter="Tools">
-                    <StackPanel Margin="8">
-                        <DockPanel>
-                            <ui:SymbolIcon Symbol="Wrench24"
-                                          DockPanel.Dock="Left"
-                                          FontSize="24"
-                                          Margin="0,0,12,0"
-                                          Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" />
-                            <StackPanel>
-                                <ui:TextBlock FontTypography="BodyStrong" Text="Tools" />
-                                <ui:TextBlock FontTypography="Caption" Opacity="0.6"
-                                             Text="File hash, passwords, BSOD, AV health" />
-                            </StackPanel>
-                        </DockPanel>
-                    </StackPanel>
-                </ui:CardAction>
-
-                <!-- Admin -->
-                <ui:CardAction Margin="0,0,8,0"
-                               Command="{Binding NavigateCommand}"
-                               CommandParameter="Admin">
-                    <StackPanel Margin="8">
-                        <DockPanel>
-                            <ui:SymbolIcon Symbol="ShieldTask24"
-                                          DockPanel.Dock="Left"
-                                          FontSize="24"
-                                          Margin="0,0,12,0"
-                                          Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" />
-                            <StackPanel>
-                                <ui:TextBlock FontTypography="BodyStrong" Text="Admin" />
-                                <ui:TextBlock FontTypography="Caption" Opacity="0.6"
-                                             Text="Services, startup, repair, debloat" />
-                            </StackPanel>
-                        </DockPanel>
-                    </StackPanel>
-                </ui:CardAction>
-
-                <!-- Settings -->
-                <ui:CardAction Margin="8,0,0,0"
-                               Command="{Binding NavigateCommand}"
-                               CommandParameter="Settings">
-                    <StackPanel Margin="8">
-                        <DockPanel>
-                            <ui:SymbolIcon Symbol="Settings24"
-                                          DockPanel.Dock="Left"
-                                          FontSize="24"
-                                          Margin="0,0,12,0"
-                                          Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" />
-                            <StackPanel>
-                                <ui:TextBlock FontTypography="BodyStrong" Text="Settings" />
-                                <ui:TextBlock FontTypography="Caption" Opacity="0.6"
-                                             Text="Theme, about, terms, privacy" />
-                            </StackPanel>
-                        </DockPanel>
-                    </StackPanel>
-                </ui:CardAction>
-
-            </UniformGrid>
-
-            <!-- ====================================================== -->
-            <!-- Footer                                                 -->
-            <!-- ====================================================== -->
-            <Border Margin="0,8,0,0"
-                    Padding="16"
-                    CornerRadius="8"
+            <!-- OS Tile -->
+            <Border Grid.Column="0" Margin="0,0,5,0" Padding="14,10"
+                    CornerRadius="6"
                     Background="{DynamicResource ControlFillColorDefaultBrush}">
                 <DockPanel>
-                    <ui:SymbolIcon Symbol="Info24"
-                                  DockPanel.Dock="Left"
-                                  FontSize="20"
-                                  Margin="0,0,12,0"
-                                  Opacity="0.5" />
-                    <ui:TextBlock FontTypography="Caption"
-                                 Opacity="0.5"
-                                 VerticalAlignment="Center"
-                                 Text="This tool requires administrator privileges for full functionality. Some features like services management, registry editing, and system repair require elevated access." />
+                    <Border DockPanel.Dock="Left"
+                            Width="36" Height="36" CornerRadius="8"
+                            Margin="0,0,10,0"
+                            Background="#1A06B6D4">
+                        <ui:SymbolIcon Symbol="Desktop24" FontSize="16"
+                                      HorizontalAlignment="Center" VerticalAlignment="Center"
+                                      Foreground="#06B6D4" />
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding ViewModel.ComputerName, FallbackValue='Loading...'}"
+                                   FontSize="13" FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding ViewModel.OsCaption, FallbackValue='Windows'}"
+                                   FontSize="10.5" Opacity="0.55"
+                                   TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
                 </DockPanel>
             </Border>
 
-        </StackPanel>
-    </ScrollViewer>
+            <!-- CPU Tile -->
+            <Border Grid.Column="1" Margin="5,0,5,0" Padding="14,10"
+                    CornerRadius="6"
+                    Background="{DynamicResource ControlFillColorDefaultBrush}">
+                <DockPanel>
+                    <Border DockPanel.Dock="Left"
+                            Width="36" Height="36" CornerRadius="8"
+                            Margin="0,0,10,0"
+                            Background="#1A8B5CF6">
+                        <ui:SymbolIcon Symbol="TopSpeed24" FontSize="16"
+                                      HorizontalAlignment="Center" VerticalAlignment="Center"
+                                      Foreground="#8B5CF6" />
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding ViewModel.CpuShortName, FallbackValue='CPU'}"
+                                   FontSize="13" FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding ViewModel.CpuSummary, FallbackValue='...'}"
+                                   FontSize="10.5" Opacity="0.55"
+                                   TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <!-- RAM Tile -->
+            <Border Grid.Column="2" Margin="5,0,5,0" Padding="14,10"
+                    CornerRadius="6"
+                    Background="{DynamicResource ControlFillColorDefaultBrush}">
+                <DockPanel>
+                    <Border DockPanel.Dock="Left"
+                            Width="36" Height="36" CornerRadius="8"
+                            Margin="0,0,10,0"
+                            Background="#1A10B981">
+                        <ui:SymbolIcon Symbol="SlideSize24" FontSize="16"
+                                      HorizontalAlignment="Center" VerticalAlignment="Center"
+                                      Foreground="#10B981" />
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding ViewModel.RamDisplay, FallbackValue='RAM'}"
+                                   FontSize="13" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding ViewModel.RamSlots, FallbackValue='...'}"
+                                   FontSize="10.5" Opacity="0.55" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <!-- GPU Tile -->
+            <Border Grid.Column="3" Margin="5,0,0,0" Padding="14,10"
+                    CornerRadius="6"
+                    Background="{DynamicResource ControlFillColorDefaultBrush}">
+                <DockPanel>
+                    <Border DockPanel.Dock="Left"
+                            Width="36" Height="36" CornerRadius="8"
+                            Margin="0,0,10,0"
+                            Background="#1AF59E0B">
+                        <ui:SymbolIcon Symbol="Video24" FontSize="16"
+                                      HorizontalAlignment="Center" VerticalAlignment="Center"
+                                      Foreground="#F59E0B" />
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding ViewModel.GpuShortName, FallbackValue='GPU'}"
+                                   FontSize="13" FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding ViewModel.GpuVram, FallbackValue='...'}"
+                                   FontSize="10.5" Opacity="0.55" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+        </Grid>
+
+        <!-- ====================================================== -->
+        <!-- Row 1: Disk Health Bar(s)                               -->
+        <!-- ====================================================== -->
+        <ItemsControl Grid.Row="1" ItemsSource="{Binding ViewModel.Disks}" Margin="0,0,0,10">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Margin="0,0,0,4" Padding="12,8"
+                            CornerRadius="6"
+                            Background="{DynamicResource ControlFillColorDefaultBrush}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Orientation="Horizontal"
+                                        VerticalAlignment="Center" Margin="0,0,12,0">
+                                <ui:SymbolIcon Symbol="Save24" FontSize="14"
+                                               Foreground="#06B6D4" Margin="0,0,8,0" />
+                                <TextBlock Text="{Binding Label}" FontSize="12"
+                                           FontWeight="SemiBold" VerticalAlignment="Center" />
+                            </StackPanel>
+
+                            <ProgressBar Grid.Column="1"
+                                         Value="{Binding UsedPercent, Mode=OneWay}"
+                                         Maximum="100" Height="14"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,12,0" />
+
+                            <TextBlock Grid.Column="2" VerticalAlignment="Center"
+                                       FontSize="11" Opacity="0.7">
+                                <Run Text="{Binding UsedDisplay, Mode=OneWay}" />
+                                <Run Text=" / " />
+                                <Run Text="{Binding TotalDisplay, Mode=OneWay}" />
+                            </TextBlock>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- ====================================================== -->
+        <!-- Row 2: Quick Actions — feature shortcuts                -->
+        <!-- ====================================================== -->
+        <Grid Grid.Row="2" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ui:CardAction Grid.Column="0" Margin="0,0,5,0"
+                           Command="{Binding ViewModel.NavigateCommand}"
+                           CommandParameter="Cleanup">
+                <DockPanel Margin="6,4">
+                    <ui:SymbolIcon Symbol="Broom24" DockPanel.Dock="Left"
+                                  FontSize="18" Margin="0,0,8,0"
+                                  Foreground="#06B6D4" />
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Cleanup" FontSize="12" FontWeight="SemiBold" />
+                        <TextBlock Text="Temp files and caches" FontSize="10" Opacity="0.5" />
+                    </StackPanel>
+                </DockPanel>
+            </ui:CardAction>
+
+            <ui:CardAction Grid.Column="1" Margin="5,0,5,0"
+                           Command="{Binding ViewModel.NavigateCommand}"
+                           CommandParameter="Network">
+                <DockPanel Margin="6,4">
+                    <ui:SymbolIcon Symbol="Globe24" DockPanel.Dock="Left"
+                                  FontSize="18" Margin="0,0,8,0"
+                                  Foreground="#8B5CF6" />
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Network" FontSize="12" FontWeight="SemiBold" />
+                        <TextBlock Text="Diagnostics and Wi-Fi" FontSize="10" Opacity="0.5" />
+                    </StackPanel>
+                </DockPanel>
+            </ui:CardAction>
+
+            <ui:CardAction Grid.Column="2" Margin="5,0,5,0"
+                           Command="{Binding ViewModel.NavigateCommand}"
+                           CommandParameter="Registry">
+                <DockPanel Margin="6,4">
+                    <ui:SymbolIcon Symbol="Key24" DockPanel.Dock="Left"
+                                  FontSize="18" Margin="0,0,8,0"
+                                  Foreground="#10B981" />
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Registry" FontSize="12" FontWeight="SemiBold" />
+                        <TextBlock Text="Clean invalid entries" FontSize="10" Opacity="0.5" />
+                    </StackPanel>
+                </DockPanel>
+            </ui:CardAction>
+
+            <ui:CardAction Grid.Column="3" Margin="5,0,0,0"
+                           Command="{Binding ViewModel.NavigateCommand}"
+                           CommandParameter="Admin">
+                <DockPanel Margin="6,4">
+                    <ui:SymbolIcon Symbol="ShieldTask24" DockPanel.Dock="Left"
+                                  FontSize="18" Margin="0,0,8,0"
+                                  Foreground="#F59E0B" />
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Admin" FontSize="12" FontWeight="SemiBold" />
+                        <TextBlock Text="Services and repair" FontSize="10" Opacity="0.5" />
+                    </StackPanel>
+                </DockPanel>
+            </ui:CardAction>
+        </Grid>
+
+        <!-- ====================================================== -->
+        <!-- Row 3: Feature Grid — remaining tools                   -->
+        <!-- ====================================================== -->
+        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Uninstaller -->
+                <ui:CardAction Grid.Row="0" Grid.Column="0" Margin="0,0,5,5"
+                               Command="{Binding ViewModel.NavigateCommand}"
+                               CommandParameter="Uninstaller">
+                    <DockPanel Margin="6,4">
+                        <ui:SymbolIcon Symbol="AppsList24" DockPanel.Dock="Left"
+                                      FontSize="18" Margin="0,0,8,0"
+                                      Foreground="#EC4899" />
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Uninstaller" FontSize="12" FontWeight="SemiBold" />
+                            <TextBlock Text="Remove programs cleanly" FontSize="10" Opacity="0.5" />
+                        </StackPanel>
+                    </DockPanel>
+                </ui:CardAction>
+
+                <!-- Hardware -->
+                <ui:CardAction Grid.Row="0" Grid.Column="1" Margin="5,0,0,5"
+                               Command="{Binding ViewModel.NavigateCommand}"
+                               CommandParameter="Hardware">
+                    <DockPanel Margin="6,4">
+                        <ui:SymbolIcon Symbol="Desktop24" DockPanel.Dock="Left"
+                                      FontSize="18" Margin="0,0,8,0"
+                                      Foreground="#06B6D4" />
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Hardware" FontSize="12" FontWeight="SemiBold" />
+                            <TextBlock Text="System specs and health" FontSize="10" Opacity="0.5" />
+                        </StackPanel>
+                    </DockPanel>
+                </ui:CardAction>
+
+                <!-- Tools -->
+                <ui:CardAction Grid.Row="1" Grid.Column="0" Margin="0,0,5,0"
+                               Command="{Binding ViewModel.NavigateCommand}"
+                               CommandParameter="Tools">
+                    <DockPanel Margin="6,4">
+                        <ui:SymbolIcon Symbol="Wrench24" DockPanel.Dock="Left"
+                                      FontSize="18" Margin="0,0,8,0"
+                                      Foreground="#F59E0B" />
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Tools" FontSize="12" FontWeight="SemiBold" />
+                            <TextBlock Text="Hash, passwords, BSOD, AV" FontSize="10" Opacity="0.5" />
+                        </StackPanel>
+                    </DockPanel>
+                </ui:CardAction>
+
+                <!-- Settings -->
+                <ui:CardAction Grid.Row="1" Grid.Column="1" Margin="5,0,0,0"
+                               Command="{Binding ViewModel.NavigateCommand}"
+                               CommandParameter="Settings">
+                    <DockPanel Margin="6,4">
+                        <ui:SymbolIcon Symbol="Settings24" DockPanel.Dock="Left"
+                                      FontSize="18" Margin="0,0,8,0"
+                                      Foreground="#6366F1" />
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Settings" FontSize="12" FontWeight="SemiBold" />
+                            <TextBlock Text="Theme, about, legal" FontSize="10" Opacity="0.5" />
+                        </StackPanel>
+                    </DockPanel>
+                </ui:CardAction>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
 </Page>

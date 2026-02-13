@@ -1,5 +1,6 @@
 using System;
 using System.Windows;
+using System.Windows.Media;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
@@ -22,8 +23,12 @@ public partial class MainWindow : FluentWindow
         DataContext = this;
         _navigationService = navigationService;
 
-        // Force dark theme regardless of system setting
+        // Force dark theme
         ApplicationThemeManager.Apply(ApplicationTheme.Dark);
+
+        // COR Intelligence brand accent — professional teal-blue
+        ApplicationAccentColorManager.Apply(
+            Color.FromRgb(0x06, 0xB6, 0xD4), ApplicationTheme.Dark);
 
         InitializeComponent();
 
