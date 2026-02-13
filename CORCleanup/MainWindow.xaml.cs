@@ -2,6 +2,7 @@ using System.Windows;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
+using Wpf.Ui.DependencyInjection;
 using CORCleanup.ViewModels;
 
 namespace CORCleanup;
