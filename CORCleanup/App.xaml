@@ -22,16 +22,38 @@
             <converters:SignalToBrushConverter x:Key="SignalToBrush" />
             <converters:IntGreaterThanZeroToVisibilityConverter x:Key="IntGreaterThanZeroToVis" />
 
-            <!-- Implicit DataGrid style — Fluent defaults for all grids -->
+            <!-- Compact page padding — override Fluent defaults -->
+            <Thickness x:Key="PagePadding">16,12,16,12</Thickness>
+
+            <!-- Compact ScrollViewer for all pages -->
+            <Style TargetType="ScrollViewer">
+                <Setter Property="Padding" Value="16,12" />
+            </Style>
+
+            <!-- Compact DataGrid — tight rows -->
             <Style TargetType="DataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
                 <Setter Property="AutoGenerateColumns" Value="False" />
                 <Setter Property="HeadersVisibility" Value="Column" />
-                <Setter Property="GridLinesVisibility" Value="Horizontal" />
+                <Setter Property="GridLinesVisibility" Value="None" />
                 <Setter Property="CanUserSortColumns" Value="True" />
                 <Setter Property="IsReadOnly" Value="True" />
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="BorderBrush" Value="{DynamicResource ControlElevationBorderBrush}" />
+                <Setter Property="RowHeight" Value="32" />
+                <Setter Property="FontSize" Value="12" />
             </Style>
+
+            <!-- Compact DataGridRow -->
+            <Style TargetType="DataGridRow" BasedOn="{StaticResource {x:Type DataGridRow}}">
+                <Setter Property="MinHeight" Value="28" />
+            </Style>
+
+            <!-- Compact TabItem — less vertical padding -->
+            <Style TargetType="TabItem" BasedOn="{StaticResource {x:Type TabItem}}">
+                <Setter Property="Padding" Value="12,6" />
+                <Setter Property="FontSize" Value="12" />
+            </Style>
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>

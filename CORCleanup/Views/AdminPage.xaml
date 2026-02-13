@@ -5,7 +5,7 @@
       Title="Admin">
 
 
-    <Grid Margin="24">
+    <Grid Margin="12,8">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />

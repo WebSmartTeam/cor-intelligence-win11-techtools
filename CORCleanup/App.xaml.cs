@@ -23,6 +23,7 @@ public partial class App : Application
             services.AddSingleton<MainWindowViewModel>();
 
             // Views — transient (new instance per navigation)
+            services.AddTransient<HomePage>();
             services.AddTransient<NetworkPage>();
             services.AddTransient<CleanupPage>();
             services.AddTransient<RegistryPage>();
@@ -33,6 +34,7 @@ public partial class App : Application
             services.AddTransient<SettingsPage>();
 
             // ViewModels — transient (tied to page lifecycle)
+            services.AddTransient<HomeViewModel>();
             services.AddTransient<NetworkViewModel>();
             services.AddTransient<CleanupViewModel>();
             services.AddTransient<RegistryViewModel>();

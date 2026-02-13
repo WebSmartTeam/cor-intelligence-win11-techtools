@@ -16,9 +16,35 @@
                        PaneDisplayMode="Left"
                        IsBackButtonVisible="Collapsed"
                        IsPaneToggleVisible="True"
-                       OpenPaneLength="250">
+                       OpenPaneLength="220">
+
+        <!-- Branding header in the pane -->
+        <ui:NavigationView.Header>
+            <Border Padding="16,8" Background="Transparent">
+                <DockPanel>
+                    <ui:SymbolIcon Symbol="WrenchScrewdriver24"
+                                  DockPanel.Dock="Left"
+                                  FontSize="18"
+                                  Margin="0,0,10,0"
+                                  Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" />
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="COR Cleanup"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        <TextBlock Text="v1.0.0"
+                                   FontSize="10"
+                                   Opacity="0.4"
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+        </ui:NavigationView.Header>
 
         <ui:NavigationView.MenuItems>
+            <ui:NavigationViewItem Content="Home"
+                                   Icon="{ui:SymbolIcon Home24}"
+                                   TargetPageType="{x:Type views:HomePage}" />
             <ui:NavigationViewItem Content="Network"
                                    Icon="{ui:SymbolIcon Globe24}"
                                    TargetPageType="{x:Type views:NetworkPage}" />

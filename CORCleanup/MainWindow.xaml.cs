@@ -22,10 +22,10 @@ public partial class MainWindow : FluentWindow
         DataContext = this;
         _navigationService = navigationService;
 
-        InitializeComponent();
+        // Force dark theme regardless of system setting
+        ApplicationThemeManager.Apply(ApplicationTheme.Dark);
 
-        ApplicationThemeManager.Apply(this);
-        SystemThemeWatcher.Watch(this);
+        InitializeComponent();
 
         NavigationView.SetServiceProvider(serviceProvider);
         navigationService.SetNavigationControl(NavigationView);
@@ -35,7 +35,6 @@ public partial class MainWindow : FluentWindow
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        // Navigate to Network page on startup
-        _navigationService.Navigate(typeof(Views.NetworkPage));
+        _navigationService.Navigate(typeof(Views.HomePage));
     }
 }

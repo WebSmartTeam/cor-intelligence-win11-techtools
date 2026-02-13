@@ -6,7 +6,7 @@
       Loaded="Page_Loaded">
 
 
-    <Grid Margin="24">
+    <Grid Margin="12,8">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
