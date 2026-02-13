@@ -4,6 +4,7 @@ using System.Text;
 using CORCleanup.Core.Interfaces;
 using CORCleanup.Core.Models;
 using Microsoft.Win32;
+using WinRegistry = Microsoft.Win32.Registry;
 
 namespace CORCleanup.Core.Services.Tools;
 
@@ -237,7 +238,7 @@ public sealed class AntivirusService : IAntivirusService
                     var keyPath = $@"{hive}\{subKey}";
                     try
                     {
-                        using var key = Registry.LocalMachine.OpenSubKey(keyPath);
+                        using var key = WinRegistry.LocalMachine.OpenSubKey(keyPath);
                         if (key is not null)
                             registryRemnants.Add($@"HKLM\{keyPath}");
                     }
@@ -254,7 +255,7 @@ public sealed class AntivirusService : IAntivirusService
                 var uninstallPath = $@"{hive}\Microsoft\Windows\CurrentVersion\Uninstall";
                 try
                 {
-                    using var uninstallKey = Registry.LocalMachine.OpenSubKey(uninstallPath);
+                    using var uninstallKey = WinRegistry.LocalMachine.OpenSubKey(uninstallPath);
                     if (uninstallKey is null) continue;
 
                     foreach (var subKeyName in uninstallKey.GetSubKeyNames())

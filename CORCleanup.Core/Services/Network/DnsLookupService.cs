@@ -119,29 +119,29 @@ public sealed partial class DnsLookupService : IDnsLookupService
         if (dnsServer is not null)
             args += $" {dnsServer}";
 
+        // Declare outside try so catch can kill the process on timeout
+        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        timeoutCts.CancelAfter(TimeSpan.FromSeconds(30));
+
+        var proc = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "nslookup",
+                Arguments = args,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+
         try
         {
-            // Hard timeout to prevent hanging nslookup processes
-            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            timeoutCts.CancelAfter(TimeSpan.FromSeconds(30));
-
-            using var process = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = "nslookup",
-                    Arguments = args,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                }
-            };
-
-            process.Start();
-            var output = await process.StandardOutput.ReadToEndAsync(timeoutCts.Token);
-            var errorOutput = await process.StandardError.ReadToEndAsync(timeoutCts.Token);
-            await process.WaitForExitAsync(timeoutCts.Token);
+            proc.Start();
+            var output = await proc.StandardOutput.ReadToEndAsync(timeoutCts.Token);
+            var errorOutput = await proc.StandardError.ReadToEndAsync(timeoutCts.Token);
+            await proc.WaitForExitAsync(timeoutCts.Token);
             sw.Stop();
 
             // nslookup sends some output to stderr (server info), combine
@@ -160,7 +160,7 @@ public sealed partial class DnsLookupService : IDnsLookupService
         catch (OperationCanceledException)
         {
             sw.Stop();
-            try { process.Kill(entireProcessTree: true); } catch { }
+            try { proc.Kill(entireProcessTree: true); } catch { }
             return new DnsLookupResult
             {
                 Domain = domain,
@@ -183,6 +183,10 @@ public sealed partial class DnsLookupService : IDnsLookupService
                 QueryTimeMs = sw.ElapsedMilliseconds,
                 Error = ex.Message
             };
+        }
+        finally
+        {
+            proc.Dispose();
         }
     }
 

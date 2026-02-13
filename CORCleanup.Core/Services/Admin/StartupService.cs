@@ -1,5 +1,6 @@
 using System.Runtime.Versioning;
 using Microsoft.Win32;
+using WinRegistry = Microsoft.Win32.Registry;
 using CORCleanup.Core.Interfaces;
 using CORCleanup.Core.Models;
 
@@ -14,10 +15,10 @@ public sealed class StartupService : IStartupService
 {
     private static readonly (RegistryKey Root, string Path, string Label)[] RegistryPaths =
     {
-        (Registry.CurrentUser, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", "HKCU\\Run"),
-        (Registry.CurrentUser, @"SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce", "HKCU\\RunOnce"),
-        (Registry.LocalMachine, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", "HKLM\\Run"),
-        (Registry.LocalMachine, @"SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce", "HKLM\\RunOnce"),
+        (WinRegistry.CurrentUser, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", "HKCU\\Run"),
+        (WinRegistry.CurrentUser, @"SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce", "HKCU\\RunOnce"),
+        (WinRegistry.LocalMachine, @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", "HKLM\\Run"),
+        (WinRegistry.LocalMachine, @"SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce", "HKLM\\RunOnce"),
     };
 
     public Task<List<StartupEntry>> GetStartupItemsAsync() => Task.Run(() =>
@@ -122,7 +123,7 @@ public sealed class StartupService : IStartupService
         try
         {
             var isHklm = entry.RegistryPath.StartsWith("HKLM");
-            var root = isHklm ? Registry.LocalMachine : Registry.CurrentUser;
+            var root = isHklm ? WinRegistry.LocalMachine : WinRegistry.CurrentUser;
             var isRunOnce = entry.Source == StartupSource.RegistryRunOnce;
             var runPath = isRunOnce
                 ? @"SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce"

@@ -1,6 +1,7 @@
 using System.Runtime.Versioning;
 using System.Text;
 using Microsoft.Win32;
+using WinRegistry = Microsoft.Win32.Registry;
 using CORCleanup.Core.Interfaces;
 using CORCleanup.Core.Models;
 
@@ -20,7 +21,7 @@ public sealed class SoftwareInventoryService : ISoftwareInventoryService
     {
         var entries = new Dictionary<string, SoftwareEntry>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var rootKey in new[] { Registry.LocalMachine, Registry.CurrentUser })
+        foreach (var rootKey in new[] { WinRegistry.LocalMachine, WinRegistry.CurrentUser })
         {
             foreach (var path in RegistryPaths)
             {

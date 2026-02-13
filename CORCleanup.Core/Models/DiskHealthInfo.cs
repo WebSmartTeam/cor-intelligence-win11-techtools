@@ -19,7 +19,7 @@ public sealed class SmartAttribute
     public DiskHealthStatus Status { get; init; } = DiskHealthStatus.Unknown;
 }
 
-public sealed class DiskHealthInfo
+public sealed record DiskHealthInfo
 {
     public required string Model { get; init; }
     public required string SerialNumber { get; init; }

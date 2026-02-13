@@ -1,5 +1,6 @@
 using System.Runtime.Versioning;
 using Microsoft.Win32;
+using WinRegistry = Microsoft.Win32.Registry;
 using CORCleanup.Core.Interfaces;
 using CORCleanup.Core.Models;
 using CORCleanup.Core.Security;
@@ -28,13 +29,13 @@ public sealed class UninstallService : IUninstallService
         // HKLM — system-wide installs
         foreach (var keyPath in UninstallKeyPaths)
         {
-            EnumerateUninstallKey(Registry.LocalMachine, keyPath, programs, seen, isWindowsApp: false);
+            EnumerateUninstallKey(WinRegistry.LocalMachine, keyPath, programs, seen, isWindowsApp: false);
         }
 
         // HKCU — per-user installs (often missed by other tools)
         foreach (var keyPath in UninstallKeyPaths)
         {
-            EnumerateUninstallKey(Registry.CurrentUser, keyPath, programs, seen, isWindowsApp: false);
+            EnumerateUninstallKey(WinRegistry.CurrentUser, keyPath, programs, seen, isWindowsApp: false);
         }
 
         return programs
