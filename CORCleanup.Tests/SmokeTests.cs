@@ -1,3 +1,5 @@
+using Xunit;
+
 namespace CORCleanup.Tests;
 
 public class SmokeTests
