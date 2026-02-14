@@ -426,6 +426,269 @@
                 </Grid>
             </TabItem>
 
+            <!-- ============================================================ -->
+            <!-- TAB 6: Process Explorer -->
+            <!-- ============================================================ -->
+            <TabItem Header="Processes">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Controls -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                        <ui:Button Content="Refresh Processes"
+                                   Appearance="Primary"
+                                   Command="{Binding ViewModel.LoadProcessesCommand}"
+                                   MinWidth="160" Margin="0,0,12,0" />
+                        <ui:Button Content="Kill Process"
+                                   Appearance="Danger"
+                                   Command="{Binding ViewModel.KillSelectedProcessCommand}"
+                                   MinWidth="110" Margin="0,0,12,0" />
+                        <ui:Button Content="Open File Location"
+                                   Command="{Binding ViewModel.OpenProcessLocationCommand}"
+                                   MinWidth="140" Margin="0,0,16,0" />
+                        <TextBlock Text="CPU usage sampled over ~500ms interval"
+                                   VerticalAlignment="Center" Opacity="0.5" FontSize="12" />
+                    </StackPanel>
+
+                    <!-- Search filter -->
+                    <ui:TextBox Grid.Row="1"
+                                PlaceholderText="Search by name, description, or PID..."
+                                Text="{Binding ViewModel.ProcessSearchFilter, UpdateSourceTrigger=PropertyChanged}"
+                                Margin="0,0,0,12" />
+
+                    <!-- Process list -->
+                    <DataGrid Grid.Row="2"
+                              ItemsSource="{Binding ViewModel.FilteredProcesses}"
+                              SelectedItem="{Binding ViewModel.SelectedProcess}"
+                              SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="PID" Binding="{Binding Pid}" Width="65">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontFamily" Value="Consolas" />
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="180" />
+                            <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*" />
+                            <DataGridTextColumn Header="CPU %" Binding="{Binding CpuFormatted}" Width="65">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                        <Setter Property="FontFamily" Value="Consolas" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Memory" Binding="{Binding WorkingSetFormatted}" Width="90">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Private" Binding="{Binding PrivateBytesFormatted}" Width="90">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Threads" Binding="{Binding ThreadCount}" Width="65">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Handles" Binding="{Binding HandleCount}" Width="65">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Started" Binding="{Binding StartTimeFormatted}" Width="120" />
+                        </DataGrid.Columns>
+
+                        <!-- Row colour coding by resource usage -->
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow"
+                                   BasedOn="{StaticResource {x:Type DataGridRow}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding CpuLevel}" Value="High">
+                                        <Setter Property="Foreground" Value="#F44336" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding CpuLevel}" Value="Medium">
+                                        <Setter Property="Foreground" Value="#FF9800" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding MemoryLevel}" Value="High">
+                                        <Setter Property="Background" Value="#22F44336" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsSystem}" Value="True">
+                                        <Setter Property="Opacity" Value="0.55" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================ -->
+            <!-- TAB 7: Memory Explorer -->
+            <!-- ============================================================ -->
+            <TabItem Header="Memory">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Controls -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                        <ui:Button Content="Refresh Memory"
+                                   Appearance="Primary"
+                                   Command="{Binding ViewModel.LoadMemoryCommand}"
+                                   MinWidth="160" Margin="0,0,16,0" />
+                        <TextBlock Text="Physical RAM, page file usage, and top consumers by working set"
+                                   VerticalAlignment="Center" Opacity="0.5" FontSize="12" />
+                    </StackPanel>
+
+                    <!-- Memory overview cards -->
+                    <Grid Grid.Row="1" Margin="0,0,0,16"
+                          Visibility="{Binding ViewModel.CurrentMemoryInfo, Converter={StaticResource NullToVis}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Physical RAM card -->
+                        <ui:Card Grid.Column="0" Padding="16" Margin="0,0,8,0">
+                            <StackPanel>
+                                <TextBlock Text="Physical RAM" FontWeight="SemiBold"
+                                           Opacity="0.7" Margin="0,0,0,8" />
+                                <ProgressBar Value="{Binding ViewModel.CurrentMemoryInfo.UsedPhysicalPercent}"
+                                             Maximum="100" Height="8" Margin="0,0,0,8" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Used:" Opacity="0.6" Margin="0,0,8,2" />
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ViewModel.CurrentMemoryInfo.UsedFormatted}"
+                                               FontWeight="SemiBold" HorizontalAlignment="Right" />
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Available:" Opacity="0.6" Margin="0,0,8,2" />
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ViewModel.CurrentMemoryInfo.AvailableFormatted}"
+                                               HorizontalAlignment="Right" />
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Total:" Opacity="0.6" Margin="0,0,8,0" />
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ViewModel.CurrentMemoryInfo.TotalFormatted}"
+                                               HorizontalAlignment="Right" />
+                                </Grid>
+                            </StackPanel>
+                        </ui:Card>
+
+                        <!-- Page File card -->
+                        <ui:Card Grid.Column="1" Padding="16" Margin="4,0,4,0">
+                            <StackPanel>
+                                <TextBlock Text="Page File" FontWeight="SemiBold"
+                                           Opacity="0.7" Margin="0,0,0,8" />
+                                <ProgressBar Value="{Binding ViewModel.CurrentMemoryInfo.UsedPageFilePercent}"
+                                             Maximum="100" Height="8" Margin="0,0,0,8" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Used:" Opacity="0.6" Margin="0,0,8,2" />
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ViewModel.CurrentMemoryInfo.PageFileUsedFormatted}"
+                                               FontWeight="SemiBold" HorizontalAlignment="Right" />
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Total:" Opacity="0.6" Margin="0,0,8,0" />
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ViewModel.CurrentMemoryInfo.PageFileTotalFormatted}"
+                                               HorizontalAlignment="Right" />
+                                </Grid>
+                            </StackPanel>
+                        </ui:Card>
+
+                        <!-- Health status card -->
+                        <ui:Card Grid.Column="2" Padding="16" Margin="8,0,0,0">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="Health" FontWeight="SemiBold"
+                                           Opacity="0.7" Margin="0,0,0,8"
+                                           HorizontalAlignment="Center" />
+                                <TextBlock Text="{Binding ViewModel.CurrentMemoryInfo.MemoryLoadPercent, StringFormat={}{0}%}"
+                                           FontSize="32" FontWeight="Bold"
+                                           HorizontalAlignment="Center" />
+                                <TextBlock Text="{Binding ViewModel.CurrentMemoryInfo.HealthLevel}"
+                                           FontSize="14" FontWeight="SemiBold"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,4,0,0" />
+                            </StackPanel>
+                        </ui:Card>
+                    </Grid>
+
+                    <!-- Top memory consumers grid -->
+                    <DataGrid Grid.Row="2"
+                              ItemsSource="{Binding ViewModel.MemoryConsumers}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="PID" Binding="{Binding Pid}" Width="65">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontFamily" Value="Consolas" />
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Process" Binding="{Binding Name}" Width="*" />
+                            <DataGridTextColumn Header="Working Set" Binding="{Binding WorkingSetFormatted}" Width="110">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Private Bytes" Binding="{Binding PrivateBytesFormatted}" Width="110">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="% RAM" Binding="{Binding PercentFormatted}" Width="70">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                        <Setter Property="FontFamily" Value="Consolas" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow"
+                                   BasedOn="{StaticResource {x:Type DataGridRow}}" />
+                        </DataGrid.RowStyle>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
         </TabControl>
 
         <!-- Status bar -->

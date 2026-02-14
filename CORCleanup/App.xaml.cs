@@ -65,6 +65,8 @@ public partial class App : Application
             services.AddSingleton<Core.Interfaces.IBsodViewerService, Core.Services.Tools.BsodViewerService>();
             services.AddSingleton<Core.Interfaces.ISoftwareInventoryService, Core.Services.Tools.SoftwareInventoryService>();
             services.AddSingleton<Core.Interfaces.IAntivirusService, Core.Services.Tools.AntivirusService>();
+            services.AddSingleton<Core.Interfaces.IProcessExplorerService, Core.Services.Tools.ProcessExplorerService>();
+            services.AddSingleton<Core.Interfaces.IMemoryExplorerService, Core.Services.Tools.MemoryExplorerService>();
             services.AddSingleton<Core.Interfaces.ISystemRepairService, Core.Services.Admin.SystemRepairService>();
             services.AddSingleton<Core.Interfaces.IPrinterService, Core.Services.Admin.PrinterService>();
             services.AddSingleton<Core.Interfaces.IHostsFileService, Core.Services.Admin.HostsFileService>();
