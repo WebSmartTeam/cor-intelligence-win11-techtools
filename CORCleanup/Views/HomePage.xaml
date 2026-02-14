@@ -341,7 +341,7 @@
                                                    HorizontalAlignment="Right" Margin="8,0,0,0"
                                                    VerticalAlignment="Center">
                                             <Run Text="{Binding CpuFormatted, Mode=OneWay}" FontWeight="SemiBold" />
-                                            <Run Text="%" Opacity="0.5" />
+                                            <Run Text="%" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                         </TextBlock>
                                     </Grid>
                                 </DataTemplate>
@@ -414,7 +414,7 @@
                                                    VerticalAlignment="Center">
                                             <Run Text="{Binding Source, Mode=OneWay}" FontWeight="SemiBold" />
                                             <Run Text=" " />
-                                            <Run Text="{Binding EventId, Mode=OneWay}" Opacity="0.5" />
+                                            <Run Text="{Binding EventId, Mode=OneWay}" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                         </TextBlock>
                                         <TextBlock Grid.Column="2" Text="{Binding TimeFormatted}"
                                                    FontSize="9.5" Opacity="0.4" Margin="6,0,0,0"
