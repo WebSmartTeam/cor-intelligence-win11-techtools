@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace CORCleanup.Core.Models;
 
 public enum CleanupCategory
@@ -20,14 +22,27 @@ public enum CleanupCategory
     ApplicationTemp
 }
 
-public sealed class CleanupItem
+public sealed class CleanupItem : INotifyPropertyChanged
 {
     public required CleanupCategory Category { get; init; }
     public required string DisplayName { get; init; }
     public required string Description { get; init; }
     public required long EstimatedSizeBytes { get; init; }
     public required bool IsSelectedByDefault { get; init; }
-    public bool IsSelected { get; set; }
+
+    private bool _isSelected;
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set
+        {
+            if (_isSelected == value) return;
+            _isSelected = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsSelected)));
+        }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public string SizeFormatted => ByteFormatter.Format(EstimatedSizeBytes);
 }

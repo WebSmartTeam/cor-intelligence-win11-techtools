@@ -385,7 +385,8 @@
 
                         <!-- Dim disabled entries -->
                         <DataGrid.RowStyle>
-                            <Style TargetType="DataGridRow">
+                            <Style TargetType="DataGridRow"
+                                   BasedOn="{StaticResource {x:Type DataGridRow}}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding StatusDisplay}" Value="Disabled">
                                         <Setter Property="Opacity" Value="0.5" />

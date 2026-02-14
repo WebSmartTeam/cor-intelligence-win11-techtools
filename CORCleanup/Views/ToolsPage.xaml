@@ -240,7 +240,8 @@
 
                         <!-- Row colour coding: red for critical errors -->
                         <DataGrid.RowStyle>
-                            <Style TargetType="DataGridRow">
+                            <Style TargetType="DataGridRow"
+                                   BasedOn="{StaticResource {x:Type DataGridRow}}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding BugCheckName}" Value="CRITICAL_PROCESS_DIED">
                                         <Setter Property="Foreground" Value="#E06666" />
@@ -349,7 +350,8 @@
 
                         <!-- Row colour coding by status -->
                         <DataGrid.RowStyle>
-                            <Style TargetType="DataGridRow">
+                            <Style TargetType="DataGridRow"
+                                   BasedOn="{StaticResource {x:Type DataGridRow}}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding StatusDisplay}" Value="Active">
                                         <Setter Property="Foreground" Value="#4CAF50" />

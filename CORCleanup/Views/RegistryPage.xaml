@@ -127,7 +127,8 @@
 
                         <!-- Row styling based on risk level -->
                         <DataGrid.RowStyle>
-                            <Style TargetType="DataGridRow">
+                            <Style TargetType="DataGridRow"
+                                   BasedOn="{StaticResource {x:Type DataGridRow}}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding Risk}" Value="Safe">
                                         <Setter Property="Foreground" Value="#7DBF8E" />

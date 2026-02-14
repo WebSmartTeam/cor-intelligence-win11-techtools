@@ -28,16 +28,18 @@
             <ui:NavigationView.Header>
                 <Border Padding="12,6" Background="Transparent">
                     <DockPanel>
+                        <!-- COR Intelligence brand mark -->
                         <Border DockPanel.Dock="Left"
-                                Width="28" Height="28"
+                                Width="32" Height="32"
                                 CornerRadius="6"
                                 Margin="0,0,10,0"
                                 Background="{DynamicResource SystemAccentColorPrimaryBrush}">
-                            <ui:SymbolIcon Symbol="WrenchScrewdriver24"
-                                          FontSize="14"
-                                          HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"
-                                          Foreground="White" />
+                            <TextBlock Text="COR"
+                                       FontSize="10"
+                                       FontWeight="Black"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Foreground="White" />
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="COR Cleanup"
@@ -46,8 +48,8 @@
                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                             <TextBlock Text="COR Intelligence"
                                        FontSize="9"
-                                       Opacity="0.4"
-                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                       Opacity="0.5"
+                                       Foreground="#06B6D4" />
                         </StackPanel>
                     </DockPanel>
                 </Border>
@@ -104,7 +106,7 @@
                                Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                 </StackPanel>
                 <TextBlock DockPanel.Dock="Right"
-                           Text="v1.0.1"
+                           Text="v1.0.2"
                            FontSize="10.5"
                            Opacity="0.4"
                            VerticalAlignment="Center"

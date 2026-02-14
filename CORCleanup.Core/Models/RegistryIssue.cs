@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace CORCleanup.Core.Models;
 
 /// <summary>
@@ -29,15 +31,30 @@ public enum RegistryRiskLevel
 
 /// <summary>
 /// A single registry issue found during scanning.
+/// Implements INotifyPropertyChanged so DataGrid checkbox bindings
+/// update when IsSelected is changed programmatically (e.g. Select All).
 /// </summary>
-public sealed class RegistryIssue
+public sealed class RegistryIssue : INotifyPropertyChanged
 {
     public required RegistryScanCategory Category { get; init; }
     public required RegistryRiskLevel Risk { get; init; }
     public required string KeyPath { get; init; }
     public string? ValueName { get; init; }
     public required string Description { get; init; }
-    public bool IsSelected { get; set; }
+
+    private bool _isSelected;
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set
+        {
+            if (_isSelected == value) return;
+            _isSelected = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsSelected)));
+        }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public string CategoryDisplayName => Category switch
     {
