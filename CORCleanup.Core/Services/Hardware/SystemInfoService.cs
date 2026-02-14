@@ -254,6 +254,68 @@ public sealed class SystemInfoService : ISystemInfoService
         return (string?)null;
     });
 
+    public Task<List<DriverInfo>> GetOutdatedDriversAsync(int olderThanYears = 3) => Task.Run(() =>
+    {
+        var cutoff = DateTime.Now.AddYears(-olderThanYears);
+        var drivers = new List<DriverInfo>();
+
+        // Skip generic device classes that don't represent real hardware
+        var skipClasses = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "LEGACYDRIVER", "SYSTEM", "VOLUMESNAPSHOT", "VOLUME",
+            "COMPUTER", "PROCESSOR", "HIDCLASS"
+        };
+
+        try
+        {
+            using var searcher = new ManagementObjectSearcher(
+                "SELECT DeviceName, DriverVersion, Manufacturer, DeviceClass, DriverDate " +
+                "FROM Win32_PnPSignedDriver WHERE DriverDate IS NOT NULL");
+
+            foreach (var obj in searcher.Get())
+            {
+                var dateStr = GetString(obj, "DriverDate", "");
+                if (string.IsNullOrEmpty(dateStr)) continue;
+
+                try
+                {
+                    var driverDate = ManagementDateTimeConverter.ToDateTime(dateStr);
+
+                    // Skip future dates or impossibly old dates
+                    if (driverDate > DateTime.Now || driverDate.Year < 2000) continue;
+                    if (driverDate >= cutoff) continue;
+
+                    var deviceClass = GetString(obj, "DeviceClass", "Unknown");
+                    if (skipClasses.Contains(deviceClass)) continue;
+
+                    var deviceName = GetString(obj, "DeviceName", "Unknown");
+                    if (string.IsNullOrWhiteSpace(deviceName) || deviceName == "Unknown") continue;
+
+                    drivers.Add(new DriverInfo
+                    {
+                        DeviceName = deviceName.Trim(),
+                        DriverVersion = GetString(obj, "DriverVersion", "Unknown"),
+                        Manufacturer = GetString(obj, "Manufacturer", "Unknown").Trim(),
+                        DeviceClass = deviceClass,
+                        DriverDate = driverDate
+                    });
+                }
+                catch
+                {
+                    // Date conversion failure — skip
+                }
+            }
+        }
+        catch (ManagementException)
+        {
+            // WMI query failure — return empty
+        }
+
+        return drivers
+            .OrderBy(d => d.DriverDate)
+            .ToList();
+    });
+
     // --- SMART data population ---
 
     private static void TryPopulateSmartData(List<DiskHealthInfo> disks)

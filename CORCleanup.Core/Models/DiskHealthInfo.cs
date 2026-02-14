@@ -37,4 +37,25 @@ public sealed record DiskHealthInfo
 
     public string SizeFormatted =>
         SizeBytes > 0 ? $"{SizeBytes / (1024.0 * 1024 * 1024):F0} GB" : "N/A";
+
+    /// <summary>
+    /// Human-readable bus type derived from WMI InterfaceType and model name.
+    /// WMI reports SATA as "IDE" and NVMe as "SCSI", so we use heuristics.
+    /// </summary>
+    public string BusDisplay => InterfaceType switch
+    {
+        "SCSI" when Model.Contains("NVMe", StringComparison.OrdinalIgnoreCase) => "NVMe",
+        "SCSI" => "PCIe",
+        "IDE" => "SATA",
+        "USB" => "USB",
+        _ => InterfaceType
+    };
+
+    public string TypeSummary => $"{BusDisplay} {MediaType}";
+
+    public string TemperatureDisplay => TemperatureCelsius.HasValue
+        ? $"{TemperatureCelsius}°C"
+        : "—";
+
+    public string HealthDisplay => OverallHealth.ToString();
 }

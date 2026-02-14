@@ -9,303 +9,554 @@
       mc:Ignorable="d"
       Title="Home">
 
-    <Grid Margin="12,8">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="12,8">
 
-        <!-- ====================================================== -->
-        <!-- Row 0: System Health Overview — 4 metric tiles          -->
-        <!-- ====================================================== -->
-        <Grid Grid.Row="0" Margin="0,0,0,10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+            <!-- ============================================================ -->
+            <!-- Header: Title + Refresh + Status                             -->
+            <!-- ============================================================ -->
+            <DockPanel Margin="0,0,0,10">
+                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="System Overview" FontSize="16" FontWeight="SemiBold" />
+                    <TextBlock Text="  Loading..." FontSize="11" Opacity="0.4"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding ViewModel.IsLoading, Converter={StaticResource BoolToVis}}" />
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right"
+                            VerticalAlignment="Center">
+                    <TextBlock Text="{Binding ViewModel.StatusText}" FontSize="10" Opacity="0.4"
+                               VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <ui:Button Appearance="Secondary"
+                               Command="{Binding ViewModel.RefreshDashboardCommand}"
+                               ToolTip="Refresh dashboard"
+                               Padding="4,3">
+                        <ui:SymbolIcon Symbol="ArrowClockwise24" FontSize="14" />
+                    </ui:Button>
+                </StackPanel>
+            </DockPanel>
 
-            <!-- OS Tile -->
-            <Border Grid.Column="0" Margin="0,0,5,0" Padding="14,10"
-                    CornerRadius="6"
-                    Background="{DynamicResource ControlFillColorDefaultBrush}">
-                <DockPanel>
-                    <Border DockPanel.Dock="Left"
-                            Width="36" Height="36" CornerRadius="8"
-                            Margin="0,0,10,0"
-                            Background="#1A06B6D4">
-                        <ui:SymbolIcon Symbol="Desktop24" FontSize="16"
-                                      HorizontalAlignment="Center" VerticalAlignment="Center"
-                                      Foreground="#06B6D4" />
-                    </Border>
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding ViewModel.ComputerName, FallbackValue='Loading...'}"
-                                   FontSize="13" FontWeight="SemiBold"
-                                   TextTrimming="CharacterEllipsis" />
-                        <TextBlock Text="{Binding ViewModel.OsCaption, FallbackValue='Windows'}"
-                                   FontSize="10.5" Opacity="0.55"
-                                   TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </DockPanel>
-            </Border>
+            <!-- ============================================================ -->
+            <!-- Row 0: System Identity — 4 metric tiles                      -->
+            <!-- ============================================================ -->
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-            <!-- CPU Tile -->
-            <Border Grid.Column="1" Margin="5,0,5,0" Padding="14,10"
-                    CornerRadius="6"
-                    Background="{DynamicResource ControlFillColorDefaultBrush}">
-                <DockPanel>
-                    <Border DockPanel.Dock="Left"
-                            Width="36" Height="36" CornerRadius="8"
-                            Margin="0,0,10,0"
-                            Background="#1A8B5CF6">
-                        <ui:SymbolIcon Symbol="TopSpeed24" FontSize="16"
-                                      HorizontalAlignment="Center" VerticalAlignment="Center"
-                                      Foreground="#8B5CF6" />
-                    </Border>
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding ViewModel.CpuShortName, FallbackValue='CPU'}"
-                                   FontSize="13" FontWeight="SemiBold"
-                                   TextTrimming="CharacterEllipsis" />
-                        <TextBlock Text="{Binding ViewModel.CpuSummary, FallbackValue='...'}"
-                                   FontSize="10.5" Opacity="0.55"
-                                   TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
-                </DockPanel>
-            </Border>
+                <!-- PC Name + OS -->
+                <Border Grid.Column="0" Margin="0,0,4,0" Padding="12,8"
+                        CornerRadius="6"
+                        Background="{DynamicResource ControlFillColorDefaultBrush}">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Left"
+                                Width="32" Height="32" CornerRadius="8"
+                                Margin="0,0,8,0"
+                                Background="#1A06B6D4">
+                            <ui:SymbolIcon Symbol="Desktop24" FontSize="14"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center"
+                                          Foreground="#06B6D4" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding ViewModel.ComputerName, FallbackValue='Loading...'}"
+                                       FontSize="12" FontWeight="SemiBold"
+                                       TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding ViewModel.OsCaption, FallbackValue='Windows'}"
+                                       FontSize="10" Opacity="0.5"
+                                       TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
 
-            <!-- RAM Tile -->
-            <Border Grid.Column="2" Margin="5,0,5,0" Padding="14,10"
-                    CornerRadius="6"
-                    Background="{DynamicResource ControlFillColorDefaultBrush}">
-                <DockPanel>
-                    <Border DockPanel.Dock="Left"
-                            Width="36" Height="36" CornerRadius="8"
-                            Margin="0,0,10,0"
-                            Background="#1A10B981">
-                        <ui:SymbolIcon Symbol="SlideSize24" FontSize="16"
-                                      HorizontalAlignment="Center" VerticalAlignment="Center"
-                                      Foreground="#10B981" />
-                    </Border>
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding ViewModel.RamDisplay, FallbackValue='RAM'}"
-                                   FontSize="13" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding ViewModel.RamSlots, FallbackValue='...'}"
-                                   FontSize="10.5" Opacity="0.55" />
-                    </StackPanel>
-                </DockPanel>
-            </Border>
+                <!-- CPU -->
+                <Border Grid.Column="1" Margin="4,0,4,0" Padding="12,8"
+                        CornerRadius="6"
+                        Background="{DynamicResource ControlFillColorDefaultBrush}">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Left"
+                                Width="32" Height="32" CornerRadius="8"
+                                Margin="0,0,8,0"
+                                Background="#1A8B5CF6">
+                            <ui:SymbolIcon Symbol="TopSpeed24" FontSize="14"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center"
+                                          Foreground="#8B5CF6" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding ViewModel.CpuShortName, FallbackValue='CPU'}"
+                                       FontSize="12" FontWeight="SemiBold"
+                                       TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding ViewModel.CpuSummary, FallbackValue='...'}"
+                                       FontSize="10" Opacity="0.5"
+                                       TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
 
-            <!-- GPU Tile -->
-            <Border Grid.Column="3" Margin="5,0,0,0" Padding="14,10"
-                    CornerRadius="6"
-                    Background="{DynamicResource ControlFillColorDefaultBrush}">
-                <DockPanel>
-                    <Border DockPanel.Dock="Left"
-                            Width="36" Height="36" CornerRadius="8"
-                            Margin="0,0,10,0"
-                            Background="#1AF59E0B">
-                        <ui:SymbolIcon Symbol="Video24" FontSize="16"
-                                      HorizontalAlignment="Center" VerticalAlignment="Center"
-                                      Foreground="#F59E0B" />
-                    </Border>
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding ViewModel.GpuShortName, FallbackValue='GPU'}"
-                                   FontSize="13" FontWeight="SemiBold"
-                                   TextTrimming="CharacterEllipsis" />
-                        <TextBlock Text="{Binding ViewModel.GpuVram, FallbackValue='...'}"
-                                   FontSize="10.5" Opacity="0.55" />
-                    </StackPanel>
-                </DockPanel>
-            </Border>
-        </Grid>
+                <!-- RAM -->
+                <Border Grid.Column="2" Margin="4,0,4,0" Padding="12,8"
+                        CornerRadius="6"
+                        Background="{DynamicResource ControlFillColorDefaultBrush}">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Left"
+                                Width="32" Height="32" CornerRadius="8"
+                                Margin="0,0,8,0"
+                                Background="#1A10B981">
+                            <ui:SymbolIcon Symbol="SlideSize24" FontSize="14"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center"
+                                          Foreground="#10B981" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding ViewModel.RamDisplay, FallbackValue='RAM'}"
+                                       FontSize="12" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding ViewModel.RamSlots, FallbackValue='...'}"
+                                       FontSize="10" Opacity="0.5" />
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
 
-        <!-- ====================================================== -->
-        <!-- Row 1: Disk Health Bar(s)                               -->
-        <!-- ====================================================== -->
-        <ItemsControl Grid.Row="1" ItemsSource="{Binding ViewModel.Disks}" Margin="0,0,0,10">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Border Margin="0,0,0,4" Padding="12,8"
-                            CornerRadius="6"
-                            Background="{DynamicResource ControlFillColorDefaultBrush}">
+                <!-- GPU -->
+                <Border Grid.Column="3" Margin="4,0,0,0" Padding="12,8"
+                        CornerRadius="6"
+                        Background="{DynamicResource ControlFillColorDefaultBrush}">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Left"
+                                Width="32" Height="32" CornerRadius="8"
+                                Margin="0,0,8,0"
+                                Background="#1AF59E0B">
+                            <ui:SymbolIcon Symbol="Video24" FontSize="14"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center"
+                                          Foreground="#F59E0B" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding ViewModel.GpuShortName, FallbackValue='GPU'}"
+                                       FontSize="12" FontWeight="SemiBold"
+                                       TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding ViewModel.GpuVram, FallbackValue='...'}"
+                                       FontSize="10" Opacity="0.5" />
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+            </Grid>
+
+            <!-- ============================================================ -->
+            <!-- Row 1: Network + Memory gauge                                -->
+            <!-- ============================================================ -->
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Network Panel -->
+                <Border Grid.Column="0" Margin="0,0,4,0" Padding="12,10"
+                        CornerRadius="6"
+                        Background="{DynamicResource ControlFillColorDefaultBrush}">
+                    <StackPanel>
+                        <TextBlock Text="NETWORK" FontSize="9" FontWeight="SemiBold"
+                                   Opacity="0.35" Margin="0,0,0,6" />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
 
-                            <StackPanel Grid.Column="0" Orientation="Horizontal"
-                                        VerticalAlignment="Center" Margin="0,0,12,0">
-                                <ui:SymbolIcon Symbol="Save24" FontSize="14"
-                                               Foreground="#06B6D4" Margin="0,0,8,0" />
-                                <TextBlock Text="{Binding Label}" FontSize="12"
-                                           FontWeight="SemiBold" VerticalAlignment="Center" />
-                            </StackPanel>
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Local IP"
+                                       FontSize="10" Opacity="0.5" Margin="0,0,8,2"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Grid.Row="0" Grid.Column="1"
+                                       Text="{Binding ViewModel.LocalIpAddress}"
+                                       FontSize="11" FontWeight="SemiBold" Margin="0,0,16,2"
+                                       Foreground="#06B6D4" VerticalAlignment="Center" />
 
-                            <ProgressBar Grid.Column="1"
-                                         Value="{Binding UsedPercent, Mode=OneWay}"
-                                         Maximum="100" Height="14"
-                                         VerticalAlignment="Center"
-                                         Margin="0,0,12,0" />
+                            <TextBlock Grid.Row="0" Grid.Column="2" Text="WAN IP"
+                                       FontSize="10" Opacity="0.5" Margin="0,0,8,2"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Grid.Row="0" Grid.Column="3"
+                                       Text="{Binding ViewModel.WanIpAddress}"
+                                       FontSize="11" FontWeight="SemiBold" Margin="0,0,0,2"
+                                       Foreground="#06B6D4" VerticalAlignment="Center" />
 
-                            <TextBlock Grid.Column="2" VerticalAlignment="Center"
-                                       FontSize="11" Opacity="0.7">
-                                <Run Text="{Binding UsedDisplay, Mode=OneWay}" />
-                                <Run Text=" / " />
-                                <Run Text="{Binding TotalDisplay, Mode=OneWay}" />
-                            </TextBlock>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4"
+                                       Text="{Binding ViewModel.NetworkAdapter}"
+                                       FontSize="10" Opacity="0.4" Margin="0,2,0,0" />
                         </Grid>
-                    </Border>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-
-        <!-- ====================================================== -->
-        <!-- Row 2: Quick Actions — feature shortcuts                -->
-        <!-- ====================================================== -->
-        <Grid Grid.Row="2" Margin="0,0,0,10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-
-            <ui:CardAction Grid.Column="0" Margin="0,0,5,0"
-                           Command="{Binding ViewModel.NavigateCommand}"
-                           CommandParameter="Cleanup">
-                <DockPanel Margin="6,4">
-                    <ui:SymbolIcon Symbol="Broom24" DockPanel.Dock="Left"
-                                  FontSize="18" Margin="0,0,8,0"
-                                  Foreground="#06B6D4" />
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="Cleanup" FontSize="12" FontWeight="SemiBold" />
-                        <TextBlock Text="Temp files and caches" FontSize="10" Opacity="0.5" />
                     </StackPanel>
-                </DockPanel>
-            </ui:CardAction>
+                </Border>
 
-            <ui:CardAction Grid.Column="1" Margin="5,0,5,0"
-                           Command="{Binding ViewModel.NavigateCommand}"
-                           CommandParameter="Network">
-                <DockPanel Margin="6,4">
-                    <ui:SymbolIcon Symbol="Globe24" DockPanel.Dock="Left"
-                                  FontSize="18" Margin="0,0,8,0"
-                                  Foreground="#8B5CF6" />
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="Network" FontSize="12" FontWeight="SemiBold" />
-                        <TextBlock Text="Diagnostics and Wi-Fi" FontSize="10" Opacity="0.5" />
+                <!-- Memory Gauge -->
+                <Border Grid.Column="1" Margin="4,0,0,0" Padding="12,10"
+                        CornerRadius="6"
+                        Background="{DynamicResource ControlFillColorDefaultBrush}">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,6">
+                            <TextBlock Text="MEMORY" FontSize="9" FontWeight="SemiBold"
+                                       Opacity="0.35" DockPanel.Dock="Left"
+                                       VerticalAlignment="Center" />
+                            <TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right"
+                                       FontSize="10.5" VerticalAlignment="Center">
+                                <Run Text="{Binding ViewModel.MemoryUsed, Mode=OneWay}" FontWeight="SemiBold" />
+                                <Run Text=" / " Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <Run Text="{Binding ViewModel.MemoryTotal, Mode=OneWay}" />
+                                <Run Text=" (" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <Run Text="{Binding ViewModel.MemoryPercent, Mode=OneWay, StringFormat={}{0}}" FontWeight="SemiBold" />
+                                <Run Text="%)" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </TextBlock>
+                        </DockPanel>
+                        <ProgressBar Value="{Binding ViewModel.MemoryPercent, Mode=OneWay}"
+                                     Maximum="100" Height="14" />
+                        <TextBlock Margin="0,4,0,0" FontSize="10" Opacity="0.4">
+                            <Run Text="Health: " />
+                            <Run Text="{Binding ViewModel.MemoryHealth, Mode=OneWay}" />
+                        </TextBlock>
                     </StackPanel>
-                </DockPanel>
-            </ui:CardAction>
+                </Border>
+            </Grid>
 
-            <ui:CardAction Grid.Column="2" Margin="5,0,5,0"
-                           Command="{Binding ViewModel.NavigateCommand}"
-                           CommandParameter="Registry">
-                <DockPanel Margin="6,4">
-                    <ui:SymbolIcon Symbol="Key24" DockPanel.Dock="Left"
-                                  FontSize="18" Margin="0,0,8,0"
-                                  Foreground="#10B981" />
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="Registry" FontSize="12" FontWeight="SemiBold" />
-                        <TextBlock Text="Clean invalid entries" FontSize="10" Opacity="0.5" />
-                    </StackPanel>
-                </DockPanel>
-            </ui:CardAction>
+            <!-- ============================================================ -->
+            <!-- Row 2: Disk Storage — logical drive usage bars               -->
+            <!-- ============================================================ -->
+            <TextBlock Text="STORAGE" FontSize="9" FontWeight="SemiBold"
+                       Opacity="0.35" Margin="0,4,0,4" />
+            <ItemsControl ItemsSource="{Binding ViewModel.LogicalDrives}" Margin="0,0,0,4">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="0,0,0,3" Padding="12,7"
+                                CornerRadius="6"
+                                Background="{DynamicResource ControlFillColorDefaultBrush}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="120" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
-            <ui:CardAction Grid.Column="3" Margin="5,0,0,0"
-                           Command="{Binding ViewModel.NavigateCommand}"
-                           CommandParameter="Admin">
-                <DockPanel Margin="6,4">
-                    <ui:SymbolIcon Symbol="ShieldTask24" DockPanel.Dock="Left"
-                                  FontSize="18" Margin="0,0,8,0"
-                                  Foreground="#F59E0B" />
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="Admin" FontSize="12" FontWeight="SemiBold" />
-                        <TextBlock Text="Services and repair" FontSize="10" Opacity="0.5" />
-                    </StackPanel>
-                </DockPanel>
-            </ui:CardAction>
-        </Grid>
+                                <TextBlock Grid.Column="0" Text="{Binding Label}" FontSize="11.5"
+                                           FontWeight="SemiBold" VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis" />
 
-        <!-- ====================================================== -->
-        <!-- Row 3: Feature Grid — remaining tools                   -->
-        <!-- ====================================================== -->
-        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
-            <Grid>
+                                <ProgressBar Grid.Column="1"
+                                             Value="{Binding UsedPercent, Mode=OneWay}"
+                                             Maximum="100" Height="12"
+                                             VerticalAlignment="Center"
+                                             Margin="0,0,12,0" />
+
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock FontSize="10.5" Opacity="0.7">
+                                        <Run Text="{Binding UsedDisplay, Mode=OneWay}" />
+                                        <Run Text=" / " />
+                                        <Run Text="{Binding TotalDisplay, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding FreeDisplay}" FontSize="10" Opacity="0.4"
+                                               Margin="8,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- ============================================================ -->
+            <!-- Row 3: Physical Disk Health — type, bus, health, temp        -->
+            <!-- ============================================================ -->
+            <TextBlock Text="DISK HEALTH" FontSize="9" FontWeight="SemiBold"
+                       Opacity="0.35" Margin="0,4,0,4" />
+            <ItemsControl ItemsSource="{Binding ViewModel.PhysicalDisks}" Margin="0,0,0,8">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="0,0,6,4" Padding="12,8"
+                                CornerRadius="6" MinWidth="220"
+                                Background="{DynamicResource ControlFillColorDefaultBrush}">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Model}" FontSize="11.5" FontWeight="SemiBold"
+                                           TextTrimming="CharacterEllipsis" MaxWidth="280" />
+                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                    <!-- Bus + Media Type badge -->
+                                    <Border Padding="5,1" CornerRadius="3" Margin="0,0,5,0"
+                                            Background="#1A8B5CF6">
+                                        <TextBlock Text="{Binding TypeSummary}" FontSize="9.5"
+                                                   Foreground="#8B5CF6" />
+                                    </Border>
+                                    <!-- Health badge -->
+                                    <Border Padding="5,1" CornerRadius="3" Margin="0,0,5,0"
+                                            Background="#1A10B981">
+                                        <TextBlock Text="{Binding HealthDisplay}" FontSize="9.5"
+                                                   Foreground="#10B981" />
+                                    </Border>
+                                    <!-- Size -->
+                                    <TextBlock Text="{Binding SizeFormatted}" FontSize="10"
+                                               Opacity="0.5" VerticalAlignment="Center"
+                                               Margin="0,0,5,0" />
+                                    <!-- Temperature -->
+                                    <TextBlock Text="{Binding TemperatureDisplay}" FontSize="10"
+                                               Opacity="0.5" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- ============================================================ -->
+            <!-- Row 4: Top 5 CPU + Top 5 Memory — side by side               -->
+            <!-- ============================================================ -->
+            <Grid Margin="0,0,0,8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
 
-                <!-- Uninstaller -->
-                <ui:CardAction Grid.Row="0" Grid.Column="0" Margin="0,0,5,5"
-                               Command="{Binding ViewModel.NavigateCommand}"
-                               CommandParameter="Uninstaller">
-                    <DockPanel Margin="6,4">
-                        <ui:SymbolIcon Symbol="AppsList24" DockPanel.Dock="Left"
-                                      FontSize="18" Margin="0,0,8,0"
-                                      Foreground="#EC4899" />
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="Uninstaller" FontSize="12" FontWeight="SemiBold" />
-                            <TextBlock Text="Remove programs cleanly" FontSize="10" Opacity="0.5" />
-                        </StackPanel>
-                    </DockPanel>
-                </ui:CardAction>
+                <!-- Top 5 CPU Processes -->
+                <Border Grid.Column="0" Margin="0,0,4,0" Padding="12,10"
+                        CornerRadius="6"
+                        Background="{DynamicResource ControlFillColorDefaultBrush}">
+                    <StackPanel>
+                        <TextBlock Text="TOP 5 — CPU USAGE" FontSize="9" FontWeight="SemiBold"
+                                   Opacity="0.35" Margin="0,0,0,6" />
+                        <ItemsControl ItemsSource="{Binding ViewModel.TopCpuProcesses}"
+                                      Grid.IsSharedSizeScope="True">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" SharedSizeGroup="ProcName" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="ProcCpu" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="{Binding Name}"
+                                                   FontSize="11.5" TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" FontSize="11.5"
+                                                   HorizontalAlignment="Right" Margin="8,0,0,0"
+                                                   VerticalAlignment="Center">
+                                            <Run Text="{Binding CpuFormatted, Mode=OneWay}" FontWeight="SemiBold" />
+                                            <Run Text="%" Opacity="0.5" />
+                                        </TextBlock>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
 
-                <!-- Hardware -->
-                <ui:CardAction Grid.Row="0" Grid.Column="1" Margin="5,0,0,5"
+                <!-- Top 5 Memory Hoggers -->
+                <Border Grid.Column="1" Margin="4,0,0,0" Padding="12,10"
+                        CornerRadius="6"
+                        Background="{DynamicResource ControlFillColorDefaultBrush}">
+                    <StackPanel>
+                        <TextBlock Text="TOP 5 — MEMORY USAGE" FontSize="9" FontWeight="SemiBold"
+                                   Opacity="0.35" Margin="0,0,0,6" />
+                        <ItemsControl ItemsSource="{Binding ViewModel.TopMemoryProcesses}"
+                                      Grid.IsSharedSizeScope="True">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" SharedSizeGroup="MemName" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="MemVal" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="{Binding Name}"
+                                                   FontSize="11.5" TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{Binding WorkingSetFormatted}"
+                                                   FontSize="11.5" FontWeight="SemiBold"
+                                                   HorizontalAlignment="Right" Margin="8,0,0,0"
+                                                   VerticalAlignment="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- ============================================================ -->
+            <!-- Row 5: Recent Errors + Outdated Drivers — side by side        -->
+            <!-- ============================================================ -->
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Latest 5 Errors -->
+                <Border Grid.Column="0" Margin="0,0,4,0" Padding="12,10"
+                        CornerRadius="6"
+                        Background="{DynamicResource ControlFillColorDefaultBrush}">
+                    <StackPanel>
+                        <TextBlock Text="RECENT ERRORS (7 DAYS)" FontSize="9" FontWeight="SemiBold"
+                                   Opacity="0.35" Margin="0,0,0,6" />
+                        <ItemsControl ItemsSource="{Binding ViewModel.RecentErrors}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Ellipse Grid.Column="0" Width="6" Height="6"
+                                                 Fill="#EF4444" Margin="0,0,6,0"
+                                                 VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" FontSize="10.5"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center">
+                                            <Run Text="{Binding Source, Mode=OneWay}" FontWeight="SemiBold" />
+                                            <Run Text=" " />
+                                            <Run Text="{Binding EventId, Mode=OneWay}" Opacity="0.5" />
+                                        </TextBlock>
+                                        <TextBlock Grid.Column="2" Text="{Binding TimeFormatted}"
+                                                   FontSize="9.5" Opacity="0.4" Margin="6,0,0,0"
+                                                   VerticalAlignment="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <!-- Empty state -->
+                        <TextBlock Text="No errors in the past 7 days"
+                                   FontSize="10.5" Opacity="0.3" FontStyle="Italic">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ViewModel.RecentErrors.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!-- Outdated Drivers -->
+                <Border Grid.Column="1" Margin="4,0,0,0" Padding="12,10"
+                        CornerRadius="6"
+                        Background="{DynamicResource ControlFillColorDefaultBrush}">
+                    <StackPanel>
+                        <TextBlock Text="OUTDATED DRIVERS (&gt;3 YEARS)" FontSize="9" FontWeight="SemiBold"
+                                   Opacity="0.35" Margin="0,0,0,6" />
+                        <ItemsControl ItemsSource="{Binding ViewModel.OutdatedDrivers}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Ellipse Grid.Column="0" Width="6" Height="6"
+                                                 Fill="#F59E0B" Margin="0,0,6,0"
+                                                 VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{Binding DeviceName}"
+                                                   FontSize="10.5" TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="2" Text="{Binding AgeSummary}"
+                                                   FontSize="9.5" Opacity="0.5"
+                                                   Margin="8,0,0,0" VerticalAlignment="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <!-- Empty state -->
+                        <TextBlock Text="All drivers are up to date"
+                                   FontSize="10.5" Opacity="0.3" FontStyle="Italic">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ViewModel.OutdatedDrivers.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- ============================================================ -->
+            <!-- Row 6: Quick Actions — feature shortcuts                     -->
+            <!-- ============================================================ -->
+            <TextBlock Text="QUICK ACTIONS" FontSize="9" FontWeight="SemiBold"
+                       Opacity="0.35" Margin="0,4,0,4" />
+            <Grid Margin="0,0,0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <ui:CardAction Grid.Column="0" Margin="0,0,4,0"
                                Command="{Binding ViewModel.NavigateCommand}"
-                               CommandParameter="Hardware">
-                    <DockPanel Margin="6,4">
-                        <ui:SymbolIcon Symbol="Desktop24" DockPanel.Dock="Left"
-                                      FontSize="18" Margin="0,0,8,0"
+                               CommandParameter="Cleanup">
+                    <DockPanel Margin="4,2">
+                        <ui:SymbolIcon Symbol="Broom24" DockPanel.Dock="Left"
+                                      FontSize="16" Margin="0,0,6,0"
                                       Foreground="#06B6D4" />
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="Hardware" FontSize="12" FontWeight="SemiBold" />
-                            <TextBlock Text="System specs and health" FontSize="10" Opacity="0.5" />
+                            <TextBlock Text="Cleanup" FontSize="11" FontWeight="SemiBold" />
+                            <TextBlock Text="Temp files" FontSize="9.5" Opacity="0.4" />
                         </StackPanel>
                     </DockPanel>
                 </ui:CardAction>
 
-                <!-- Tools -->
-                <ui:CardAction Grid.Row="1" Grid.Column="0" Margin="0,0,5,0"
+                <ui:CardAction Grid.Column="1" Margin="4,0,4,0"
                                Command="{Binding ViewModel.NavigateCommand}"
-                               CommandParameter="Tools">
-                    <DockPanel Margin="6,4">
-                        <ui:SymbolIcon Symbol="Wrench24" DockPanel.Dock="Left"
-                                      FontSize="18" Margin="0,0,8,0"
+                               CommandParameter="Network">
+                    <DockPanel Margin="4,2">
+                        <ui:SymbolIcon Symbol="Globe24" DockPanel.Dock="Left"
+                                      FontSize="16" Margin="0,0,6,0"
+                                      Foreground="#8B5CF6" />
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Network" FontSize="11" FontWeight="SemiBold" />
+                            <TextBlock Text="Diagnostics" FontSize="9.5" Opacity="0.4" />
+                        </StackPanel>
+                    </DockPanel>
+                </ui:CardAction>
+
+                <ui:CardAction Grid.Column="2" Margin="4,0,4,0"
+                               Command="{Binding ViewModel.NavigateCommand}"
+                               CommandParameter="Registry">
+                    <DockPanel Margin="4,2">
+                        <ui:SymbolIcon Symbol="Key24" DockPanel.Dock="Left"
+                                      FontSize="16" Margin="0,0,6,0"
+                                      Foreground="#10B981" />
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Registry" FontSize="11" FontWeight="SemiBold" />
+                            <TextBlock Text="Clean entries" FontSize="9.5" Opacity="0.4" />
+                        </StackPanel>
+                    </DockPanel>
+                </ui:CardAction>
+
+                <ui:CardAction Grid.Column="3" Margin="4,0,0,0"
+                               Command="{Binding ViewModel.NavigateCommand}"
+                               CommandParameter="Admin">
+                    <DockPanel Margin="4,2">
+                        <ui:SymbolIcon Symbol="ShieldTask24" DockPanel.Dock="Left"
+                                      FontSize="16" Margin="0,0,6,0"
                                       Foreground="#F59E0B" />
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="Tools" FontSize="12" FontWeight="SemiBold" />
-                            <TextBlock Text="Hash, passwords, BSOD, AV" FontSize="10" Opacity="0.5" />
-                        </StackPanel>
-                    </DockPanel>
-                </ui:CardAction>
-
-                <!-- Settings -->
-                <ui:CardAction Grid.Row="1" Grid.Column="1" Margin="5,0,0,0"
-                               Command="{Binding ViewModel.NavigateCommand}"
-                               CommandParameter="Settings">
-                    <DockPanel Margin="6,4">
-                        <ui:SymbolIcon Symbol="Settings24" DockPanel.Dock="Left"
-                                      FontSize="18" Margin="0,0,8,0"
-                                      Foreground="#6366F1" />
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="Settings" FontSize="12" FontWeight="SemiBold" />
-                            <TextBlock Text="Theme, about, legal" FontSize="10" Opacity="0.5" />
+                            <TextBlock Text="Admin" FontSize="11" FontWeight="SemiBold" />
+                            <TextBlock Text="Services" FontSize="9.5" Opacity="0.4" />
                         </StackPanel>
                     </DockPanel>
                 </ui:CardAction>
             </Grid>
-        </ScrollViewer>
-    </Grid>
+
+        </StackPanel>
+    </ScrollViewer>
 </Page>

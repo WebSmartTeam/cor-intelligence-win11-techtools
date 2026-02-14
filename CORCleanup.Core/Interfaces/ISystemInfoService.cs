@@ -9,4 +9,5 @@ public interface ISystemInfoService
     Task<List<DiskHealthInfo>> GetDiskHealthAsync();
     Task<BatteryInfo> GetBatteryInfoAsync();
     Task<string?> GetProductKeyAsync();
+    Task<List<DriverInfo>> GetOutdatedDriversAsync(int olderThanYears = 3);
 }

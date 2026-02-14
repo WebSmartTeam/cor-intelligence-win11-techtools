@@ -1,9 +1,9 @@
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CORCleanup.Core.Interfaces;
+using CORCleanup.Core.Models;
 using Wpf.Ui;
 
 namespace CORCleanup.ViewModels;
@@ -12,19 +12,31 @@ public partial class HomeViewModel : ObservableObject
 {
     private readonly INavigationService _navigationService;
     private readonly ISystemInfoService _systemInfoService;
+    private readonly IProcessExplorerService _processExplorerService;
+    private readonly IMemoryExplorerService _memoryExplorerService;
+    private readonly INetworkInfoService _networkInfoService;
+    private readonly IEventLogService _eventLogService;
 
     public HomeViewModel(
         INavigationService navigationService,
-        ISystemInfoService systemInfoService)
+        ISystemInfoService systemInfoService,
+        IProcessExplorerService processExplorerService,
+        IMemoryExplorerService memoryExplorerService,
+        INetworkInfoService networkInfoService,
+        IEventLogService eventLogService)
     {
         _navigationService = navigationService;
         _systemInfoService = systemInfoService;
+        _processExplorerService = processExplorerService;
+        _memoryExplorerService = memoryExplorerService;
+        _networkInfoService = networkInfoService;
+        _eventLogService = eventLogService;
 
-        _ = LoadSystemDataAsync();
+        _ = InitializeDashboardAsync();
     }
 
     // ================================================================
-    // System Overview Properties
+    // System Identity
     // ================================================================
 
     [ObservableProperty] private string _computerName = "Loading...";
@@ -36,13 +48,64 @@ public partial class HomeViewModel : ObservableObject
     [ObservableProperty] private string _gpuShortName = "GPU";
     [ObservableProperty] private string _gpuVram = string.Empty;
 
-    public ObservableCollection<DiskDisplayItem> Disks { get; } = new();
-
     // ================================================================
-    // Data Loading
+    // Network
     // ================================================================
 
-    private async Task LoadSystemDataAsync()
+    [ObservableProperty] private string _localIpAddress = "Detecting...";
+    [ObservableProperty] private string _wanIpAddress = "Detecting...";
+    [ObservableProperty] private string _networkAdapter = string.Empty;
+
+    // ================================================================
+    // Memory Gauge
+    // ================================================================
+
+    [ObservableProperty] private string _memoryUsed = "—";
+    [ObservableProperty] private string _memoryTotal = "—";
+    [ObservableProperty] private int _memoryPercent;
+    [ObservableProperty] private string _memoryHealth = "Good";
+
+    // ================================================================
+    // Loading State
+    // ================================================================
+
+    [ObservableProperty] private bool _isLoading = true;
+    [ObservableProperty] private string _statusText = "Loading dashboard...";
+
+    // ================================================================
+    // Collections
+    // ================================================================
+
+    public ObservableCollection<DiskDisplayItem> LogicalDrives { get; } = new();
+    public ObservableCollection<DiskHealthInfo> PhysicalDisks { get; } = new();
+    public ObservableCollection<ProcessEntry> TopCpuProcesses { get; } = new();
+    public ObservableCollection<MemoryConsumer> TopMemoryProcesses { get; } = new();
+    public ObservableCollection<EventLogEntry> RecentErrors { get; } = new();
+    public ObservableCollection<DriverInfo> OutdatedDrivers { get; } = new();
+
+    // ================================================================
+    // Dashboard Initialization
+    // ================================================================
+
+    private async Task InitializeDashboardAsync()
+    {
+        IsLoading = true;
+
+        // Fire all independent tasks — each handles its own errors
+        var sysTask = LoadSystemInfoAsync();
+        var netTask = LoadNetworkAsync();
+        var memTask = LoadMemoryAsync();
+        var processTask = LoadTopProcessesAsync();
+        var errorTask = LoadRecentErrorsAsync();
+        var driverTask = LoadOutdatedDriversAsync();
+
+        await Task.WhenAll(sysTask, netTask, memTask, processTask, errorTask, driverTask);
+
+        IsLoading = false;
+        StatusText = $"Dashboard loaded — {DateTime.Now:HH:mm:ss}";
+    }
+
+    private async Task LoadSystemInfoAsync()
     {
         try
         {
@@ -60,7 +123,7 @@ public partial class HomeViewModel : ObservableObject
             ComputerName = sys.ComputerName;
             OsCaption = $"{sys.OsEdition} ({sys.OsBuild})";
 
-            // CPU — shorten the name
+            // CPU
             CpuShortName = ShortenCpuName(sys.CpuName);
             CpuSummary = $"{sys.CpuCores}C / {sys.CpuThreads}T \u2022 {sys.CpuMaxClockMhz} MHz";
 
@@ -74,32 +137,22 @@ public partial class HomeViewModel : ObservableObject
                 ? $"{sys.GpuVramFormatted} VRAM"
                 : "Integrated";
 
-            // Disks — use logical drive info from disk health
+            // Physical disks
             foreach (var d in disks)
-            {
-                Disks.Add(new DiskDisplayItem
-                {
-                    Label = $"{d.Model} ({d.SizeFormatted})",
-                    TotalDisplay = d.SizeFormatted,
-                    UsedDisplay = d.SizeFormatted, // full capacity display
-                    UsedPercent = d.WearLevellingPercent ?? 0,
-                    Health = d.OverallHealth.ToString()
-                });
-            }
+                PhysicalDisks.Add(d);
 
-            // If no SMART data, show logical drives instead
-            if (Disks.Count == 0)
-                await LoadLogicalDrivesAsync();
+            // Logical drives
+            LoadLogicalDrives();
         }
         catch
         {
             ComputerName = Environment.MachineName;
             OsCaption = Environment.OSVersion.ToString();
-            await LoadLogicalDrivesAsync();
+            LoadLogicalDrives();
         }
     }
 
-    private Task LoadLogicalDrivesAsync()
+    private void LoadLogicalDrives()
     {
         foreach (var drive in DriveInfo.GetDrives())
         {
@@ -108,20 +161,126 @@ public partial class HomeViewModel : ObservableObject
 
             var totalGb = drive.TotalSize / (1024.0 * 1024 * 1024);
             var usedGb = (drive.TotalSize - drive.TotalFreeSpace) / (1024.0 * 1024 * 1024);
+            var freeGb = drive.TotalFreeSpace / (1024.0 * 1024 * 1024);
             var pct = drive.TotalSize > 0
                 ? (double)(drive.TotalSize - drive.TotalFreeSpace) / drive.TotalSize * 100
                 : 0;
 
-            Disks.Add(new DiskDisplayItem
+            LogicalDrives.Add(new DiskDisplayItem
             {
-                Label = $"{drive.Name.TrimEnd('\\')} {drive.VolumeLabel}",
+                Label = $"{drive.Name.TrimEnd('\\')} {drive.VolumeLabel}".Trim(),
                 TotalDisplay = $"{totalGb:F0} GB",
                 UsedDisplay = $"{usedGb:F0} GB",
+                FreeDisplay = $"{freeGb:F0} GB free",
                 UsedPercent = pct,
                 Health = pct > 90 ? "Caution" : "Good"
             });
         }
-        return Task.CompletedTask;
+    }
+
+    private async Task LoadNetworkAsync()
+    {
+        try
+        {
+            var adaptersTask = _networkInfoService.GetAdaptersAsync();
+            var wanTask = _networkInfoService.GetPublicIpAsync();
+
+            await Task.WhenAll(adaptersTask, wanTask);
+
+            var adapters = adaptersTask.Result;
+            var wan = wanTask.Result;
+
+            // Find the active adapter with an IP address
+            var active = adapters.FirstOrDefault(a =>
+                a.Status == "Up" && !string.IsNullOrEmpty(a.IpAddress));
+
+            LocalIpAddress = active?.IpAddress ?? "No network";
+            NetworkAdapter = active != null
+                ? $"{active.Type} \u2022 {active.SpeedDisplay}"
+                : "Disconnected";
+
+            WanIpAddress = wan ?? "Unavailable";
+        }
+        catch
+        {
+            LocalIpAddress = "Error";
+            WanIpAddress = "Error";
+        }
+    }
+
+    private async Task LoadMemoryAsync()
+    {
+        try
+        {
+            var info = await _memoryExplorerService.GetMemoryInfoAsync();
+            MemoryUsed = info.UsedFormatted;
+            MemoryTotal = info.TotalFormatted;
+            MemoryPercent = info.MemoryLoadPercent;
+            MemoryHealth = info.HealthLevel;
+
+            var consumers = await _memoryExplorerService.GetTopConsumersAsync(5);
+            foreach (var c in consumers)
+                TopMemoryProcesses.Add(c);
+        }
+        catch
+        {
+            MemoryHealth = "Error";
+        }
+    }
+
+    private async Task LoadTopProcessesAsync()
+    {
+        try
+        {
+            var entries = await _processExplorerService.GetProcessesAsync();
+            var top5 = entries
+                .Where(e => !e.IsSystem)
+                .OrderByDescending(e => e.CpuPercent)
+                .Take(5);
+
+            foreach (var p in top5)
+                TopCpuProcesses.Add(p);
+        }
+        catch { }
+    }
+
+    private async Task LoadRecentErrorsAsync()
+    {
+        try
+        {
+            var events = await _eventLogService.GetRecentEventsAsync(days: 7, EventSeverity.Error);
+            foreach (var e in events.Take(5))
+                RecentErrors.Add(e);
+        }
+        catch { }
+    }
+
+    private async Task LoadOutdatedDriversAsync()
+    {
+        try
+        {
+            var drivers = await _systemInfoService.GetOutdatedDriversAsync(3);
+            foreach (var d in drivers)
+                OutdatedDrivers.Add(d);
+        }
+        catch { }
+    }
+
+    // ================================================================
+    // Refresh Command
+    // ================================================================
+
+    [RelayCommand]
+    private async Task RefreshDashboardAsync()
+    {
+        LogicalDrives.Clear();
+        PhysicalDisks.Clear();
+        TopCpuProcesses.Clear();
+        TopMemoryProcesses.Clear();
+        RecentErrors.Clear();
+        OutdatedDrivers.Clear();
+
+        await InitializeDashboardAsync();
     }
 
     // ================================================================
@@ -154,8 +313,6 @@ public partial class HomeViewModel : ObservableObject
 
     private static string ShortenCpuName(string name)
     {
-        // "Intel(R) Core(TM) i7-13700K CPU @ 3.40GHz" → "Core i7-13700K"
-        // "AMD Ryzen 9 7950X 16-Core Processor" → "Ryzen 9 7950X"
         var s = name
             .Replace("(R)", "", StringComparison.OrdinalIgnoreCase)
             .Replace("(TM)", "", StringComparison.OrdinalIgnoreCase)
@@ -167,11 +324,9 @@ public partial class HomeViewModel : ObservableObject
             .Replace("4-Core", "", StringComparison.OrdinalIgnoreCase)
             .Trim();
 
-        // Remove "Intel " prefix, keep "Core..."
         if (s.StartsWith("Intel ", StringComparison.OrdinalIgnoreCase))
             s = s[6..].Trim();
 
-        // Trim anything after the clock speed
         var atIdx = s.IndexOf('@');
         if (atIdx > 0)
             s = s[..atIdx].Trim();
@@ -194,7 +349,7 @@ public partial class HomeViewModel : ObservableObject
 }
 
 // ================================================================
-// Display model for disk drive bar
+// Display model for logical drive bar
 // ================================================================
 
 public sealed class DiskDisplayItem
@@ -202,6 +357,7 @@ public sealed class DiskDisplayItem
     public required string Label { get; init; }
     public required string TotalDisplay { get; init; }
     public required string UsedDisplay { get; init; }
+    public string FreeDisplay { get; init; } = string.Empty;
     public required double UsedPercent { get; init; }
     public required string Health { get; init; }
 }
