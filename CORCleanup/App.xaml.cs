@@ -71,6 +71,11 @@ public partial class App : Application
             services.AddSingleton<Core.Interfaces.IPrinterService, Core.Services.Admin.PrinterService>();
             services.AddSingleton<Core.Interfaces.IHostsFileService, Core.Services.Admin.HostsFileService>();
             services.AddSingleton<Core.Interfaces.IDebloatService, Core.Services.Admin.DebloatService>();
+            services.AddSingleton<Core.Interfaces.IAutoToolService, Core.Services.Tools.AutoToolService>();
+
+            // Auto Tool page
+            services.AddTransient<AutoToolViewModel>();
+            services.AddTransient<AutoToolPage>();
         })
         .Build();
 

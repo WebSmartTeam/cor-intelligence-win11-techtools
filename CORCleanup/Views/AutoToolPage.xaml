@@ -1,0 +1,629 @@
+<Page x:Class="CORCleanup.Views.AutoToolPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:converters="clr-namespace:CORCleanup.Converters"
+      xmlns:models="clr-namespace:CORCleanup.Core.Models;assembly=CORCleanup.Core"
+      Title="Auto Tool">
+
+    <Page.Resources>
+        <converters:ActionStatusToBrushConverter x:Key="ActionStatusToBrush" />
+        <converters:RiskLevelToBrushConverter x:Key="RiskLevelToBrush" />
+
+        <!-- Phase visibility converters — show panel when CurrentPhase matches -->
+        <converters:StringToVisibilityConverter x:Key="StringToVis" />
+
+        <!-- Action item template for the execution/selection list -->
+        <DataTemplate x:Key="ActionItemTemplate" DataType="{x:Type models:AutoToolAction}">
+            <Border Padding="12,8"
+                    Margin="0,2"
+                    CornerRadius="6"
+                    Background="{DynamicResource ControlFillColorDefaultBrush}"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource ControlElevationBorderBrush}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Checkbox -->
+                    <CheckBox Grid.Column="0"
+                              IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                              VerticalAlignment="Center"
+                              Margin="0,0,8,0" />
+
+                    <!-- Name + Description -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding DisplayName}"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        <TextBlock Text="{Binding Description}"
+                                   FontSize="11"
+                                   Opacity="0.6"
+                                   TextTrimming="CharacterEllipsis"
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <!-- AI reason if present -->
+                        <TextBlock Text="{Binding AiReason}"
+                                   FontSize="11"
+                                   FontStyle="Italic"
+                                   Foreground="#06B6D4"
+                                   Visibility="{Binding AiReason, Converter={StaticResource StringToVis}}"
+                                   TextWrapping="Wrap"
+                                   Margin="0,2,0,0" />
+                    </StackPanel>
+
+                    <!-- Category badge -->
+                    <Border Grid.Column="2"
+                            Padding="8,3"
+                            CornerRadius="4"
+                            Margin="8,0"
+                            VerticalAlignment="Center"
+                            Background="{DynamicResource ControlFillColorSecondaryBrush}">
+                        <TextBlock Text="{Binding Category}"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </Border>
+
+                    <!-- Risk level badge -->
+                    <Border Grid.Column="3"
+                            Padding="8,3"
+                            CornerRadius="4"
+                            Margin="0,0,8,0"
+                            VerticalAlignment="Center"
+                            Background="{Binding RiskLevel, Converter={StaticResource RiskLevelToBrush}}"
+                            Opacity="0.85">
+                        <TextBlock Text="{Binding RiskDisplay}"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"
+                                   Foreground="White" />
+                    </Border>
+
+                    <!-- AI Recommended badge -->
+                    <Border Grid.Column="4"
+                            Padding="6,3"
+                            CornerRadius="4"
+                            VerticalAlignment="Center"
+                            Background="#06B6D4"
+                            Visibility="{Binding AiRecommended, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="AI"
+                                   FontSize="10"
+                                   FontWeight="Bold"
+                                   Foreground="White" />
+                    </Border>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <!-- Execution result template -->
+        <DataTemplate x:Key="ExecutionResultTemplate" DataType="{x:Type models:AutoToolAction}">
+            <Border Padding="12,6"
+                    Margin="0,2"
+                    CornerRadius="6"
+                    Background="{DynamicResource ControlFillColorDefaultBrush}"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource ControlElevationBorderBrush}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Status indicator -->
+                    <Ellipse Grid.Column="0"
+                             Width="10" Height="10"
+                             VerticalAlignment="Center"
+                             Margin="0,0,10,0"
+                             Fill="{Binding Status, Converter={StaticResource ActionStatusToBrush}}" />
+
+                    <!-- Name + Result -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding DisplayName}"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        <TextBlock Text="{Binding ResultMessage}"
+                                   FontSize="11"
+                                   Opacity="0.7"
+                                   TextWrapping="Wrap"
+                                   Visibility="{Binding ResultMessage, Converter={StaticResource StringToVis}}"
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+
+                    <!-- Status text -->
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding StatusDisplay}"
+                               FontSize="11"
+                               VerticalAlignment="Center"
+                               Foreground="{Binding Status, Converter={StaticResource ActionStatusToBrush}}" />
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid Margin="12,8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ScrollViewer Grid.Row="0"
+                      VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="4">
+
+                <!-- ============================================================ -->
+                <!-- PHASE: Ready -->
+                <!-- ============================================================ -->
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ViewModel.CurrentPhase}" Value="Ready">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <!-- Hero header -->
+                    <Border Padding="32,40"
+                            Margin="0,20,0,0"
+                            CornerRadius="12"
+                            Background="{DynamicResource ControlFillColorDefaultBrush}"
+                            BorderThickness="1"
+                            BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                            HorizontalAlignment="Center"
+                            MaxWidth="600">
+                        <StackPanel HorizontalAlignment="Center">
+                            <!-- COR brand mark -->
+                            <Border Width="56" Height="56"
+                                    CornerRadius="12"
+                                    Margin="0,0,0,16"
+                                    HorizontalAlignment="Center"
+                                    Background="{DynamicResource SystemAccentColorPrimaryBrush}">
+                                <TextBlock Text="COR"
+                                           FontSize="16"
+                                           FontWeight="Black"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Foreground="White" />
+                            </Border>
+
+                            <TextBlock Text="Auto Tool"
+                                       FontSize="24"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+
+                            <TextBlock Text="COR Intelligence"
+                                       FontSize="12"
+                                       HorizontalAlignment="Center"
+                                       Foreground="#06B6D4"
+                                       Margin="0,2,0,16" />
+
+                            <TextBlock TextWrapping="Wrap"
+                                       TextAlignment="Center"
+                                       FontSize="13"
+                                       Opacity="0.7"
+                                       MaxWidth="420"
+                                       Margin="0,0,0,24"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                                Run a full system diagnostic, optionally consult AI for recommendations,
+                                then execute selected repairs and optimisations in one go.
+                            </TextBlock>
+
+                            <ui:Button Content="Run Full Diagnostic"
+                                       Appearance="Primary"
+                                       Icon="{ui:SymbolIcon Search24}"
+                                       FontSize="14"
+                                       Padding="24,10"
+                                       HorizontalAlignment="Center"
+                                       Command="{Binding ViewModel.RunDiagnosticsCommand}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- ============================================================ -->
+                <!-- PHASE: Diagnosing -->
+                <!-- ============================================================ -->
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ViewModel.CurrentPhase}" Value="Diagnosing">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <Border Padding="24,32"
+                            Margin="0,20,0,0"
+                            CornerRadius="12"
+                            Background="{DynamicResource ControlFillColorDefaultBrush}"
+                            BorderThickness="1"
+                            BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                            HorizontalAlignment="Center"
+                            MaxWidth="500">
+                        <StackPanel HorizontalAlignment="Center">
+                            <ui:ProgressRing IsIndeterminate="True"
+                                             Width="48" Height="48"
+                                             Margin="0,0,0,16"
+                                             HorizontalAlignment="Center" />
+
+                            <TextBlock Text="Running Full System Diagnostic..."
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Center"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+
+                            <TextBlock Text="{Binding ViewModel.ProgressDetail}"
+                                       FontSize="12"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,8,0,16"
+                                       Opacity="0.6"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+
+                            <ui:Button Content="Cancel"
+                                       Appearance="Secondary"
+                                       HorizontalAlignment="Center"
+                                       Command="{Binding ViewModel.CancelCommand}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- ============================================================ -->
+                <!-- PHASE: ReportReady -->
+                <!-- ============================================================ -->
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ViewModel.CurrentPhase}" Value="ReportReady">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <!-- Report summary card -->
+                    <Border Padding="20,16"
+                            Margin="0,12,0,0"
+                            CornerRadius="8"
+                            Background="{DynamicResource ControlFillColorDefaultBrush}"
+                            BorderThickness="1"
+                            BorderBrush="{DynamicResource ControlElevationBorderBrush}">
+                        <StackPanel>
+                            <TextBlock Text="Diagnostic Report"
+                                       FontSize="16"
+                                       FontWeight="Bold"
+                                       Margin="0,0,0,12"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+
+                            <UniformGrid Columns="4" Margin="0,0,0,12">
+                                <!-- Machine -->
+                                <StackPanel Margin="0,0,12,0">
+                                    <TextBlock Text="Machine" FontSize="11" Opacity="0.5"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="{Binding ViewModel.MachineName}" FontSize="13" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </StackPanel>
+                                <!-- OS -->
+                                <StackPanel Margin="0,0,12,0">
+                                    <TextBlock Text="Operating System" FontSize="11" Opacity="0.5"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="{Binding ViewModel.OsSummary}" FontSize="13" FontWeight="SemiBold"
+                                               TextTrimming="CharacterEllipsis"
+                                               Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </StackPanel>
+                                <!-- CPU -->
+                                <StackPanel Margin="0,0,12,0">
+                                    <TextBlock Text="CPU" FontSize="11" Opacity="0.5"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="{Binding ViewModel.CpuSummary}" FontSize="13" FontWeight="SemiBold"
+                                               TextTrimming="CharacterEllipsis"
+                                               Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </StackPanel>
+                                <!-- RAM -->
+                                <StackPanel>
+                                    <TextBlock Text="RAM" FontSize="11" Opacity="0.5"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="{Binding ViewModel.RamSummary}" FontSize="13" FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </StackPanel>
+                            </UniformGrid>
+
+                            <!-- Issue counts -->
+                            <UniformGrid Columns="4" Margin="0,0,0,16">
+                                <StackPanel Margin="0,0,12,0">
+                                    <TextBlock Text="Cleanable" FontSize="11" Opacity="0.5"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="{Binding ViewModel.CleanableSize}" FontSize="14" FontWeight="Bold"
+                                               Foreground="#4CAF50" />
+                                </StackPanel>
+                                <StackPanel Margin="0,0,12,0">
+                                    <TextBlock Text="Registry Issues" FontSize="11" Opacity="0.5"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="{Binding ViewModel.RegistryIssueCount}" FontSize="14" FontWeight="Bold"
+                                               Foreground="#FF9800" />
+                                </StackPanel>
+                                <StackPanel Margin="0,0,12,0">
+                                    <TextBlock Text="Recent Errors" FontSize="11" Opacity="0.5"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="{Binding ViewModel.RecentErrorCount}" FontSize="14" FontWeight="Bold"
+                                               Foreground="#F44336" />
+                                </StackPanel>
+                                <StackPanel>
+                                    <TextBlock Text="Bloatware" FontSize="11" Opacity="0.5"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="{Binding ViewModel.BloatwareCount}" FontSize="14" FontWeight="Bold"
+                                               Foreground="#FF9800" />
+                                </StackPanel>
+                            </UniformGrid>
+
+                            <!-- Action buttons -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <ui:Button Content="Submit to AI"
+                                           Appearance="Primary"
+                                           Icon="{ui:SymbolIcon BrainCircuit24}"
+                                           Margin="0,0,12,0"
+                                           Padding="20,8"
+                                           Command="{Binding ViewModel.SubmitToAiCommand}" />
+                                <ui:Button Content="Skip AI — Choose Manually"
+                                           Appearance="Secondary"
+                                           Padding="20,8"
+                                           Command="{Binding ViewModel.SkipAiCommand}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- ============================================================ -->
+                <!-- PHASE: ConsultingAi -->
+                <!-- ============================================================ -->
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ViewModel.CurrentPhase}" Value="ConsultingAi">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <Border Padding="24,32"
+                            Margin="0,20,0,0"
+                            CornerRadius="12"
+                            Background="{DynamicResource ControlFillColorDefaultBrush}"
+                            BorderThickness="1"
+                            BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                            HorizontalAlignment="Center"
+                            MaxWidth="500">
+                        <StackPanel HorizontalAlignment="Center">
+                            <ui:ProgressRing IsIndeterminate="True"
+                                             Width="48" Height="48"
+                                             Margin="0,0,0,16"
+                                             HorizontalAlignment="Center" />
+
+                            <TextBlock Text="Consulting COR Intelligence AI..."
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       HorizontalAlignment="Center"
+                                       Foreground="#06B6D4" />
+
+                            <TextBlock Text="Analysing your diagnostic report and selecting optimal actions"
+                                       FontSize="12"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,8,0,16"
+                                       Opacity="0.6"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+
+                            <ui:Button Content="Cancel"
+                                       Appearance="Secondary"
+                                       HorizontalAlignment="Center"
+                                       Command="{Binding ViewModel.CancelCommand}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- ============================================================ -->
+                <!-- PHASE: ActionSelection -->
+                <!-- ============================================================ -->
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ViewModel.CurrentPhase}" Value="ActionSelection">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <!-- AI Summary card (only when AI was consulted) -->
+                    <Border Padding="16,12"
+                            Margin="0,8,0,8"
+                            CornerRadius="8"
+                            BorderThickness="1"
+                            BorderBrush="#06B6D4"
+                            Background="{DynamicResource ControlFillColorDefaultBrush}"
+                            Visibility="{Binding ViewModel.HasAiRecommendation, Converter={StaticResource BoolToVis}}">
+                        <StackPanel>
+                            <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="#06B6D4" Margin="0,0,0,4">
+                                <Run Text="AI Assessment" />
+                            </TextBlock>
+                            <TextBlock Text="{Binding ViewModel.AiSummary}"
+                                       FontSize="12"
+                                       TextWrapping="Wrap"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Action buttons bar -->
+                    <DockPanel Margin="0,4,0,8">
+                        <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                            <ui:Button Content="Select All Safe"
+                                       Appearance="Secondary"
+                                       FontSize="12"
+                                       Padding="12,6"
+                                       Margin="0,0,8,0"
+                                       Command="{Binding ViewModel.SelectAllSafeCommand}" />
+                            <ui:Button Content="Deselect All"
+                                       Appearance="Secondary"
+                                       FontSize="12"
+                                       Padding="12,6"
+                                       Command="{Binding ViewModel.DeselectAllCommand}" />
+                        </StackPanel>
+
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <TextBlock VerticalAlignment="Center"
+                                       Margin="0,0,12,0"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                                <Run Text="{Binding ViewModel.SelectedActionCount, Mode=OneWay}" />
+                                <Run Text=" selected" />
+                            </TextBlock>
+                            <ui:Button Content="  GO  "
+                                       Appearance="Primary"
+                                       FontSize="16"
+                                       FontWeight="Bold"
+                                       Padding="28,8"
+                                       Command="{Binding ViewModel.ExecuteSelectedCommand}" />
+                        </StackPanel>
+                    </DockPanel>
+
+                    <!-- Action list -->
+                    <ItemsControl ItemsSource="{Binding ViewModel.Actions}"
+                                  ItemTemplate="{StaticResource ActionItemTemplate}" />
+                </StackPanel>
+
+                <!-- ============================================================ -->
+                <!-- PHASE: Executing -->
+                <!-- ============================================================ -->
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ViewModel.CurrentPhase}" Value="Executing">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <!-- Progress header -->
+                    <DockPanel Margin="0,8,0,8">
+                        <TextBlock DockPanel.Dock="Left"
+                                   Text="{Binding ViewModel.StatusText}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        <ui:Button DockPanel.Dock="Right"
+                                   Content="Cancel"
+                                   Appearance="Secondary"
+                                   FontSize="12"
+                                   HorizontalAlignment="Right"
+                                   Command="{Binding ViewModel.CancelCommand}" />
+                    </DockPanel>
+
+                    <ProgressBar Value="{Binding ViewModel.ProgressPercent}"
+                                 Height="4"
+                                 Margin="0,0,0,4" />
+
+                    <TextBlock Text="{Binding ViewModel.ProgressDetail}"
+                               FontSize="11"
+                               Opacity="0.6"
+                               Margin="0,0,0,12"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+
+                    <!-- Execution result list -->
+                    <ItemsControl ItemsSource="{Binding ViewModel.Actions}"
+                                  ItemTemplate="{StaticResource ExecutionResultTemplate}" />
+                </StackPanel>
+
+                <!-- ============================================================ -->
+                <!-- PHASE: Complete -->
+                <!-- ============================================================ -->
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ViewModel.CurrentPhase}" Value="Complete">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <!-- Summary card -->
+                    <Border Padding="20,16"
+                            Margin="0,12,0,12"
+                            CornerRadius="8"
+                            Background="{DynamicResource ControlFillColorDefaultBrush}"
+                            BorderThickness="1"
+                            BorderBrush="{DynamicResource ControlElevationBorderBrush}">
+                        <StackPanel>
+                            <TextBlock Text="Execution Complete"
+                                       FontSize="18"
+                                       FontWeight="Bold"
+                                       Margin="0,0,0,12"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                <StackPanel Margin="0,0,24,0">
+                                    <TextBlock Text="Completed" FontSize="11" Opacity="0.5"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="{Binding ViewModel.CompletedCount}" FontSize="20" FontWeight="Bold"
+                                               Foreground="#4CAF50" />
+                                </StackPanel>
+                                <StackPanel>
+                                    <TextBlock Text="Failed" FontSize="11" Opacity="0.5"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="{Binding ViewModel.FailedCount}" FontSize="20" FontWeight="Bold"
+                                               Foreground="#F44336" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <ui:Button Content="Run Again"
+                                       Appearance="Primary"
+                                       Icon="{ui:SymbolIcon ArrowRepeatAll24}"
+                                       Padding="20,8"
+                                       Command="{Binding ViewModel.ResetCommand}" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Results list -->
+                    <ItemsControl ItemsSource="{Binding ViewModel.Actions}"
+                                  ItemTemplate="{StaticResource ExecutionResultTemplate}" />
+                </StackPanel>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Status bar -->
+        <Border Grid.Row="1"
+                Padding="12,6"
+                Background="{DynamicResource ControlFillColorDefaultBrush}"
+                BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource ControlElevationBorderBrush}">
+            <TextBlock Text="{Binding ViewModel.StatusText}"
+                       FontSize="11"
+                       Opacity="0.6"
+                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+        </Border>
+    </Grid>
+</Page>

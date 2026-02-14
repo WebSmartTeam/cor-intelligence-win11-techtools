@@ -56,6 +56,9 @@
             </ui:NavigationView.Header>
 
             <ui:NavigationView.MenuItems>
+                <ui:NavigationViewItem Content="Auto Tool"
+                                       Icon="{ui:SymbolIcon Wand24}"
+                                       TargetPageType="{x:Type views:AutoToolPage}" />
                 <ui:NavigationViewItem Content="Home"
                                        Icon="{ui:SymbolIcon Home24}"
                                        TargetPageType="{x:Type views:HomePage}" />
@@ -106,7 +109,7 @@
                                Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                 </StackPanel>
                 <TextBlock DockPanel.Dock="Right"
-                           Text="v1.0.4"
+                           Text="v1.0.5"
                            FontSize="10.5"
                            Opacity="0.4"
                            VerticalAlignment="Center"

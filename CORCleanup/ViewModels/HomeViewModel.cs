@@ -300,6 +300,7 @@ public partial class HomeViewModel : ObservableObject
             "Tools" => typeof(Views.ToolsPage),
             "Admin" => typeof(Views.AdminPage),
             "Settings" => typeof(Views.SettingsPage),
+            "AutoTool" => typeof(Views.AutoToolPage),
             _ => null
         };
 
