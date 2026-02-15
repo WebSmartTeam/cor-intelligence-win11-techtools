@@ -9,7 +9,7 @@ namespace CORCleanup.ViewModels;
 public partial class SettingsViewModel : ObservableObject
 {
     [ObservableProperty] private string _pageTitle = "Settings";
-    [ObservableProperty] private bool _isDarkTheme = true;
+    [ObservableProperty] private bool _isDarkTheme = false;
 
     // ================================================================
     // About

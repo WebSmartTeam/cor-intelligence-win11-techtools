@@ -11,7 +11,7 @@
                  WindowStartupLocation="CenterScreen"
                  Icon="pack://application:,,,/Assets/cor-icon.png"
                  ExtendsContentIntoTitleBar="True"
-                 WindowBackdropType="Mica">
+                 WindowBackdropType="None">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -33,29 +33,6 @@
                            IsBackButtonVisible="Collapsed"
                            IsPaneToggleVisible="True"
                            OpenPaneLength="200">
-
-            <ui:NavigationView.Header>
-                <Border Padding="12,8" Background="Transparent">
-                    <DockPanel>
-                        <!-- COR Intelligence logo -->
-                        <Image DockPanel.Dock="Left"
-                               Source="pack://application:,,,/Assets/cor-icon.png"
-                               Width="34" Height="34"
-                               RenderOptions.BitmapScalingMode="HighQuality"
-                               Margin="0,0,10,0" />
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="COR Cleanup"
-                                       FontSize="14"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                            <TextBlock Text="COR Intelligence"
-                                       FontSize="9"
-                                       Foreground="#06B6D4"
-                                       Opacity="0.7" />
-                        </StackPanel>
-                    </DockPanel>
-                </Border>
-            </ui:NavigationView.Header>
 
             <ui:NavigationView.MenuItems>
                 <ui:NavigationViewItem Content="Auto Tool"
@@ -86,6 +63,24 @@
                                        Icon="{ui:SymbolIcon ShieldTask24}"
                                        TargetPageType="{x:Type views:AdminPage}" />
             </ui:NavigationView.MenuItems>
+
+            <!-- Brand mark — above Settings in the sidebar -->
+            <ui:NavigationView.PaneFooter>
+                <Border Padding="12,10" BorderThickness="0,1,0,0"
+                        BorderBrush="{DynamicResource ControlElevationBorderBrush}">
+                    <StackPanel HorizontalAlignment="Left">
+                        <Image Source="pack://application:,,,/Assets/cor-icon.png"
+                               Width="32" Height="32"
+                               RenderOptions.BitmapScalingMode="HighQuality"
+                               HorizontalAlignment="Left"
+                               Margin="0,0,0,4" />
+                        <TextBlock Text="COR Intelligence"
+                                   FontSize="9"
+                                   Opacity="0.45"
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </Border>
+            </ui:NavigationView.PaneFooter>
 
             <ui:NavigationView.FooterMenuItems>
                 <ui:NavigationViewItem Content="Settings"

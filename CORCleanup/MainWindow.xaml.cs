@@ -23,12 +23,12 @@ public partial class MainWindow : FluentWindow
         DataContext = this;
         _navigationService = navigationService;
 
-        // Force dark theme
-        ApplicationThemeManager.Apply(ApplicationTheme.Dark);
+        // Light theme — clean professional look like CCleaner
+        ApplicationThemeManager.Apply(ApplicationTheme.Light);
 
-        // COR Intelligence brand accent — professional teal-blue
+        // COR Intelligence brand accent
         ApplicationAccentColorManager.Apply(
-            Color.FromRgb(0x06, 0xB6, 0xD4), ApplicationTheme.Dark);
+            Color.FromRgb(0x06, 0xB6, 0xD4), ApplicationTheme.Light);
 
         InitializeComponent();
 
