@@ -8,7 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>COR Cleanup</AssemblyName>
     <RootNamespace>CORCleanup</RootNamespace>
-    <Version>1.0.10</Version>
+    <Version>1.0.11</Version>
     <Company>COR Intelligence</Company>
     <Product>COR Cleanup</Product>
     <Description>All-in-one Windows 11 MSP technician tool by COR Intelligence</Description>

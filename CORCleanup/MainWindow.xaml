@@ -5,7 +5,7 @@
         xmlns:views="clr-namespace:CORCleanup.Views"
         Title="COR Cleanup"
         Width="1200"
-        Height="700"
+        Height="620"
         MinWidth="900"
         MinHeight="550"
         WindowStartupLocation="CenterScreen"
@@ -91,7 +91,7 @@
                                Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                 </StackPanel>
                 <TextBlock DockPanel.Dock="Right"
-                           Text="v1.0.10"
+                           Text="v1.0.11"
                            FontSize="10.5"
                            Opacity="0.4"
                            VerticalAlignment="Center"
