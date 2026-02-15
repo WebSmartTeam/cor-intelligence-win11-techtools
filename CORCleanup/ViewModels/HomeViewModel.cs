@@ -222,7 +222,8 @@ public partial class HomeViewModel : ObservableObject
             MemoryPercent = info.MemoryLoadPercent;
             MemoryHealth = info.HealthLevel;
 
-            var consumers = await _memoryExplorerService.GetTopConsumersAsync(5);
+            var consumers = (await _memoryExplorerService.GetTopConsumersAsync(5)).ToList();
+            TopMemoryProcesses.Clear();
             foreach (var c in consumers)
                 TopMemoryProcesses.Add(c);
         }
@@ -240,8 +241,10 @@ public partial class HomeViewModel : ObservableObject
             var top5 = entries
                 .Where(e => !e.IsSystem && e.Pid != _ownPid)
                 .OrderByDescending(e => e.CpuPercent)
-                .Take(5);
+                .Take(5)
+                .ToList();
 
+            TopCpuProcesses.Clear();
             foreach (var p in top5)
                 TopCpuProcesses.Add(p);
         }
@@ -253,7 +256,10 @@ public partial class HomeViewModel : ObservableObject
         try
         {
             var events = await _eventLogService.GetRecentEventsAsync(days: 7, EventSeverity.Error);
-            foreach (var e in events.Take(5))
+            var recent = events.Take(5).ToList();
+
+            RecentErrors.Clear();
+            foreach (var e in recent)
                 RecentErrors.Add(e);
         }
         catch { }
@@ -277,14 +283,17 @@ public partial class HomeViewModel : ObservableObject
     [RelayCommand]
     private async Task RefreshDashboardAsync()
     {
-        LogicalDrives.Clear();
-        PhysicalDisks.Clear();
-        TopCpuProcesses.Clear();
-        TopMemoryProcesses.Clear();
-        RecentErrors.Clear();
-        OutdatedDrivers.Clear();
+        // Only refresh volatile data — drivers and disk health don't change mid-session
+        IsLoading = true;
 
-        await InitializeDashboardAsync();
+        var memTask = LoadMemoryAsync();
+        var processTask = LoadTopProcessesAsync();
+        var errorTask = LoadRecentErrorsAsync();
+
+        await Task.WhenAll(memTask, processTask, errorTask);
+
+        IsLoading = false;
+        StatusText = $"Updated {DateTime.Now:HH:mm:ss} — auto-refreshes every 30s";
     }
 
     private async Task StartAutoRefreshAsync()
