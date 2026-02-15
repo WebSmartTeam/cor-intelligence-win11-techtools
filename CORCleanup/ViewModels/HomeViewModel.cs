@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -18,7 +17,7 @@ public partial class HomeViewModel : ObservableObject
     private readonly INetworkInfoService _networkInfoService;
     private readonly IEventLogService _eventLogService;
 
-    private readonly int _ownPid = Process.GetCurrentProcess().Id;
+    private readonly int _ownPid = System.Diagnostics.Process.GetCurrentProcess().Id;
     private CancellationTokenSource? _autoRefreshCts;
 
     public HomeViewModel(
