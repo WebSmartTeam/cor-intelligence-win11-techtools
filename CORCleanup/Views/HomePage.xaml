@@ -163,9 +163,17 @@
                             Background="{DynamicResource ControlFillColorDefaultBrush}">
                         <StackPanel>
                             <DockPanel Margin="0,0,0,6">
-                                <TextBlock Text="MEMORY USAGE" FontSize="9" FontWeight="SemiBold"
-                                           Opacity="0.35" DockPanel.Dock="Left"
-                                           VerticalAlignment="Center" />
+                                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="MEMORY USAGE" FontSize="9" FontWeight="SemiBold"
+                                               Opacity="0.35" VerticalAlignment="Center" />
+                                    <ui:Button Appearance="Transparent"
+                                               Command="{Binding ViewModel.RefreshMemoryCommand}"
+                                               ToolTip="Refresh memory"
+                                               Padding="2" Margin="4,0,0,0"
+                                               VerticalAlignment="Center">
+                                        <ui:SymbolIcon Symbol="ArrowClockwise20" FontSize="10" Opacity="0.35" />
+                                    </ui:Button>
+                                </StackPanel>
                                 <TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right"
                                            FontSize="10.5" VerticalAlignment="Center">
                                     <Run Text="{Binding ViewModel.MemoryUsed, Mode=OneWay}" FontWeight="SemiBold" />
@@ -314,8 +322,17 @@
                         CornerRadius="6"
                         Background="{DynamicResource ControlFillColorDefaultBrush}">
                     <StackPanel>
-                        <TextBlock Text="TOP 5 — CPU USAGE" FontSize="9" FontWeight="SemiBold"
-                                   Opacity="0.35" Margin="0,0,0,6" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <TextBlock Text="TOP 5 — CPU USAGE" FontSize="9" FontWeight="SemiBold"
+                                       Opacity="0.35" VerticalAlignment="Center" />
+                            <ui:Button Appearance="Transparent"
+                                       Command="{Binding ViewModel.RefreshProcessesCommand}"
+                                       ToolTip="Refresh processes"
+                                       Padding="2" Margin="4,0,0,0"
+                                       VerticalAlignment="Center">
+                                <ui:SymbolIcon Symbol="ArrowClockwise20" FontSize="10" Opacity="0.35" />
+                            </ui:Button>
+                        </StackPanel>
                         <ItemsControl ItemsSource="{Binding ViewModel.TopCpuProcesses}"
                                       Grid.IsSharedSizeScope="True">
                             <ItemsControl.ItemTemplate>
@@ -346,8 +363,17 @@
                         CornerRadius="6"
                         Background="{DynamicResource ControlFillColorDefaultBrush}">
                     <StackPanel>
-                        <TextBlock Text="TOP 5 — MEMORY USAGE" FontSize="9" FontWeight="SemiBold"
-                                   Opacity="0.35" Margin="0,0,0,6" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <TextBlock Text="TOP 5 — MEMORY USAGE" FontSize="9" FontWeight="SemiBold"
+                                       Opacity="0.35" VerticalAlignment="Center" />
+                            <ui:Button Appearance="Transparent"
+                                       Command="{Binding ViewModel.RefreshMemoryCommand}"
+                                       ToolTip="Refresh memory consumers"
+                                       Padding="2" Margin="4,0,0,0"
+                                       VerticalAlignment="Center">
+                                <ui:SymbolIcon Symbol="ArrowClockwise20" FontSize="10" Opacity="0.35" />
+                            </ui:Button>
+                        </StackPanel>
                         <ItemsControl ItemsSource="{Binding ViewModel.TopMemoryProcesses}"
                                       Grid.IsSharedSizeScope="True">
                             <ItemsControl.ItemTemplate>
@@ -387,8 +413,17 @@
                         CornerRadius="6"
                         Background="{DynamicResource ControlFillColorDefaultBrush}">
                     <StackPanel>
-                        <TextBlock Text="RECENT ERRORS (7 DAYS)" FontSize="9" FontWeight="SemiBold"
-                                   Opacity="0.35" Margin="0,0,0,6" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <TextBlock Text="RECENT ERRORS (7 DAYS)" FontSize="9" FontWeight="SemiBold"
+                                       Opacity="0.35" VerticalAlignment="Center" />
+                            <ui:Button Appearance="Transparent"
+                                       Command="{Binding ViewModel.RefreshErrorsCommand}"
+                                       ToolTip="Refresh errors"
+                                       Padding="2" Margin="4,0,0,0"
+                                       VerticalAlignment="Center">
+                                <ui:SymbolIcon Symbol="ArrowClockwise20" FontSize="10" Opacity="0.35" />
+                            </ui:Button>
+                        </StackPanel>
                         <ItemsControl ItemsSource="{Binding ViewModel.RecentErrors}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -437,8 +472,17 @@
                         CornerRadius="6"
                         Background="{DynamicResource ControlFillColorDefaultBrush}">
                     <StackPanel>
-                        <TextBlock Text="OUTDATED DRIVERS (&gt;3 YEARS)" FontSize="9" FontWeight="SemiBold"
-                                   Opacity="0.35" Margin="0,0,0,6" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                            <TextBlock Text="OUTDATED DRIVERS (&gt;3 YEARS)" FontSize="9" FontWeight="SemiBold"
+                                       Opacity="0.35" VerticalAlignment="Center" />
+                            <ui:Button Appearance="Transparent"
+                                       Command="{Binding ViewModel.RefreshDriversCommand}"
+                                       ToolTip="Refresh drivers"
+                                       Padding="2" Margin="4,0,0,0"
+                                       VerticalAlignment="Center">
+                                <ui:SymbolIcon Symbol="ArrowClockwise20" FontSize="10" Opacity="0.35" />
+                            </ui:Button>
+                        </StackPanel>
                         <ScrollViewer MaxHeight="160" VerticalScrollBarVisibility="Auto"
                                       CanContentScroll="False">
                             <ItemsControl ItemsSource="{Binding ViewModel.OutdatedDrivers}">

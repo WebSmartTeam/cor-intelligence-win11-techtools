@@ -18,7 +18,6 @@ public partial class HomeViewModel : ObservableObject
     private readonly IEventLogService _eventLogService;
 
     private readonly int _ownPid = System.Diagnostics.Process.GetCurrentProcess().Id;
-    private CancellationTokenSource? _autoRefreshCts;
 
     public HomeViewModel(
         INavigationService navigationService,
@@ -36,7 +35,6 @@ public partial class HomeViewModel : ObservableObject
         _eventLogService = eventLogService;
 
         _ = InitializeDashboardAsync();
-        _ = StartAutoRefreshAsync();
     }
 
     // ================================================================
@@ -106,7 +104,7 @@ public partial class HomeViewModel : ObservableObject
         await Task.WhenAll(sysTask, netTask, memTask, processTask, errorTask, driverTask);
 
         IsLoading = false;
-        StatusText = $"Updated {DateTime.Now:HH:mm:ss} — auto-refreshes every 30s";
+        StatusText = $"Loaded {DateTime.Now:HH:mm:ss}";
     }
 
     private async Task LoadSystemInfoAsync()
@@ -141,8 +139,8 @@ public partial class HomeViewModel : ObservableObject
                 ? $"{sys.GpuVramFormatted} VRAM"
                 : "Integrated";
 
-            // Physical disks
-            foreach (var d in disks)
+            // Physical disks — max 2 on dashboard, full list on Hardware page
+            foreach (var d in disks.Take(2))
                 PhysicalDisks.Add(d);
 
             // Logical drives
@@ -277,37 +275,46 @@ public partial class HomeViewModel : ObservableObject
     }
 
     // ================================================================
-    // Refresh Command
+    // Refresh Commands — manual only, no auto-refresh
     // ================================================================
 
     [RelayCommand]
     private async Task RefreshDashboardAsync()
     {
-        // Only refresh volatile data — drivers and disk health don't change mid-session
-        IsLoading = true;
-
         var memTask = LoadMemoryAsync();
         var processTask = LoadTopProcessesAsync();
         var errorTask = LoadRecentErrorsAsync();
-
         await Task.WhenAll(memTask, processTask, errorTask);
-
-        IsLoading = false;
-        StatusText = $"Updated {DateTime.Now:HH:mm:ss} — auto-refreshes every 30s";
+        StatusText = $"Refreshed {DateTime.Now:HH:mm:ss}";
     }
 
-    private async Task StartAutoRefreshAsync()
+    [RelayCommand]
+    private async Task RefreshMemoryAsync()
     {
-        _autoRefreshCts = new CancellationTokenSource();
-        try
-        {
-            while (!_autoRefreshCts.Token.IsCancellationRequested)
-            {
-                await Task.Delay(TimeSpan.FromSeconds(30), _autoRefreshCts.Token);
-                await RefreshDashboardAsync();
-            }
-        }
-        catch (OperationCanceledException) { }
+        await LoadMemoryAsync();
+        StatusText = $"Memory refreshed {DateTime.Now:HH:mm:ss}";
+    }
+
+    [RelayCommand]
+    private async Task RefreshProcessesAsync()
+    {
+        await LoadTopProcessesAsync();
+        StatusText = $"Processes refreshed {DateTime.Now:HH:mm:ss}";
+    }
+
+    [RelayCommand]
+    private async Task RefreshErrorsAsync()
+    {
+        await LoadRecentErrorsAsync();
+        StatusText = $"Errors refreshed {DateTime.Now:HH:mm:ss}";
+    }
+
+    [RelayCommand]
+    private async Task RefreshDriversAsync()
+    {
+        OutdatedDrivers.Clear();
+        await LoadOutdatedDriversAsync();
+        StatusText = $"Drivers refreshed {DateTime.Now:HH:mm:ss}";
     }
 
     // ================================================================
