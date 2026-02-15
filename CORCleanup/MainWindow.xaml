@@ -9,6 +9,7 @@
                  MinWidth="960"
                  MinHeight="600"
                  WindowStartupLocation="CenterScreen"
+                 Icon="pack://application:,,,/Assets/cor-icon.png"
                  ExtendsContentIntoTitleBar="True"
                  WindowBackdropType="Mica">
 
@@ -36,23 +37,12 @@
             <ui:NavigationView.Header>
                 <Border Padding="12,8" Background="Transparent">
                     <DockPanel>
-                        <!-- COR Intelligence brand mark -->
-                        <Border DockPanel.Dock="Left"
-                                Width="34" Height="34"
-                                CornerRadius="8"
-                                Margin="0,0,10,0">
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                    <GradientStop Color="#06B6D4" Offset="0" />
-                                    <GradientStop Color="#0891B2" Offset="1" />
-                                </LinearGradientBrush>
-                            </Border.Background>
-                            <ui:SymbolIcon Symbol="ShieldCheckmark24"
-                                          FontSize="17"
-                                          HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"
-                                          Foreground="White" />
-                        </Border>
+                        <!-- COR Intelligence logo -->
+                        <Image DockPanel.Dock="Left"
+                               Source="pack://application:,,,/Assets/cor-icon.png"
+                               Width="34" Height="34"
+                               RenderOptions.BitmapScalingMode="HighQuality"
+                               Margin="0,0,10,0" />
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="COR Cleanup"
                                        FontSize="14"

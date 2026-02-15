@@ -28,8 +28,29 @@ jobs:
       - name: Publish (single-file x64)
         run: dotnet publish CORCleanup/CORCleanup.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o ./publish
 
-      - name: Upload build artifact
+      - name: Extract version from csproj
+        id: version
+        shell: pwsh
+        run: |
+          [xml]$csproj = Get-Content CORCleanup/CORCleanup.csproj
+          $ver = $csproj.Project.PropertyGroup.Version
+          echo "APP_VERSION=$ver" >> $env:GITHUB_OUTPUT
+          Write-Host "Version: $ver"
+
+      - name: Build NSIS installer
+        uses: joncloud/makensis-action@v4
+        with:
+          script-file: installer/cor-cleanup.nsi
+          arguments: /DVERSION=${{ steps.version.outputs.APP_VERSION }} /DPUBLISH_DIR=..\publish
+
+      - name: Upload portable exe
         uses: actions/upload-artifact@v4
         with:
           name: CORCleanup-win-x64
           path: ./publish/COR Cleanup.exe
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: CORCleanup-Setup
+          path: ./installer/CORCleanup-Setup-*.exe

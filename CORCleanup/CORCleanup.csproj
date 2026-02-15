@@ -14,6 +14,7 @@
     <Description>All-in-one Windows 11 MSP technician tool by COR Intelligence</Description>
     <Copyright>Copyright © COR Intelligence 2026</Copyright>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\cor-cleanup.ico</ApplicationIcon>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
@@ -26,6 +27,12 @@
     <PackageReference Include="WPF-UI.DependencyInjection" Version="4.2.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\cor-cleanup.ico" />
+    <Resource Include="Assets\cor-icon.png" />
+    <Resource Include="Assets\cor-logo.png" />
   </ItemGroup>
 
   <ItemGroup>
