@@ -1,5 +1,3 @@
-using System;
-using System.Windows;
 using System.Windows.Media;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
@@ -36,23 +34,10 @@ public partial class MainWindow : FluentWindow
         navigationService.SetNavigationControl(NavigationView);
 
         Loaded += OnLoaded;
-        StateChanged += OnStateChanged;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         _navigationService.Navigate(typeof(Views.HomePage));
-    }
-
-    /// <summary>
-    /// Compensates for WPF custom-chrome windows extending ~7px beyond screen edges
-    /// when maximized with ExtendsContentIntoTitleBar. Adds border padding so the
-    /// title bar, close button, and content stay within the visible screen area.
-    /// </summary>
-    private void OnStateChanged(object? sender, EventArgs e)
-    {
-        BorderThickness = WindowState == WindowState.Maximized
-            ? new Thickness(8)
-            : new Thickness(0);
     }
 }

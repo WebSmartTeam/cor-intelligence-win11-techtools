@@ -10,25 +10,17 @@
                  MinHeight="600"
                  WindowStartupLocation="CenterScreen"
                  Icon="pack://application:,,,/Assets/cor-icon.png"
-                 ExtendsContentIntoTitleBar="True"
                  WindowBackdropType="None">
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Title Bar — drag region + minimise / maximise / close buttons -->
-        <ui:TitleBar
-            x:Name="TitleBar"
-            Grid.Row="0"
-            Title="COR Cleanup" />
-
         <!-- Navigation sidebar + routed content -->
         <ui:NavigationView x:Name="NavigationView"
-                           Grid.Row="1"
+                           Grid.Row="0"
                            PaneDisplayMode="Left"
                            IsBackButtonVisible="Collapsed"
                            IsPaneToggleVisible="True"
@@ -91,7 +83,7 @@
         </ui:NavigationView>
 
         <!-- Status Bar -->
-        <Border Grid.Row="2"
+        <Border Grid.Row="1"
                 Padding="12,4"
                 Background="{DynamicResource ControlFillColorDefaultBrush}"
                 BorderThickness="0,1,0,0"
