@@ -67,13 +67,18 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $tag = "${{ github.ref_name }}"
-          $portable = Get-Item "./publish/COR Cleanup.exe"
-          $installer = Get-Item "./installer/CORCleanup-Setup-*.exe" -ErrorAction SilentlyContinue
 
-          # Rename portable for clarity
-          Copy-Item $portable.FullName "./COR.Cleanup.exe"
+          # Upload portable exe
+          Copy-Item "./publish/COR Cleanup.exe" "./COR.Cleanup.exe"
+          Write-Host "Uploading portable: COR.Cleanup.exe"
           gh release upload $tag "./COR.Cleanup.exe" --clobber
 
-          if ($installer) {
-            gh release upload $tag $installer.FullName --clobber
+          # Upload installer
+          $installers = Get-ChildItem "./installer/CORCleanup-Setup-*.exe" -ErrorAction SilentlyContinue
+          foreach ($inst in $installers) {
+            Write-Host "Uploading installer: $($inst.Name)"
+            gh release upload $tag "$($inst.FullName)" --clobber
+          }
+          if (-not $installers) {
+            Write-Host "::warning::No installer found to upload"
           }
