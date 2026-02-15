@@ -4,7 +4,8 @@
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:converters="clr-namespace:CORCleanup.Converters"
       xmlns:models="clr-namespace:CORCleanup.Core.Models;assembly=CORCleanup.Core"
-      Title="Auto Tool">
+      Title="Auto Tool"
+      Background="{DynamicResource ApplicationBackgroundBrush}">
 
     <Page.Resources>
         <converters:ActionStatusToBrushConverter x:Key="ActionStatusToBrush" />
