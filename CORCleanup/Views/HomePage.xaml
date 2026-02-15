@@ -146,17 +146,70 @@
 
             <!-- ============================================================ -->
             <!-- Row 1: Two-column layout                                     -->
-            <!--   LEFT  (~55%): Storage + Disk Health                        -->
-            <!--   RIGHT (~45%): RAM Info + Memory Gauge                      -->
+            <!--   LEFT  (~50%): RAM Info + Memory Gauge                      -->
+            <!--   RIGHT (~50%): Storage + Disk Health                        -->
             <!-- ============================================================ -->
             <Grid Margin="0,0,0,8">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="55*" />
-                    <ColumnDefinition Width="45*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <!-- ======== LEFT COLUMN: Storage + Disk Health ======== -->
+                <!-- ======== LEFT COLUMN: RAM Info + Memory Gauge ======== -->
                 <StackPanel Grid.Column="0" Margin="0,0,4,0">
+
+                    <!-- RAM Info (slots, type, speed) -->
+                    <Border Padding="12,10" CornerRadius="6" Margin="0,0,0,6"
+                            Background="{DynamicResource ControlFillColorDefaultBrush}">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Left"
+                                    Width="32" Height="32" CornerRadius="8"
+                                    Margin="0,0,8,0"
+                                    Background="#1A10B981">
+                                <ui:SymbolIcon Symbol="SlideSize24" FontSize="14"
+                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              Foreground="#10B981" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{Binding ViewModel.RamDisplay, FallbackValue='RAM'}"
+                                           FontSize="12" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding ViewModel.RamSlots, FallbackValue='...'}"
+                                           FontSize="10" Opacity="0.5" />
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+
+                    <!-- Memory Gauge (usage bar) -->
+                    <Border Padding="12,10" CornerRadius="6"
+                            Background="{DynamicResource ControlFillColorDefaultBrush}">
+                        <StackPanel>
+                            <DockPanel Margin="0,0,0,6">
+                                <TextBlock Text="MEMORY USAGE" FontSize="9" FontWeight="SemiBold"
+                                           Opacity="0.35" DockPanel.Dock="Left"
+                                           VerticalAlignment="Center" />
+                                <TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right"
+                                           FontSize="10.5" VerticalAlignment="Center">
+                                    <Run Text="{Binding ViewModel.MemoryUsed, Mode=OneWay}" FontWeight="SemiBold" />
+                                    <Run Text=" / " Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <Run Text="{Binding ViewModel.MemoryTotal, Mode=OneWay}" />
+                                    <Run Text=" (" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <Run Text="{Binding ViewModel.MemoryPercent, Mode=OneWay, StringFormat={}{0}}" FontWeight="SemiBold" />
+                                    <Run Text="%)" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                </TextBlock>
+                            </DockPanel>
+                            <ProgressBar Value="{Binding ViewModel.MemoryPercent, Mode=OneWay}"
+                                         Maximum="100" Height="14" />
+                            <TextBlock Margin="0,4,0,0" FontSize="10" Opacity="0.4">
+                                <Run Text="Health: " />
+                                <Run Text="{Binding ViewModel.MemoryHealth, Mode=OneWay}" />
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                </StackPanel>
+
+                <!-- ======== RIGHT COLUMN: Storage + Disk Health ======== -->
+                <StackPanel Grid.Column="1" Margin="4,0,0,0">
 
                     <!-- Storage section -->
                     <Border Padding="12,10" CornerRadius="6" Margin="0,0,0,6"
@@ -241,59 +294,6 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                        </StackPanel>
-                    </Border>
-
-                </StackPanel>
-
-                <!-- ======== RIGHT COLUMN: RAM Info + Memory Gauge ======== -->
-                <StackPanel Grid.Column="1" Margin="4,0,0,0">
-
-                    <!-- RAM Info (slots, type, speed) -->
-                    <Border Padding="12,10" CornerRadius="6" Margin="0,0,0,6"
-                            Background="{DynamicResource ControlFillColorDefaultBrush}">
-                        <DockPanel>
-                            <Border DockPanel.Dock="Left"
-                                    Width="32" Height="32" CornerRadius="8"
-                                    Margin="0,0,8,0"
-                                    Background="#1A10B981">
-                                <ui:SymbolIcon Symbol="SlideSize24" FontSize="14"
-                                              HorizontalAlignment="Center" VerticalAlignment="Center"
-                                              Foreground="#10B981" />
-                            </Border>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="{Binding ViewModel.RamDisplay, FallbackValue='RAM'}"
-                                           FontSize="12" FontWeight="SemiBold" />
-                                <TextBlock Text="{Binding ViewModel.RamSlots, FallbackValue='...'}"
-                                           FontSize="10" Opacity="0.5" />
-                            </StackPanel>
-                        </DockPanel>
-                    </Border>
-
-                    <!-- Memory Gauge (usage bar) -->
-                    <Border Padding="12,10" CornerRadius="6"
-                            Background="{DynamicResource ControlFillColorDefaultBrush}">
-                        <StackPanel>
-                            <DockPanel Margin="0,0,0,6">
-                                <TextBlock Text="MEMORY USAGE" FontSize="9" FontWeight="SemiBold"
-                                           Opacity="0.35" DockPanel.Dock="Left"
-                                           VerticalAlignment="Center" />
-                                <TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right"
-                                           FontSize="10.5" VerticalAlignment="Center">
-                                    <Run Text="{Binding ViewModel.MemoryUsed, Mode=OneWay}" FontWeight="SemiBold" />
-                                    <Run Text=" / " Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                    <Run Text="{Binding ViewModel.MemoryTotal, Mode=OneWay}" />
-                                    <Run Text=" (" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                    <Run Text="{Binding ViewModel.MemoryPercent, Mode=OneWay, StringFormat={}{0}}" FontWeight="SemiBold" />
-                                    <Run Text="%)" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                </TextBlock>
-                            </DockPanel>
-                            <ProgressBar Value="{Binding ViewModel.MemoryPercent, Mode=OneWay}"
-                                         Maximum="100" Height="14" />
-                            <TextBlock Margin="0,4,0,0" FontSize="10" Opacity="0.4">
-                                <Run Text="Health: " />
-                                <Run Text="{Binding ViewModel.MemoryHealth, Mode=OneWay}" />
-                            </TextBlock>
                         </StackPanel>
                     </Border>
 
