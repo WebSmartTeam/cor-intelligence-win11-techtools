@@ -128,13 +128,11 @@ public sealed class SystemInfoService : ISystemInfoService
                     ? "SSD"
                     : mediaType.Contains("Fixed", StringComparison.OrdinalIgnoreCase) ? "HDD" : mediaType,
                 OverallHealth = DiskHealthStatus.Unknown,
-                // SMART attributes require MSFT_StorageReliabilityCounter (Storage namespace)
-                // or MSStorageDriver_ATAPISmartData (ROOT\WMI) — added separately
                 SmartAttributes = new()
             });
         }
 
-        // Attempt SMART data from Storage namespace (works for SATA + NVMe)
+        // Enhance with Storage namespace: health status, accurate media/bus type, SMART data
         TryPopulateSmartData(disks);
 
         return disks;
@@ -316,44 +314,250 @@ public sealed class SystemInfoService : ISystemInfoService
             .ToList();
     });
 
-    // --- SMART data population ---
+    // --- SMART data population via Storage namespace (MSFT_PhysicalDisk + MSFT_StorageReliabilityCounter) ---
 
+    /// <summary>
+    /// Enhances disk list with accurate health status, media/bus type from MSFT_PhysicalDisk,
+    /// and SMART telemetry from MSFT_StorageReliabilityCounter.
+    /// Both classes live in ROOT\Microsoft\Windows\Storage and work for SATA and NVMe on Win11.
+    /// Matching is by model name (FriendlyName vs Model) rather than fragile index ordering.
+    /// </summary>
     private static void TryPopulateSmartData(List<DiskHealthInfo> disks)
     {
+        if (disks.Count == 0) return;
+
+        // --- Step 1: Query MSFT_PhysicalDisk for health, accurate media/bus type, and FriendlyName ---
+        var physicalDisks = new List<PhysicalDiskEntry>();
         try
         {
-            // MSFT_StorageReliabilityCounter in ROOT\Microsoft\Windows\Storage
-            // Works for both SATA and NVMe on Win11
-            using var searcher = new ManagementObjectSearcher(
+            using var pdSearcher = new ManagementObjectSearcher(
                 @"ROOT\Microsoft\Windows\Storage",
-                "SELECT * FROM MSFT_StorageReliabilityCounter");
+                "SELECT DeviceId, FriendlyName, HealthStatus, MediaType, BusType, Size FROM MSFT_PhysicalDisk");
 
-            var idx = 0;
-            foreach (var obj in searcher.Get())
+            foreach (var obj in pdSearcher.Get())
             {
-                if (idx >= disks.Count) break;
-                var disk = disks[idx];
-
-                // Temperature may be null on some NVMe drives (known Win11 bug)
-                var temp = obj["Temperature"];
-                if (temp is not null)
-                    disks[idx] = disk with { TemperatureCelsius = Convert.ToInt32(temp) };
-
-                var powerOn = obj["PowerOnHours"];
-                if (powerOn is not null)
-                    disks[idx] = disk with { PowerOnHours = Convert.ToInt64(powerOn) };
-
-                var wear = obj["Wear"];
-                if (wear is not null)
-                    disks[idx] = disk with { WearLevellingPercent = Convert.ToInt32(wear) };
-
-                idx++;
+                physicalDisks.Add(new PhysicalDiskEntry
+                {
+                    DeviceId = GetString(obj, "DeviceId", ""),
+                    FriendlyName = GetString(obj, "FriendlyName", "").Trim(),
+                    HealthStatus = GetUShort(obj, "HealthStatus"),
+                    MediaType = GetUShort(obj, "MediaType"),
+                    BusType = GetUShort(obj, "BusType"),
+                    SizeBytes = GetLong(obj, "Size")
+                });
             }
         }
         catch (ManagementException)
         {
-            // Storage namespace may not be accessible without elevation
+            // Storage namespace not accessible — cannot enhance, return with originals
+            return;
         }
+
+        // --- Step 2: Match physical disks to our DiskHealthInfo list and apply health/type overrides ---
+        foreach (var pd in physicalDisks)
+        {
+            var matchIdx = FindMatchingDiskIndex(disks, pd.FriendlyName, pd.SizeBytes);
+            if (matchIdx < 0) continue;
+
+            var disk = disks[matchIdx];
+
+            // Map MSFT_PhysicalDisk.HealthStatus → DiskHealthStatus
+            var health = pd.HealthStatus switch
+            {
+                0 => DiskHealthStatus.Good,
+                1 => DiskHealthStatus.Caution,   // Warning
+                2 => DiskHealthStatus.Bad,        // Unhealthy
+                _ => DiskHealthStatus.Unknown      // 5 = Unknown, others
+            };
+
+            // Map MSFT_PhysicalDisk.MediaType (more accurate than Win32_DiskDrive)
+            var mediaType = pd.MediaType switch
+            {
+                3 => "HDD",
+                4 => "SSD",
+                5 => "SCM",
+                _ => disk.MediaType   // Keep existing if unspecified (0)
+            };
+
+            // Map MSFT_PhysicalDisk.BusType (solves NVMe misreported as "SCSI")
+            var interfaceType = pd.BusType switch
+            {
+                7 => "SATA",
+                11 or 17 => "NVMe",
+                6 => "Fibre Channel",
+                8 => "SSA",
+                9 => "IEEE 1394",
+                10 => "SAS",
+                12 => "SD",
+                13 => "MMC",
+                14 => "Virtual",
+                15 => "File Backed Virtual",
+                16 => "Storage Spaces",
+                _ => disk.InterfaceType   // Keep existing for USB (3), SCSI, etc.
+            };
+
+            disks[matchIdx] = disk with
+            {
+                OverallHealth = health,
+                MediaType = mediaType,
+                InterfaceType = interfaceType
+            };
+        }
+
+        // --- Step 3: Query MSFT_StorageReliabilityCounter for SMART telemetry ---
+        try
+        {
+            using var rcSearcher = new ManagementObjectSearcher(
+                @"ROOT\Microsoft\Windows\Storage",
+                "SELECT * FROM MSFT_StorageReliabilityCounter");
+
+            // MSFT_StorageReliabilityCounter enumerates in the same order as MSFT_PhysicalDisk
+            // within the Storage namespace. We use this to correlate via FriendlyName.
+            var rcIndex = 0;
+            foreach (var obj in rcSearcher.Get())
+            {
+                // Find which DiskHealthInfo this reliability counter belongs to
+                // by mapping through the MSFT_PhysicalDisk list (same enumeration order)
+                int diskIdx = -1;
+                if (rcIndex < physicalDisks.Count)
+                {
+                    var pd = physicalDisks[rcIndex];
+                    diskIdx = FindMatchingDiskIndex(disks, pd.FriendlyName, pd.SizeBytes);
+                }
+                rcIndex++;
+
+                if (diskIdx < 0) continue;
+                var disk = disks[diskIdx];
+
+                // Temperature (may be null on some NVMe drives — known Win11 quirk)
+                int? temp = null;
+                var tempVal = obj["Temperature"];
+                if (tempVal is not null)
+                    temp = Convert.ToInt32(tempVal);
+
+                // Power-on hours
+                long? powerOn = null;
+                var powerOnVal = obj["PowerOnHours"];
+                if (powerOnVal is not null)
+                    powerOn = Convert.ToInt64(powerOnVal);
+
+                // Wear levelling (SSD/NVMe percentage used, 0 = new, 100 = end of life)
+                int? wear = null;
+                var wearVal = obj["Wear"];
+                if (wearVal is not null)
+                    wear = Convert.ToInt32(wearVal);
+
+                // Build SMART attributes list from available counters
+                var smartAttrs = new List<SmartAttribute>(disk.SmartAttributes);
+
+                // Read error counters (NVMe-specific, valuable for diagnostics)
+                TryAddSmartAttribute(smartAttrs, obj, "ReadErrorsTotal", 1, "Read Errors Total");
+                TryAddSmartAttribute(smartAttrs, obj, "WriteErrorsTotal", 200, "Write Errors Total");
+                TryAddSmartAttribute(smartAttrs, obj, "ReadLatencyMax", 201, "Read Latency Max (ns)");
+                TryAddSmartAttribute(smartAttrs, obj, "WriteLatencyMax", 202, "Write Latency Max (ns)");
+
+                // Standard counters as SMART attributes for the table display
+                if (temp.HasValue)
+                    TryAddSmartAttribute(smartAttrs, obj, "Temperature", 194, "Temperature (C)");
+                if (powerOn.HasValue)
+                    TryAddSmartAttribute(smartAttrs, obj, "PowerOnHours", 9, "Power-On Hours");
+                if (wear.HasValue)
+                    TryAddSmartAttribute(smartAttrs, obj, "Wear", 177, "Wear Levelling Count");
+
+                disks[diskIdx] = disk with
+                {
+                    TemperatureCelsius = temp ?? disk.TemperatureCelsius,
+                    PowerOnHours = powerOn ?? disk.PowerOnHours,
+                    WearLevellingPercent = wear ?? disk.WearLevellingPercent,
+                    SmartAttributes = smartAttrs
+                };
+            }
+        }
+        catch (ManagementException)
+        {
+            // MSFT_StorageReliabilityCounter not accessible — health status from Step 2 still applies
+        }
+    }
+
+    /// <summary>
+    /// Finds the best matching disk in our list by comparing model names.
+    /// Uses case-insensitive contains matching with size as a tiebreaker.
+    /// </summary>
+    private static int FindMatchingDiskIndex(List<DiskHealthInfo> disks, string friendlyName, long sizeBytes)
+    {
+        if (string.IsNullOrWhiteSpace(friendlyName)) return -1;
+
+        // Exact match first (case-insensitive)
+        for (var i = 0; i < disks.Count; i++)
+        {
+            if (disks[i].Model.Equals(friendlyName, StringComparison.OrdinalIgnoreCase))
+                return i;
+        }
+
+        // Contains match — FriendlyName within Model or Model within FriendlyName
+        for (var i = 0; i < disks.Count; i++)
+        {
+            if (disks[i].Model.Contains(friendlyName, StringComparison.OrdinalIgnoreCase)
+                || friendlyName.Contains(disks[i].Model, StringComparison.OrdinalIgnoreCase))
+                return i;
+        }
+
+        // Fallback: match by size (within 5% tolerance) when names don't align
+        if (sizeBytes > 0)
+        {
+            for (var i = 0; i < disks.Count; i++)
+            {
+                var diff = Math.Abs(disks[i].SizeBytes - sizeBytes);
+                if (diff < sizeBytes * 0.05)
+                    return i;
+            }
+        }
+
+        return -1;
+    }
+
+    /// <summary>
+    /// Attempts to read a WMI property and add it as a SmartAttribute entry.
+    /// Silently skips if the property is null or unavailable.
+    /// </summary>
+    private static void TryAddSmartAttribute(
+        List<SmartAttribute> attrs, ManagementBaseObject obj,
+        string propertyName, int smartId, string displayName)
+    {
+        try
+        {
+            var val = obj[propertyName];
+            if (val is null) return;
+
+            var rawValue = Convert.ToInt64(val);
+            attrs.Add(new SmartAttribute
+            {
+                Id = smartId,
+                Name = displayName,
+                CurrentValue = rawValue > int.MaxValue ? 100 : (int)rawValue,
+                WorstValue = 0,
+                Threshold = 0,
+                RawValue = rawValue,
+                Status = DiskHealthStatus.Good
+            });
+        }
+        catch
+        {
+            // Property not available on this drive — skip silently
+        }
+    }
+
+    /// <summary>
+    /// Intermediate record for MSFT_PhysicalDisk query results.
+    /// </summary>
+    private sealed record PhysicalDiskEntry
+    {
+        public required string DeviceId { get; init; }
+        public required string FriendlyName { get; init; }
+        public required ushort HealthStatus { get; init; }
+        public required ushort MediaType { get; init; }
+        public required ushort BusType { get; init; }
+        public required long SizeBytes { get; init; }
     }
 
     // --- Windows Edition detection ---

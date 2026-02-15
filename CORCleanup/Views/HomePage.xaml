@@ -7,10 +7,10 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       mc:Ignorable="d"
-      Title="Home"
+      Title="Dashboard"
       Background="{DynamicResource ApplicationBackgroundBrush}">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" CanContentScroll="False">
         <StackPanel Margin="12,8">
 
             <!-- ============================================================ -->
@@ -18,7 +18,7 @@
             <!-- ============================================================ -->
             <DockPanel Margin="0,0,0,10">
                 <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="System Overview" FontSize="16" FontWeight="SemiBold" />
+                    <TextBlock Text="Dashboard" FontSize="16" FontWeight="SemiBold" />
                     <TextBlock Text="  Loading..." FontSize="11" Opacity="0.4"
                                VerticalAlignment="Center"
                                Visibility="{Binding ViewModel.IsLoading, Converter={StaticResource BoolToVis}}" />
@@ -142,173 +142,180 @@
             </Grid>
 
             <!-- ============================================================ -->
-            <!-- Row 1: Network + Memory gauge                                -->
+            <!-- Row 1-3: Two-column layout                                   -->
+            <!--   LEFT  (~55%): Storage + Disk Health                        -->
+            <!--   RIGHT (~45%): Network + Memory                             -->
             <!-- ============================================================ -->
             <Grid Margin="0,0,0,8">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="55*" />
+                    <ColumnDefinition Width="45*" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Network Panel -->
-                <Border Grid.Column="0" Margin="0,0,4,0" Padding="12,10"
-                        CornerRadius="6"
-                        Background="{DynamicResource ControlFillColorDefaultBrush}">
-                    <StackPanel>
-                        <TextBlock Text="NETWORK" FontSize="9" FontWeight="SemiBold"
-                                   Opacity="0.35" Margin="0,0,0,6" />
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
+                <!-- ======== LEFT COLUMN: Storage + Disk Health ======== -->
+                <StackPanel Grid.Column="0" Margin="0,0,4,0">
 
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Local IP"
-                                       FontSize="10" Opacity="0.5" Margin="0,0,8,2"
-                                       VerticalAlignment="Center" />
-                            <TextBlock Grid.Row="0" Grid.Column="1"
-                                       Text="{Binding ViewModel.LocalIpAddress}"
-                                       FontSize="11" FontWeight="SemiBold" Margin="0,0,16,2"
-                                       Foreground="#06B6D4" VerticalAlignment="Center" />
+                    <!-- Storage section -->
+                    <Border Padding="12,10" CornerRadius="6" Margin="0,0,0,6"
+                            Background="{DynamicResource ControlFillColorDefaultBrush}">
+                        <StackPanel>
+                            <TextBlock Text="STORAGE" FontSize="9" FontWeight="SemiBold"
+                                       Opacity="0.35" Margin="0,0,0,6" />
+                            <ItemsControl ItemsSource="{Binding ViewModel.LogicalDrives}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,0,0,5">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="100" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Row="0" Grid.Column="2" Text="WAN IP"
-                                       FontSize="10" Opacity="0.5" Margin="0,0,8,2"
-                                       VerticalAlignment="Center" />
-                            <TextBlock Grid.Row="0" Grid.Column="3"
-                                       Text="{Binding ViewModel.WanIpAddress}"
-                                       FontSize="11" FontWeight="SemiBold" Margin="0,0,0,2"
-                                       Foreground="#06B6D4" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="0" Text="{Binding Label}" FontSize="11.5"
+                                                       FontWeight="SemiBold" VerticalAlignment="Center"
+                                                       TextTrimming="CharacterEllipsis" />
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4"
-                                       Text="{Binding ViewModel.NetworkAdapter}"
-                                       FontSize="10" Opacity="0.4" Margin="0,2,0,0" />
-                        </Grid>
-                    </StackPanel>
-                </Border>
+                                            <ProgressBar Grid.Column="1"
+                                                         Value="{Binding UsedPercent, Mode=OneWay}"
+                                                         Maximum="100" Height="12"
+                                                         VerticalAlignment="Center"
+                                                         Margin="0,0,10,0" />
 
-                <!-- Memory Gauge -->
-                <Border Grid.Column="1" Margin="4,0,0,0" Padding="12,10"
-                        CornerRadius="6"
-                        Background="{DynamicResource ControlFillColorDefaultBrush}">
-                    <StackPanel>
-                        <DockPanel Margin="0,0,0,6">
-                            <TextBlock Text="MEMORY" FontSize="9" FontWeight="SemiBold"
-                                       Opacity="0.35" DockPanel.Dock="Left"
-                                       VerticalAlignment="Center" />
-                            <TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right"
-                                       FontSize="10.5" VerticalAlignment="Center">
-                                <Run Text="{Binding ViewModel.MemoryUsed, Mode=OneWay}" FontWeight="SemiBold" />
-                                <Run Text=" / " Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                <Run Text="{Binding ViewModel.MemoryTotal, Mode=OneWay}" />
-                                <Run Text=" (" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                <Run Text="{Binding ViewModel.MemoryPercent, Mode=OneWay, StringFormat={}{0}}" FontWeight="SemiBold" />
-                                <Run Text="%)" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                            </TextBlock>
-                        </DockPanel>
-                        <ProgressBar Value="{Binding ViewModel.MemoryPercent, Mode=OneWay}"
-                                     Maximum="100" Height="14" />
-                        <TextBlock Margin="0,4,0,0" FontSize="10" Opacity="0.4">
-                            <Run Text="Health: " />
-                            <Run Text="{Binding ViewModel.MemoryHealth, Mode=OneWay}" />
-                        </TextBlock>
-                    </StackPanel>
-                </Border>
-            </Grid>
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock FontSize="10" Opacity="0.7">
+                                                    <Run Text="{Binding UsedDisplay, Mode=OneWay}" />
+                                                    <Run Text=" / " />
+                                                    <Run Text="{Binding TotalDisplay, Mode=OneWay}" />
+                                                </TextBlock>
+                                                <TextBlock Text="{Binding FreeDisplay}" FontSize="9.5" Opacity="0.4"
+                                                           Margin="6,0,0,0" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
 
-            <!-- ============================================================ -->
-            <!-- Row 2: Disk Storage — logical drive usage bars               -->
-            <!-- ============================================================ -->
-            <TextBlock Text="STORAGE" FontSize="9" FontWeight="SemiBold"
-                       Opacity="0.35" Margin="0,4,0,4" />
-            <ItemsControl ItemsSource="{Binding ViewModel.LogicalDrives}" Margin="0,0,0,4">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Margin="0,0,0,3" Padding="12,7"
-                                CornerRadius="6"
-                                Background="{DynamicResource ControlFillColorDefaultBrush}">
+                    <!-- Disk Health section -->
+                    <Border Padding="12,10" CornerRadius="6"
+                            Background="{DynamicResource ControlFillColorDefaultBrush}">
+                        <StackPanel>
+                            <TextBlock Text="DISK HEALTH" FontSize="9" FontWeight="SemiBold"
+                                       Opacity="0.35" Margin="0,0,0,6" />
+                            <ItemsControl ItemsSource="{Binding ViewModel.PhysicalDisks}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="0,0,0,5" Padding="10,7"
+                                                CornerRadius="5"
+                                                Background="{DynamicResource ApplicationBackgroundBrush}">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Model}" FontSize="11" FontWeight="SemiBold"
+                                                           TextTrimming="CharacterEllipsis" />
+                                                <WrapPanel Margin="0,4,0,0">
+                                                    <!-- Bus + Media Type badge -->
+                                                    <Border Padding="5,1" CornerRadius="3" Margin="0,0,5,0"
+                                                            Background="#1A8B5CF6">
+                                                        <TextBlock Text="{Binding TypeSummary}" FontSize="9.5"
+                                                                   Foreground="#8B5CF6" />
+                                                    </Border>
+                                                    <!-- Health badge -->
+                                                    <Border Padding="5,1" CornerRadius="3" Margin="0,0,5,0"
+                                                            Background="#1A10B981">
+                                                        <TextBlock Text="{Binding HealthDisplay}" FontSize="9.5"
+                                                                   Foreground="#10B981" />
+                                                    </Border>
+                                                    <!-- Size -->
+                                                    <TextBlock Text="{Binding SizeFormatted}" FontSize="9.5"
+                                                               Opacity="0.5" VerticalAlignment="Center"
+                                                               Margin="0,0,5,0" />
+                                                    <!-- Temperature -->
+                                                    <TextBlock Text="{Binding TemperatureDisplay}" FontSize="9.5"
+                                                               Opacity="0.5" VerticalAlignment="Center" />
+                                                </WrapPanel>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                </StackPanel>
+
+                <!-- ======== RIGHT COLUMN: Network + Memory ======== -->
+                <StackPanel Grid.Column="1" Margin="4,0,0,0">
+
+                    <!-- Network Panel -->
+                    <Border Padding="12,10" CornerRadius="6" Margin="0,0,0,6"
+                            Background="{DynamicResource ControlFillColorDefaultBrush}">
+                        <StackPanel>
+                            <TextBlock Text="NETWORK" FontSize="9" FontWeight="SemiBold"
+                                       Opacity="0.35" Margin="0,0,0,6" />
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="120" />
-                                    <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
 
-                                <TextBlock Grid.Column="0" Text="{Binding Label}" FontSize="11.5"
-                                           FontWeight="SemiBold" VerticalAlignment="Center"
-                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Local IP"
+                                           FontSize="10" Opacity="0.5" Margin="0,0,10,4"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Grid.Row="0" Grid.Column="1"
+                                           Text="{Binding ViewModel.LocalIpAddress}"
+                                           FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"
+                                           Foreground="#06B6D4" VerticalAlignment="Center" />
 
-                                <ProgressBar Grid.Column="1"
-                                             Value="{Binding UsedPercent, Mode=OneWay}"
-                                             Maximum="100" Height="12"
-                                             VerticalAlignment="Center"
-                                             Margin="0,0,12,0" />
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="WAN IP"
+                                           FontSize="10" Opacity="0.5" Margin="0,0,10,4"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Grid.Row="1" Grid.Column="1"
+                                           Text="{Binding ViewModel.WanIpAddress}"
+                                           FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"
+                                           Foreground="#06B6D4" VerticalAlignment="Center" />
 
-                                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock FontSize="10.5" Opacity="0.7">
-                                        <Run Text="{Binding UsedDisplay, Mode=OneWay}" />
-                                        <Run Text=" / " />
-                                        <Run Text="{Binding TotalDisplay, Mode=OneWay}" />
-                                    </TextBlock>
-                                    <TextBlock Text="{Binding FreeDisplay}" FontSize="10" Opacity="0.4"
-                                               Margin="8,0,0,0" VerticalAlignment="Center" />
-                                </StackPanel>
+                                <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                           Text="{Binding ViewModel.NetworkAdapter}"
+                                           FontSize="10" Opacity="0.4" Margin="0,2,0,0"
+                                           TextWrapping="Wrap" />
                             </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                        </StackPanel>
+                    </Border>
 
-            <!-- ============================================================ -->
-            <!-- Row 3: Physical Disk Health — type, bus, health, temp        -->
-            <!-- ============================================================ -->
-            <TextBlock Text="DISK HEALTH" FontSize="9" FontWeight="SemiBold"
-                       Opacity="0.35" Margin="0,4,0,4" />
-            <ItemsControl ItemsSource="{Binding ViewModel.PhysicalDisks}" Margin="0,0,0,8">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Margin="0,0,6,4" Padding="12,8"
-                                CornerRadius="6" MinWidth="220"
-                                Background="{DynamicResource ControlFillColorDefaultBrush}">
-                            <StackPanel>
-                                <TextBlock Text="{Binding Model}" FontSize="11.5" FontWeight="SemiBold"
-                                           TextTrimming="CharacterEllipsis" MaxWidth="280" />
-                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                    <!-- Bus + Media Type badge -->
-                                    <Border Padding="5,1" CornerRadius="3" Margin="0,0,5,0"
-                                            Background="#1A8B5CF6">
-                                        <TextBlock Text="{Binding TypeSummary}" FontSize="9.5"
-                                                   Foreground="#8B5CF6" />
-                                    </Border>
-                                    <!-- Health badge -->
-                                    <Border Padding="5,1" CornerRadius="3" Margin="0,0,5,0"
-                                            Background="#1A10B981">
-                                        <TextBlock Text="{Binding HealthDisplay}" FontSize="9.5"
-                                                   Foreground="#10B981" />
-                                    </Border>
-                                    <!-- Size -->
-                                    <TextBlock Text="{Binding SizeFormatted}" FontSize="10"
-                                               Opacity="0.5" VerticalAlignment="Center"
-                                               Margin="0,0,5,0" />
-                                    <!-- Temperature -->
-                                    <TextBlock Text="{Binding TemperatureDisplay}" FontSize="10"
-                                               Opacity="0.5" VerticalAlignment="Center" />
-                                </StackPanel>
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                    <!-- Memory Gauge -->
+                    <Border Padding="12,10" CornerRadius="6"
+                            Background="{DynamicResource ControlFillColorDefaultBrush}">
+                        <StackPanel>
+                            <DockPanel Margin="0,0,0,6">
+                                <TextBlock Text="MEMORY" FontSize="9" FontWeight="SemiBold"
+                                           Opacity="0.35" DockPanel.Dock="Left"
+                                           VerticalAlignment="Center" />
+                                <TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right"
+                                           FontSize="10.5" VerticalAlignment="Center">
+                                    <Run Text="{Binding ViewModel.MemoryUsed, Mode=OneWay}" FontWeight="SemiBold" />
+                                    <Run Text=" / " Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <Run Text="{Binding ViewModel.MemoryTotal, Mode=OneWay}" />
+                                    <Run Text=" (" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <Run Text="{Binding ViewModel.MemoryPercent, Mode=OneWay, StringFormat={}{0}}" FontWeight="SemiBold" />
+                                    <Run Text="%)" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                </TextBlock>
+                            </DockPanel>
+                            <ProgressBar Value="{Binding ViewModel.MemoryPercent, Mode=OneWay}"
+                                         Maximum="100" Height="14" />
+                            <TextBlock Margin="0,4,0,0" FontSize="10" Opacity="0.4">
+                                <Run Text="Health: " />
+                                <Run Text="{Binding ViewModel.MemoryHealth, Mode=OneWay}" />
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                </StackPanel>
+            </Grid>
 
             <!-- ============================================================ -->
             <!-- Row 4: Top 5 CPU + Top 5 Memory — side by side               -->

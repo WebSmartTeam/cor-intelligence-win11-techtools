@@ -29,7 +29,7 @@
                 <ui:NavigationViewItem Content="Auto Tool"
                                        Icon="{ui:SymbolIcon Wand24}"
                                        TargetPageType="{x:Type views:AutoToolPage}" />
-                <ui:NavigationViewItem Content="Home"
+                <ui:NavigationViewItem Content="Dashboard"
                                        Icon="{ui:SymbolIcon Home24}"
                                        TargetPageType="{x:Type views:HomePage}" />
                 <ui:NavigationViewItem Content="Network"
@@ -59,7 +59,7 @@
             <ui:NavigationView.PaneFooter>
                 <Border Padding="8,10" BorderThickness="0,1,0,0"
                         BorderBrush="{DynamicResource ControlElevationBorderBrush}">
-                    <Image Source="pack://application:,,,/Assets/cor-logo.png"
+                    <Image Source="pack://application:,,,/Assets/cor-intelligence-logo.png"
                            RenderOptions.BitmapScalingMode="HighQuality"
                            HorizontalAlignment="Stretch"
                            Stretch="Uniform"
@@ -91,7 +91,7 @@
                                Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                 </StackPanel>
                 <TextBlock DockPanel.Dock="Right"
-                           Text="v1.0.7"
+                           Text="v1.0.8"
                            FontSize="10.5"
                            Opacity="0.4"
                            VerticalAlignment="Center"

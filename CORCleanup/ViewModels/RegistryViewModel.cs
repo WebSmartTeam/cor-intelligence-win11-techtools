@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
+using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CORCleanup.Core.Interfaces;
@@ -119,7 +121,7 @@ public partial class RegistryViewModel : ObservableObject
     {
         foreach (var issue in Issues)
             issue.IsSelected = true;
-        OnPropertyChanged(nameof(Issues));
+        RefreshIssuesView();
     }
 
     [RelayCommand]
@@ -127,7 +129,7 @@ public partial class RegistryViewModel : ObservableObject
     {
         foreach (var issue in Issues)
             issue.IsSelected = false;
-        OnPropertyChanged(nameof(Issues));
+        RefreshIssuesView();
     }
 
     [RelayCommand]
@@ -135,7 +137,17 @@ public partial class RegistryViewModel : ObservableObject
     {
         foreach (var issue in Issues)
             issue.IsSelected = issue.Risk == RegistryRiskLevel.Safe;
-        OnPropertyChanged(nameof(Issues));
+        RefreshIssuesView();
+    }
+
+    /// <summary>
+    /// Force the DataGrid to re-read checkbox states.
+    /// DataGrid row virtualisation can cause programmatic IsSelected changes
+    /// to not reflect visually — refreshing the CollectionView fixes this.
+    /// </summary>
+    private void RefreshIssuesView()
+    {
+        CollectionViewSource.GetDefaultView(Issues)?.Refresh();
     }
 
     // ----------------------------------------------------------------

@@ -33,6 +33,7 @@
     <Resource Include="Assets\cor-cleanup.ico" />
     <Resource Include="Assets\cor-icon.png" />
     <Resource Include="Assets\cor-logo.png" />
+    <Resource Include="Assets\cor-intelligence-logo.png" />
   </ItemGroup>
 
   <ItemGroup>
