@@ -3,7 +3,7 @@ using System.Runtime.Versioning;
 using System.Security.Cryptography;
 using CORCleanup.Core.Interfaces;
 using CORCleanup.Core.Models;
-using Microsoft.VisualBasic.FileIO;
+using RecycleBin = Microsoft.VisualBasic.FileIO.FileSystem;
 
 namespace CORCleanup.Core.Services.Tools;
 
@@ -142,10 +142,10 @@ public sealed class DuplicateFinderService : IDuplicateFinderService
             if (!File.Exists(filePath))
                 throw new FileNotFoundException("File not found.", filePath);
 
-            FileSystem.DeleteFile(
+            RecycleBin.DeleteFile(
                 filePath,
-                UIOption.OnlyErrorDialogs,
-                RecycleOption.SendToRecycleBin);
+                Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs,
+                Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
         });
     }
 
