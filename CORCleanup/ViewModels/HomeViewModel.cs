@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -17,6 +18,9 @@ public partial class HomeViewModel : ObservableObject
     private readonly INetworkInfoService _networkInfoService;
     private readonly IEventLogService _eventLogService;
 
+    private readonly int _ownPid = Process.GetCurrentProcess().Id;
+    private CancellationTokenSource? _autoRefreshCts;
+
     public HomeViewModel(
         INavigationService navigationService,
         ISystemInfoService systemInfoService,
@@ -33,6 +37,7 @@ public partial class HomeViewModel : ObservableObject
         _eventLogService = eventLogService;
 
         _ = InitializeDashboardAsync();
+        _ = StartAutoRefreshAsync();
     }
 
     // ================================================================
@@ -102,7 +107,7 @@ public partial class HomeViewModel : ObservableObject
         await Task.WhenAll(sysTask, netTask, memTask, processTask, errorTask, driverTask);
 
         IsLoading = false;
-        StatusText = $"Dashboard loaded — {DateTime.Now:HH:mm:ss}";
+        StatusText = $"Updated {DateTime.Now:HH:mm:ss} — auto-refreshes every 30s";
     }
 
     private async Task LoadSystemInfoAsync()
@@ -234,7 +239,7 @@ public partial class HomeViewModel : ObservableObject
         {
             var entries = await _processExplorerService.GetProcessesAsync();
             var top5 = entries
-                .Where(e => !e.IsSystem)
+                .Where(e => !e.IsSystem && e.Pid != _ownPid)
                 .OrderByDescending(e => e.CpuPercent)
                 .Take(5);
 
@@ -281,6 +286,20 @@ public partial class HomeViewModel : ObservableObject
         OutdatedDrivers.Clear();
 
         await InitializeDashboardAsync();
+    }
+
+    private async Task StartAutoRefreshAsync()
+    {
+        _autoRefreshCts = new CancellationTokenSource();
+        try
+        {
+            while (!_autoRefreshCts.Token.IsCancellationRequested)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(30), _autoRefreshCts.Token);
+                await RefreshDashboardAsync();
+            }
+        }
+        catch (OperationCanceledException) { }
     }
 
     // ================================================================

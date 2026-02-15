@@ -2,12 +2,11 @@ using System.Windows;
 using System.Windows.Media;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
-using Wpf.Ui.Controls;
 using CORCleanup.ViewModels;
 
 namespace CORCleanup;
 
-public partial class MainWindow : FluentWindow
+public partial class MainWindow : Window
 {
     private readonly INavigationService _navigationService;
 
