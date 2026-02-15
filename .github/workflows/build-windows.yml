@@ -3,12 +3,15 @@ name: Build COR Cleanup
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
     branches: [main]
 
 jobs:
   build:
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -56,3 +59,21 @@ jobs:
         with:
           name: CORCleanup-Setup
           path: ./installer/CORCleanup-Setup-*.exe
+
+      - name: Attach assets to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $portable = Get-Item "./publish/COR Cleanup.exe"
+          $installer = Get-Item "./installer/CORCleanup-Setup-*.exe" -ErrorAction SilentlyContinue
+
+          # Rename portable for clarity
+          Copy-Item $portable.FullName "./COR.Cleanup.exe"
+          gh release upload $tag "./COR.Cleanup.exe" --clobber
+
+          if ($installer) {
+            gh release upload $tag $installer.FullName --clobber
+          }
