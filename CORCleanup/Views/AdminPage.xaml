@@ -8,11 +8,46 @@
 
     <Grid Margin="12,8">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TabControl Grid.Row="0"
+        <!-- System Summary Report Export -->
+        <ui:Card Grid.Row="0" Padding="12" Margin="0,0,0,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <ui:Button Grid.Column="0"
+                           Content="Export System Report"
+                           Appearance="Primary"
+                           Command="{Binding ViewModel.ExportSystemReportCommand}"
+                           MinWidth="180"
+                           Margin="0,0,12,0"
+                           ToolTip="Generate a COR Intelligence branded HTML report of the complete system status" />
+
+                <ProgressBar Grid.Column="1"
+                             IsIndeterminate="True"
+                             Width="120"
+                             Height="4"
+                             VerticalAlignment="Center"
+                             Margin="0,0,12,0"
+                             Visibility="{Binding ViewModel.IsExportingReport, Converter={StaticResource BoolToVis}}" />
+
+                <TextBlock Grid.Column="2"
+                           Text="{Binding ViewModel.ExportStatusText}"
+                           VerticalAlignment="Center"
+                           Opacity="0.7"
+                           FontSize="12"
+                           TextTrimming="CharacterEllipsis" />
+            </Grid>
+        </ui:Card>
+
+        <TabControl Grid.Row="1"
                     SelectedIndex="{Binding ViewModel.SelectedTabIndex}">
 
             <!-- ============================================================ -->
@@ -739,7 +774,7 @@
         </TabControl>
 
         <!-- Status bar -->
-        <TextBlock Grid.Row="1"
+        <TextBlock Grid.Row="2"
                    Text="{Binding ViewModel.StatusText}"
                    Opacity="0.6"
                    FontSize="12"

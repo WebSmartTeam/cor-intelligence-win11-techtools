@@ -19,11 +19,13 @@ public partial class NetworkViewModel : ObservableObject
     private readonly ISubnetCalculatorService _subnetCalculatorService;
     private readonly IWifiService _wifiService;
     private readonly IWifiScannerService _wifiScannerService;
+    private readonly ISpeedTestService _speedTestService;
 
     private CancellationTokenSource? _pingCts;
     private CancellationTokenSource? _traceCts;
     private CancellationTokenSource? _portScanCts;
     private CancellationTokenSource? _signalCts;
+    private CancellationTokenSource? _speedCts;
 
     [ObservableProperty] private string _pageTitle = "Network Tools";
     [ObservableProperty] private int _selectedTabIndex;
@@ -158,6 +160,24 @@ public partial class NetworkViewModel : ObservableObject
     public ObservableCollection<WifiProfile> WifiProfiles { get; } = new();
 
     // ================================================================
+    // Speed Test
+    // ================================================================
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(RunSpeedTestCommand))]
+    [NotifyCanExecuteChangedFor(nameof(CancelSpeedTestCommand))]
+    private bool _isTestingSpeed;
+
+    [ObservableProperty] private string _speedTestDownload = "—";
+    [ObservableProperty] private string _speedTestUpload = "—";
+    [ObservableProperty] private string _speedTestLatency = "—";
+    [ObservableProperty] private string _speedTestJitter = "—";
+    [ObservableProperty] private string _speedTestServer = "—";
+    [ObservableProperty] private string _speedTestProgress = "";
+    [ObservableProperty] private int _speedTestPercent;
+    [ObservableProperty] private bool _hasSpeedResult;
+
+    // ================================================================
     // Network Scanner (Advanced IP Scanner style)
     // ================================================================
 
@@ -207,7 +227,8 @@ public partial class NetworkViewModel : ObservableObject
         IWifiService wifiService,
         IWifiScannerService wifiScannerService,
         INetworkScannerService networkScannerService,
-        IConnectionMonitorService connectionMonitorService)
+        IConnectionMonitorService connectionMonitorService,
+        ISpeedTestService speedTestService)
     {
         _pingService = pingService;
         _tracerouteService = tracerouteService;
@@ -219,6 +240,7 @@ public partial class NetworkViewModel : ObservableObject
         _wifiScannerService = wifiScannerService;
         _networkScannerService = networkScannerService;
         _connectionMonitorService = connectionMonitorService;
+        _speedTestService = speedTestService;
     }
 
     // ================================================================
@@ -935,6 +957,74 @@ public partial class NetworkViewModel : ObservableObject
 
         return new IPAddress(networkBytes).ToString();
     }
+
+    // ================================================================
+    // Speed Test Commands
+    // ================================================================
+
+    private bool CanRunSpeedTest() => !IsTestingSpeed;
+    private bool CanCancelSpeedTest() => IsTestingSpeed;
+
+    [RelayCommand(CanExecute = nameof(CanRunSpeedTest))]
+    private async Task RunSpeedTestAsync()
+    {
+        _speedCts = new CancellationTokenSource();
+        IsTestingSpeed = true;
+        HasSpeedResult = false;
+        SpeedTestDownload = "—";
+        SpeedTestUpload = "—";
+        SpeedTestLatency = "—";
+        SpeedTestJitter = "—";
+        SpeedTestServer = "—";
+        SpeedTestProgress = "Initialising...";
+        SpeedTestPercent = 0;
+        StatusText = "Running speed test...";
+
+        var progress = new Progress<Core.Models.SpeedTestProgress>(p =>
+        {
+            SpeedTestProgress = p.Phase;
+            SpeedTestPercent = p.PercentComplete;
+        });
+
+        try
+        {
+            var result = await _speedTestService.RunTestAsync(progress, _speedCts.Token);
+
+            SpeedTestDownload = result.DownloadFormatted;
+            SpeedTestUpload = result.UploadFormatted;
+            SpeedTestLatency = $"{result.LatencyMs:F1} ms";
+            SpeedTestJitter = $"{result.JitterMs:F1} ms";
+            SpeedTestServer = result.ServerName;
+            HasSpeedResult = true;
+
+            SpeedTestProgress = $"Completed at {result.TestedAt:HH:mm:ss}";
+            StatusText = $"Speed test complete — Down: {result.DownloadFormatted} | Up: {result.UploadFormatted} | Ping: {result.LatencyMs:F1}ms";
+        }
+        catch (OperationCanceledException)
+        {
+            SpeedTestProgress = "Test cancelled";
+            StatusText = "Speed test cancelled";
+        }
+        catch (HttpRequestException ex)
+        {
+            SpeedTestProgress = $"Network error: {ex.Message}";
+            StatusText = $"Speed test failed: {ex.Message}";
+        }
+        catch (Exception ex)
+        {
+            SpeedTestProgress = $"Error: {ex.Message}";
+            StatusText = $"Speed test error: {ex.Message}";
+        }
+        finally
+        {
+            IsTestingSpeed = false;
+            _speedCts?.Dispose();
+            _speedCts = null;
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanCancelSpeedTest))]
+    private void CancelSpeedTest() => _speedCts?.Cancel();
 
     // ================================================================
     // Active Connections Commands

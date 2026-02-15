@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CORCleanup.Core.Interfaces;
@@ -18,6 +19,7 @@ public partial class AdminViewModel : ObservableObject
     private readonly IDebloatService _debloatService;
     private readonly IFirewallService _firewallService;
     private readonly IEnvironmentService _environmentService;
+    private readonly IReportService _reportService;
 
     [ObservableProperty] private string _pageTitle = "System Administration";
     [ObservableProperty] private bool _isLoading;
@@ -117,6 +119,13 @@ public partial class AdminViewModel : ObservableObject
     public static string[] EnvVarEditScopes => ["User", "Machine"];
 
     // ================================================================
+    // System Summary Report
+    // ================================================================
+
+    [ObservableProperty] private bool _isExportingReport;
+    [ObservableProperty] private string _exportStatusText = "";
+
+    // ================================================================
     // Constructor
     // ================================================================
 
@@ -129,7 +138,8 @@ public partial class AdminViewModel : ObservableObject
         IHostsFileService hostsFileService,
         IDebloatService debloatService,
         IFirewallService firewallService,
-        IEnvironmentService environmentService)
+        IEnvironmentService environmentService,
+        IReportService reportService)
     {
         _startupService = startupService;
         _servicesManager = servicesManager;
@@ -140,6 +150,7 @@ public partial class AdminViewModel : ObservableObject
         _debloatService = debloatService;
         _firewallService = firewallService;
         _environmentService = environmentService;
+        _reportService = reportService;
     }
 
     partial void OnHideMicrosoftEntriesChanged(bool value) => ApplyStartupFilter();
@@ -989,6 +1000,68 @@ public partial class AdminViewModel : ObservableObject
                 continue;
 
             FilteredEnvVariables.Add(v);
+        }
+    }
+
+    // ================================================================
+    // System Summary Report Commands
+    // ================================================================
+
+    [RelayCommand]
+    private async Task ExportSystemReportAsync()
+    {
+        IsExportingReport = true;
+        ExportStatusText = "Gathering system data...";
+        StatusText = "Generating system summary report...";
+
+        try
+        {
+            var htmlContent = await _reportService.GenerateHtmlReportAsync();
+
+            ExportStatusText = "Report generated — choose save location...";
+
+            var dialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Title = "Save System Summary Report",
+                Filter = "HTML Files|*.html",
+                DefaultExt = ".html",
+                FileName = $"COR-Cleanup-Report-{DateTime.Now:yyyy-MM-dd-HHmm}.html"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                await _reportService.SaveReportAsync(htmlContent, dialog.FileName);
+                ExportStatusText = $"Report saved to {dialog.FileName}";
+                StatusText = "System summary report exported successfully";
+
+                // Open the report in the default browser
+                try
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = dialog.FileName,
+                        UseShellExecute = true
+                    });
+                }
+                catch
+                {
+                    // Non-critical — report is saved even if browser fails to open
+                }
+            }
+            else
+            {
+                ExportStatusText = "Export cancelled";
+                StatusText = "Report export cancelled";
+            }
+        }
+        catch (Exception ex)
+        {
+            ExportStatusText = $"Error: {ex.Message}";
+            StatusText = $"Error generating report: {ex.Message}";
+        }
+        finally
+        {
+            IsExportingReport = false;
         }
     }
 }

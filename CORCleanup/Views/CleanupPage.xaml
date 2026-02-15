@@ -135,6 +135,7 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -156,8 +157,39 @@
                         </StackPanel>
                     </ui:Card>
 
+                    <!-- Dynamic running-browser warning card -->
+                    <ui:Card Grid.Row="1" Margin="0,0,0,12" Padding="12"
+                             Visibility="{Binding ViewModel.RunningBrowserWarning, Converter={StaticResource StringToVis}}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0"
+                                       Text="&#xE783;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="16"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"
+                                       Foreground="OrangeRed" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding ViewModel.RunningBrowserWarning}"
+                                       TextWrapping="Wrap"
+                                       VerticalAlignment="Center"
+                                       FontWeight="SemiBold"
+                                       Foreground="OrangeRed" />
+                            <ui:Button Grid.Column="2"
+                                       Content="Close Browsers"
+                                       Appearance="Caution"
+                                       Command="{Binding ViewModel.CloseBrowsersCommand}"
+                                       MinWidth="120"
+                                       Margin="12,0,0,0" />
+                        </Grid>
+                    </ui:Card>
+
                     <!-- Action buttons -->
-                    <Grid Grid.Row="1" Margin="0,0,0,12">
+                    <Grid Grid.Row="2" Margin="0,0,0,12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
@@ -204,7 +236,7 @@
                     </Grid>
 
                     <!-- Summary card -->
-                    <ui:Card Grid.Row="2" Margin="0,0,0,12" Padding="16"
+                    <ui:Card Grid.Row="3" Margin="0,0,0,12" Padding="16"
                              Visibility="{Binding ViewModel.HasBrowserScanned, Converter={StaticResource BoolToVis}}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Safe to clean: "
@@ -218,7 +250,7 @@
                     </ui:Card>
 
                     <!-- Browser cleanup items DataGrid -->
-                    <DataGrid Grid.Row="3"
+                    <DataGrid Grid.Row="4"
                               ItemsSource="{Binding ViewModel.BrowserCleanupItems}"
                               IsReadOnly="False"
                               SelectionMode="Single">
@@ -246,7 +278,7 @@
                     </DataGrid>
 
                     <!-- Results output -->
-                    <TextBox Grid.Row="4"
+                    <TextBox Grid.Row="5"
                              Text="{Binding ViewModel.BrowserResultText, Mode=OneWay}"
                              IsReadOnly="True"
                              FontFamily="Consolas"
@@ -259,7 +291,7 @@
                              Visibility="{Binding ViewModel.BrowserResultText, Converter={StaticResource StringToVis}}" />
 
                     <!-- Browser status -->
-                    <TextBlock Grid.Row="5"
+                    <TextBlock Grid.Row="6"
                                Text="{Binding ViewModel.BrowserStatusText}"
                                Opacity="0.6"
                                FontSize="12"

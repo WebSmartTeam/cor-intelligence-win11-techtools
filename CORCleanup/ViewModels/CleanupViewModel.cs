@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CORCleanup.Core;
@@ -55,6 +56,7 @@ public partial class CleanupViewModel : ObservableObject
     [ObservableProperty] private string _browserResultText = "";
     [ObservableProperty] private string _browserTotalSize = "";
     [ObservableProperty] private bool _hasBrowserScanned;
+    [ObservableProperty] private string _runningBrowserWarning = "";
 
     public ObservableCollection<BrowserCleanupItem> BrowserCleanupItems { get; } = new();
 
@@ -113,6 +115,17 @@ public partial class CleanupViewModel : ObservableObject
         {
             StatusText = "No items selected for cleaning";
             return;
+        }
+
+        // Check for running browsers and warn if detected
+        var runningBrowsers = _browserCleanupService.GetRunningBrowsers();
+        if (runningBrowsers.Count > 0)
+        {
+            RunningBrowserWarning = $"{string.Join(" and ", runningBrowsers)} running. Close them for a thorough clean.";
+        }
+        else
+        {
+            RunningBrowserWarning = "";
         }
 
         if (!DialogHelper.Confirm($"Clean {selectedCategories.Count} selected category/categories?\nThis will permanently delete temporary files."))
@@ -188,6 +201,58 @@ public partial class CleanupViewModel : ObservableObject
     {
         foreach (var item in CleanupItems)
             item.IsSelected = item.IsSelectedByDefault;
+    }
+
+    [RelayCommand]
+    private async Task CloseBrowsersAsync()
+    {
+        var browserProcessNames = new[] { "chrome", "msedge", "firefox", "brave" };
+        var closed = new List<string>();
+
+        await Task.Run(() =>
+        {
+            foreach (var name in browserProcessNames)
+            {
+                foreach (var proc in Process.GetProcessesByName(name))
+                {
+                    try
+                    {
+                        // Graceful close — sends WM_CLOSE, gives the user a chance to save tabs
+                        if (proc.CloseMainWindow())
+                        {
+                            proc.WaitForExit(10_000); // 10-second timeout
+                            if (!closed.Contains(proc.ProcessName))
+                                closed.Add(proc.ProcessName);
+                        }
+                    }
+                    catch
+                    {
+                        // Process may have already exited — skip
+                    }
+                }
+            }
+        });
+
+        if (closed.Count > 0)
+        {
+            RunningBrowserWarning = "";
+            StatusText = $"Closed: {string.Join(", ", closed)}";
+            BrowserStatusText = "Browsers closed — ready for a thorough clean";
+        }
+        else
+        {
+            // Re-check in case they were already closed
+            var stillRunning = _browserCleanupService.GetRunningBrowsers();
+            if (stillRunning.Count == 0)
+            {
+                RunningBrowserWarning = "";
+                StatusText = "No browsers detected";
+            }
+            else
+            {
+                RunningBrowserWarning = $"{string.Join(" and ", stillRunning)} could not be closed. Please close them manually.";
+            }
+        }
     }
 
     // ──────────────────────────────────────────────────────

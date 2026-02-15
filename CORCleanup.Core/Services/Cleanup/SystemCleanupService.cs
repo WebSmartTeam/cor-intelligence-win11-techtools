@@ -75,6 +75,11 @@ public sealed partial class SystemCleanupService : ICleanupService
             "Temporary internet files for Chrome, Edge, Firefox, Brave",
             true,
             () => GetBrowserCachePaths()),
+        [CleanupCategory.ApplicationTemp] = new(
+            "Application Temp Files",
+            "Cached and temporary files from Adobe, Microsoft Office, Java, and other applications",
+            true,
+            () => GetApplicationTempPaths()),
         [CleanupCategory.DnsCache] = new(
             "DNS Cache",
             "Cached DNS lookups — flushing forces fresh name resolution",
@@ -318,6 +323,71 @@ public sealed partial class SystemCleanupService : ICleanupService
                 if (Directory.Exists(cache2)) paths.Add(cache2);
             }
         }
+
+        return paths.ToArray();
+    }
+
+    private static string[] GetApplicationTempPaths()
+    {
+        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        var roamingAppData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var paths = new List<string>();
+
+        // Adobe cache directories
+        var adobeLocal = Path.Combine(localAppData, "Adobe");
+        if (Directory.Exists(adobeLocal))
+        {
+            foreach (var productDir in Directory.EnumerateDirectories(adobeLocal))
+            {
+                var cache = Path.Combine(productDir, "Cache");
+                if (Directory.Exists(cache)) paths.Add(cache);
+            }
+        }
+        var adobeRoaming = Path.Combine(roamingAppData, "Adobe");
+        if (Directory.Exists(adobeRoaming))
+        {
+            foreach (var productDir in Directory.EnumerateDirectories(adobeRoaming))
+            {
+                var cache = Path.Combine(productDir, "Cache");
+                if (Directory.Exists(cache)) paths.Add(cache);
+            }
+        }
+
+        // Microsoft Office file cache
+        var officeCache = Path.Combine(localAppData, @"Microsoft\Office\16.0\OfficeFileCache");
+        if (Directory.Exists(officeCache)) paths.Add(officeCache);
+
+        // Microsoft Office temp templates (files matching ~*)
+        var templatesDir = Path.Combine(roamingAppData, @"Microsoft\Templates");
+        if (Directory.Exists(templatesDir))
+        {
+            foreach (var file in Directory.EnumerateFiles(templatesDir, "~*"))
+                paths.Add(file);
+        }
+
+        // Windows Media Player cache
+        var wmpDir = Path.Combine(localAppData, @"Microsoft\Media Player");
+        if (Directory.Exists(wmpDir))
+        {
+            foreach (var entry in Directory.EnumerateFileSystemEntries(wmpDir, "*cache*"))
+                paths.Add(entry);
+        }
+
+        // Java deployment cache
+        var javaCache = Path.Combine(localAppData, @"Sun\Java\Deployment\cache");
+        if (Directory.Exists(javaCache)) paths.Add(javaCache);
+
+        // Local crash dumps (application crash minidumps)
+        var crashDumps = Path.Combine(localAppData, "CrashDumps");
+        if (Directory.Exists(crashDumps)) paths.Add(crashDumps);
+
+        // Direct3D shader cache
+        var d3dCache = Path.Combine(localAppData, "D3DSCache");
+        if (Directory.Exists(d3dCache)) paths.Add(d3dCache);
+
+        // Icon cache database
+        var iconCache = Path.Combine(localAppData, "IconCache.db");
+        if (File.Exists(iconCache)) paths.Add(iconCache);
 
         return paths.ToArray();
     }

@@ -86,6 +86,8 @@ public partial class App : Application
             services.AddSingleton<Core.Interfaces.IFirewallService, Core.Services.Admin.FirewallService>();
             services.AddSingleton<Core.Interfaces.IEnvironmentService, Core.Services.Admin.EnvironmentService>();
             services.AddSingleton<Core.Interfaces.IBrowserCleanupService, Core.Services.Cleanup.BrowserCleanupService>();
+            services.AddSingleton<Core.Interfaces.ISpeedTestService, Core.Services.Network.SpeedTestService>();
+            services.AddSingleton<Core.Interfaces.IReportService, Core.Services.Tools.ReportService>();
 
             // Auto Tool page
             services.AddTransient<AutoToolViewModel>();

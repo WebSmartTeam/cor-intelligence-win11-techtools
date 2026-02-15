@@ -1093,6 +1093,110 @@
                 </Grid>
             </TabItem>
 
+            <!-- ============================================================ -->
+            <!-- TAB 10: Speed Test                                         -->
+            <!-- ============================================================ -->
+            <TabItem Header="Speed Test">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Run / Cancel buttons -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+                        <ui:Button Content="Run Speed Test"
+                                   Appearance="Primary"
+                                   Command="{Binding ViewModel.RunSpeedTestCommand}"
+                                   MinWidth="140" Margin="0,0,8,0" />
+                        <ui:Button Content="Cancel"
+                                   Appearance="Danger"
+                                   Command="{Binding ViewModel.CancelSpeedTestCommand}"
+                                   Visibility="{Binding ViewModel.IsTestingSpeed, Converter={StaticResource BoolToVis}}"
+                                   MinWidth="80" Margin="0,0,16,0" />
+                        <TextBlock Text="Tests download, upload, latency and jitter via Cloudflare"
+                                   VerticalAlignment="Center" Opacity="0.5" FontSize="12" />
+                    </StackPanel>
+
+                    <!-- Progress bar + status text -->
+                    <StackPanel Grid.Row="1" Margin="0,0,0,16"
+                                Visibility="{Binding ViewModel.IsTestingSpeed, Converter={StaticResource BoolToVis}}">
+                        <ProgressBar Value="{Binding ViewModel.SpeedTestPercent}"
+                                     Maximum="100" Height="20" Margin="0,0,0,8" />
+                        <TextBlock Text="{Binding ViewModel.SpeedTestProgress}"
+                                   Opacity="0.7" FontSize="13" />
+                    </StackPanel>
+
+                    <!-- Completion status (when not testing) -->
+                    <TextBlock Grid.Row="1"
+                               Text="{Binding ViewModel.SpeedTestProgress}"
+                               Visibility="{Binding ViewModel.SpeedTestProgress, Converter={StaticResource StringToVis}}"
+                               Opacity="0.7" Margin="0,0,0,16" />
+
+                    <!-- Results card: 2x2 grid with large numbers -->
+                    <ui:Card Grid.Row="2" Padding="24" Margin="0,0,0,16"
+                             Visibility="{Binding ViewModel.HasSpeedResult, Converter={StaticResource BoolToVis}}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Download -->
+                            <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                <TextBlock Text="Download" Opacity="0.6"
+                                           HorizontalAlignment="Center" Margin="0,0,0,4" />
+                                <TextBlock Text="{Binding ViewModel.SpeedTestDownload}"
+                                           FontSize="28" FontWeight="Bold"
+                                           HorizontalAlignment="Center"
+                                           Foreground="#7DBF8E" />
+                            </StackPanel>
+
+                            <!-- Upload -->
+                            <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                <TextBlock Text="Upload" Opacity="0.6"
+                                           HorizontalAlignment="Center" Margin="0,0,0,4" />
+                                <TextBlock Text="{Binding ViewModel.SpeedTestUpload}"
+                                           FontSize="28" FontWeight="Bold"
+                                           HorizontalAlignment="Center"
+                                           Foreground="#6CA6D4" />
+                            </StackPanel>
+
+                            <!-- Latency -->
+                            <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                <TextBlock Text="Latency" Opacity="0.6"
+                                           HorizontalAlignment="Center" Margin="0,0,0,4" />
+                                <TextBlock Text="{Binding ViewModel.SpeedTestLatency}"
+                                           FontSize="28" FontWeight="Bold"
+                                           HorizontalAlignment="Center" />
+                            </StackPanel>
+
+                            <!-- Jitter -->
+                            <StackPanel Grid.Column="3" HorizontalAlignment="Center">
+                                <TextBlock Text="Jitter" Opacity="0.6"
+                                           HorizontalAlignment="Center" Margin="0,0,0,4" />
+                                <TextBlock Text="{Binding ViewModel.SpeedTestJitter}"
+                                           FontSize="28" FontWeight="Bold"
+                                           HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Grid>
+                    </ui:Card>
+
+                    <!-- Server info and timestamp -->
+                    <StackPanel Grid.Row="3" VerticalAlignment="Top"
+                                Visibility="{Binding ViewModel.HasSpeedResult, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Opacity="0.5" FontSize="12">
+                            <Run Text="Server: " />
+                            <Run Text="{Binding ViewModel.SpeedTestServer}" FontWeight="SemiBold" />
+                        </TextBlock>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
         </TabControl>
 
         <!-- Status bar -->
