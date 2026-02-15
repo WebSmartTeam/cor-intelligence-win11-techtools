@@ -14,42 +14,54 @@
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
+        <!-- Title Bar — drag region + minimise / maximise / close buttons -->
+        <ui:TitleBar
+            x:Name="TitleBar"
+            Grid.Row="0"
+            Title="COR Cleanup" />
+
+        <!-- Navigation sidebar + routed content -->
         <ui:NavigationView x:Name="NavigationView"
-                           Grid.Row="0"
+                           Grid.Row="1"
                            PaneDisplayMode="Left"
                            IsBackButtonVisible="Collapsed"
                            IsPaneToggleVisible="True"
                            OpenPaneLength="200">
 
             <ui:NavigationView.Header>
-                <Border Padding="12,6" Background="Transparent">
+                <Border Padding="12,8" Background="Transparent">
                     <DockPanel>
                         <!-- COR Intelligence brand mark -->
                         <Border DockPanel.Dock="Left"
-                                Width="32" Height="32"
-                                CornerRadius="6"
-                                Margin="0,0,10,0"
-                                Background="{DynamicResource SystemAccentColorPrimaryBrush}">
-                            <TextBlock Text="COR"
-                                       FontSize="10"
-                                       FontWeight="Black"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       Foreground="White" />
+                                Width="34" Height="34"
+                                CornerRadius="8"
+                                Margin="0,0,10,0">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                    <GradientStop Color="#06B6D4" Offset="0" />
+                                    <GradientStop Color="#0891B2" Offset="1" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <ui:SymbolIcon Symbol="ShieldCheckmark24"
+                                          FontSize="17"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          Foreground="White" />
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="COR Cleanup"
-                                       FontSize="13"
+                                       FontSize="14"
                                        FontWeight="SemiBold"
                                        Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                             <TextBlock Text="COR Intelligence"
                                        FontSize="9"
-                                       Opacity="0.5"
-                                       Foreground="#06B6D4" />
+                                       Foreground="#06B6D4"
+                                       Opacity="0.7" />
                         </StackPanel>
                     </DockPanel>
                 </Border>
@@ -94,7 +106,7 @@
         </ui:NavigationView>
 
         <!-- Status Bar -->
-        <Border Grid.Row="1"
+        <Border Grid.Row="2"
                 Padding="12,4"
                 Background="{DynamicResource ControlFillColorDefaultBrush}"
                 BorderThickness="0,1,0,0"
