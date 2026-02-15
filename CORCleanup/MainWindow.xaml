@@ -4,10 +4,10 @@
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:views="clr-namespace:CORCleanup.Views"
         Title="COR Cleanup"
-        Width="1280"
-        Height="800"
-        MinWidth="960"
-        MinHeight="600"
+        Width="1200"
+        Height="700"
+        MinWidth="900"
+        MinHeight="550"
         WindowStartupLocation="CenterScreen"
         Icon="pack://application:,,,/Assets/cor-icon.png">
 
