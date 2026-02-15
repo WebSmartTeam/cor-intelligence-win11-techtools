@@ -16,6 +16,8 @@ public partial class AdminViewModel : ObservableObject
     private readonly IPrinterService _printerService;
     private readonly IHostsFileService _hostsFileService;
     private readonly IDebloatService _debloatService;
+    private readonly IFirewallService _firewallService;
+    private readonly IEnvironmentService _environmentService;
 
     [ObservableProperty] private string _pageTitle = "System Administration";
     [ObservableProperty] private bool _isLoading;
@@ -86,6 +88,35 @@ public partial class AdminViewModel : ObservableObject
     public string[] DebloatCategories { get; } = ["All", "AI / Copilot", "Xbox / Gaming", "Entertainment", "Communication", "Productivity", "System Extras"];
 
     // ================================================================
+    // Firewall Rules
+    // ================================================================
+
+    [ObservableProperty] private bool _isLoadingFirewall;
+    [ObservableProperty] private string _firewallFilter = "";
+    [ObservableProperty] private string _firewallDirectionFilter = "All";
+    [ObservableProperty] private FirewallRule? _selectedFirewallRule;
+    public ObservableCollection<FirewallRule> FirewallRules { get; } = new();
+    public ObservableCollection<FirewallRule> FilteredFirewallRules { get; } = new();
+    public static string[] FirewallDirectionOptions => ["All", "In", "Out"];
+
+    // ================================================================
+    // Environment Variables
+    // ================================================================
+
+    [ObservableProperty] private bool _isLoadingEnvVars;
+    [ObservableProperty] private string _envVarFilter = "";
+    [ObservableProperty] private string _envVarScopeFilter = "All";
+    [ObservableProperty] private EnvironmentVariable? _selectedEnvVar;
+    [ObservableProperty] private string _newEnvVarName = "";
+    [ObservableProperty] private string _newEnvVarValue = "";
+    [ObservableProperty] private string _newEnvVarScope = "User";
+    public ObservableCollection<EnvironmentVariable> EnvVariables { get; } = new();
+    public ObservableCollection<EnvironmentVariable> FilteredEnvVariables { get; } = new();
+    public ObservableCollection<string> PathEntries { get; } = new();
+    public static string[] EnvVarScopes => ["All", "User", "Machine"];
+    public static string[] EnvVarEditScopes => ["User", "Machine"];
+
+    // ================================================================
     // Constructor
     // ================================================================
 
@@ -96,7 +127,9 @@ public partial class AdminViewModel : ObservableObject
         ISystemRepairService repairService,
         IPrinterService printerService,
         IHostsFileService hostsFileService,
-        IDebloatService debloatService)
+        IDebloatService debloatService,
+        IFirewallService firewallService,
+        IEnvironmentService environmentService)
     {
         _startupService = startupService;
         _servicesManager = servicesManager;
@@ -105,11 +138,17 @@ public partial class AdminViewModel : ObservableObject
         _printerService = printerService;
         _hostsFileService = hostsFileService;
         _debloatService = debloatService;
+        _firewallService = firewallService;
+        _environmentService = environmentService;
     }
 
     partial void OnHideMicrosoftEntriesChanged(bool value) => ApplyStartupFilter();
     partial void OnServiceFilterChanged(string value) => ApplyServiceFilter();
     partial void OnDebloatCategoryFilterChanged(string value) => ApplyBloatwareFilter();
+    partial void OnFirewallFilterChanged(string value) => ApplyFirewallFilter();
+    partial void OnFirewallDirectionFilterChanged(string value) => ApplyFirewallFilter();
+    partial void OnEnvVarFilterChanged(string value) => ApplyEnvVarFilter();
+    partial void OnEnvVarScopeFilterChanged(string value) => ApplyEnvVarFilter();
 
     // ================================================================
     // Startup Items Commands
@@ -758,5 +797,198 @@ public partial class AdminViewModel : ObservableObject
     {
         _debloatOutputBuilder.AppendLine(line);
         DebloatOutput = _debloatOutputBuilder.ToString();
+    }
+
+    // ================================================================
+    // Firewall Rules Commands
+    // ================================================================
+
+    [RelayCommand]
+    private async Task LoadFirewallRulesAsync()
+    {
+        IsLoadingFirewall = true;
+        StatusText = "Loading firewall rules...";
+
+        try
+        {
+            var rules = await _firewallService.GetAllRulesAsync();
+            FirewallRules.Clear();
+            foreach (var rule in rules)
+                FirewallRules.Add(rule);
+
+            ApplyFirewallFilter();
+            StatusText = $"{FirewallRules.Count} firewall rule(s) found";
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            IsLoadingFirewall = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ToggleFirewallRuleAsync()
+    {
+        if (SelectedFirewallRule is null) return;
+
+        var newState = !SelectedFirewallRule.Enabled;
+        var action = newState ? "Enabling" : "Disabling";
+        StatusText = $"{action} '{SelectedFirewallRule.Name}'...";
+
+        try
+        {
+            await _firewallService.SetRuleEnabledAsync(SelectedFirewallRule.Name, newState);
+            StatusText = $"'{SelectedFirewallRule.Name}' {(newState ? "enabled" : "disabled")}";
+            await LoadFirewallRulesAsync();
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Error toggling rule: {ex.Message}";
+        }
+    }
+
+    private void ApplyFirewallFilter()
+    {
+        FilteredFirewallRules.Clear();
+        var filter = FirewallFilter?.Trim() ?? "";
+
+        foreach (var rule in FirewallRules)
+        {
+            if (FirewallDirectionFilter != "All" &&
+                !rule.Direction.Equals(FirewallDirectionFilter, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            if (!string.IsNullOrEmpty(filter) &&
+                !rule.Name.Contains(filter, StringComparison.OrdinalIgnoreCase) &&
+                !rule.Program.Contains(filter, StringComparison.OrdinalIgnoreCase) &&
+                !rule.LocalPort.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            FilteredFirewallRules.Add(rule);
+        }
+    }
+
+    // ================================================================
+    // Environment Variables Commands
+    // ================================================================
+
+    [RelayCommand]
+    private async Task LoadEnvVariablesAsync()
+    {
+        IsLoadingEnvVars = true;
+        StatusText = "Loading environment variables...";
+
+        try
+        {
+            var variables = await _environmentService.GetAllVariablesAsync();
+            EnvVariables.Clear();
+            foreach (var v in variables)
+                EnvVariables.Add(v);
+
+            ApplyEnvVarFilter();
+            StatusText = $"{EnvVariables.Count} environment variable(s) found";
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            IsLoadingEnvVars = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task AddEnvVariableAsync()
+    {
+        if (string.IsNullOrWhiteSpace(NewEnvVarName))
+        {
+            StatusText = "Please enter a variable name";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(NewEnvVarValue))
+        {
+            StatusText = "Please enter a variable value";
+            return;
+        }
+
+        try
+        {
+            await _environmentService.SetVariableAsync(NewEnvVarName.Trim(), NewEnvVarValue.Trim(), NewEnvVarScope);
+            StatusText = $"Variable '{NewEnvVarName.Trim()}' set ({NewEnvVarScope})";
+            NewEnvVarName = "";
+            NewEnvVarValue = "";
+            await LoadEnvVariablesAsync();
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Error: {ex.Message}";
+        }
+    }
+
+    [RelayCommand]
+    private async Task DeleteEnvVariableAsync()
+    {
+        if (SelectedEnvVar is null) return;
+        if (!DialogHelper.Confirm($"Delete environment variable '{SelectedEnvVar.Name}' ({SelectedEnvVar.Scope})?"))
+            return;
+
+        try
+        {
+            await _environmentService.DeleteVariableAsync(SelectedEnvVar.Name, SelectedEnvVar.Scope);
+            StatusText = $"Variable '{SelectedEnvVar.Name}' deleted";
+            await LoadEnvVariablesAsync();
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Error: {ex.Message}";
+        }
+    }
+
+    [RelayCommand]
+    private void LoadPathEntries()
+    {
+        PathEntries.Clear();
+
+        try
+        {
+            var userEntries = _environmentService.GetPathEntries("User");
+            var machineEntries = _environmentService.GetPathEntries("Machine");
+
+            foreach (var entry in machineEntries)
+                PathEntries.Add($"[Machine] {entry}");
+            foreach (var entry in userEntries)
+                PathEntries.Add($"[User] {entry}");
+
+            StatusText = $"{PathEntries.Count} PATH entry/entries loaded";
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Error loading PATH: {ex.Message}";
+        }
+    }
+
+    private void ApplyEnvVarFilter()
+    {
+        FilteredEnvVariables.Clear();
+        var filter = EnvVarFilter?.Trim() ?? "";
+
+        foreach (var v in EnvVariables)
+        {
+            if (EnvVarScopeFilter != "All" &&
+                !v.Scope.Equals(EnvVarScopeFilter, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            if (!string.IsNullOrEmpty(filter) &&
+                !v.Name.Contains(filter, StringComparison.OrdinalIgnoreCase) &&
+                !v.Value.Contains(filter, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            FilteredEnvVariables.Add(v);
+        }
     }
 }

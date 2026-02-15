@@ -11,9 +11,14 @@ namespace CORCleanup.ViewModels;
 public partial class CleanupViewModel : ObservableObject
 {
     private readonly ICleanupService _cleanupService;
+    private readonly IBrowserCleanupService _browserCleanupService;
     private CancellationTokenSource? _cleanCts;
+    private CancellationTokenSource? _browserCleanCts;
 
     [ObservableProperty] private string _pageTitle = "System Cleanup";
+    [ObservableProperty] private int _cleanupTabIndex;
+
+    // --- System cleanup state ---
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ScanCommand))]
@@ -33,9 +38,30 @@ public partial class CleanupViewModel : ObservableObject
 
     public ObservableCollection<CleanupItem> CleanupItems { get; } = new();
 
-    public CleanupViewModel(ICleanupService cleanupService)
+    // --- Browser cleanup state ---
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ScanBrowserDataCommand))]
+    [NotifyCanExecuteChangedFor(nameof(CleanBrowserDataCommand))]
+    private bool _isScanningBrowsers;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ScanBrowserDataCommand))]
+    [NotifyCanExecuteChangedFor(nameof(CleanBrowserDataCommand))]
+    [NotifyCanExecuteChangedFor(nameof(StopBrowserCleanCommand))]
+    private bool _isCleaningBrowsers;
+
+    [ObservableProperty] private string _browserStatusText = "Ready — press Scan Browser Data to analyse";
+    [ObservableProperty] private string _browserResultText = "";
+    [ObservableProperty] private string _browserTotalSize = "";
+    [ObservableProperty] private bool _hasBrowserScanned;
+
+    public ObservableCollection<BrowserCleanupItem> BrowserCleanupItems { get; } = new();
+
+    public CleanupViewModel(ICleanupService cleanupService, IBrowserCleanupService browserCleanupService)
     {
         _cleanupService = cleanupService;
+        _browserCleanupService = browserCleanupService;
     }
 
     private bool CanScan() => !IsScanning && !IsCleaning;
@@ -162,5 +188,129 @@ public partial class CleanupViewModel : ObservableObject
     {
         foreach (var item in CleanupItems)
             item.IsSelected = item.IsSelectedByDefault;
+    }
+
+    // ──────────────────────────────────────────────────────
+    //  Browser Cleanup Commands
+    // ──────────────────────────────────────────────────────
+
+    private bool CanScanBrowser() => !IsScanningBrowsers && !IsCleaningBrowsers;
+    private bool CanCleanBrowser() => !IsScanningBrowsers && !IsCleaningBrowsers && HasBrowserScanned;
+    private bool CanStopBrowserClean() => IsCleaningBrowsers;
+
+    [RelayCommand(CanExecute = nameof(CanScanBrowser))]
+    private async Task ScanBrowserDataAsync()
+    {
+        IsScanningBrowsers = true;
+        BrowserCleanupItems.Clear();
+        BrowserResultText = "";
+
+        try
+        {
+            var running = _browserCleanupService.GetRunningBrowsers();
+            if (running.Count > 0)
+            {
+                BrowserStatusText = $"Warning: {string.Join(", ", running)} running — close for best results. Scanning...";
+            }
+            else
+            {
+                BrowserStatusText = "Scanning browser data...";
+            }
+
+            var items = await _browserCleanupService.ScanBrowserDataAsync();
+
+            foreach (var item in items)
+            {
+                item.IsSelected = item.IsSafe;
+                BrowserCleanupItems.Add(item);
+            }
+
+            var safeTotal = items.Where(i => i.IsSafe).Sum(i => i.SizeBytes);
+            BrowserTotalSize = ByteFormatter.Format(safeTotal);
+            HasBrowserScanned = true;
+            BrowserStatusText = $"Scan complete — {ByteFormatter.Format(items.Sum(i => i.SizeBytes))} found ({BrowserTotalSize} safe to clean)";
+        }
+        catch (Exception ex)
+        {
+            BrowserStatusText = $"Scan error: {ex.Message}";
+        }
+        finally
+        {
+            IsScanningBrowsers = false;
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanCleanBrowser))]
+    private async Task CleanBrowserDataAsync()
+    {
+        var selected = BrowserCleanupItems.Where(i => i.IsSelected).ToList();
+
+        if (selected.Count == 0)
+        {
+            BrowserStatusText = "No items selected for cleaning";
+            return;
+        }
+
+        var running = _browserCleanupService.GetRunningBrowsers();
+        var warningPrefix = running.Count > 0
+            ? $"Warning: {string.Join(", ", running)} still running — some files may be locked.\n\n"
+            : "";
+
+        if (!DialogHelper.Confirm($"{warningPrefix}Clean {selected.Count} selected browser item(s)?\nThis will permanently delete the selected browser data."))
+            return;
+
+        _browserCleanCts = new CancellationTokenSource();
+        IsCleaningBrowsers = true;
+        BrowserResultText = "";
+        BrowserStatusText = "Cleaning browser data...";
+
+        try
+        {
+            var bytesFreed = await _browserCleanupService.CleanSelectedAsync(selected, _browserCleanCts.Token);
+            var freedFormatted = ByteFormatter.Format(bytesFreed);
+            BrowserResultText = $"Space reclaimed: {freedFormatted}";
+            BrowserStatusText = $"Browser cleanup complete — {freedFormatted} reclaimed";
+        }
+        catch (OperationCanceledException)
+        {
+            BrowserStatusText = "Browser cleanup cancelled";
+        }
+        catch (Exception ex)
+        {
+            BrowserStatusText = $"Browser cleanup error: {ex.Message}";
+        }
+        finally
+        {
+            IsCleaningBrowsers = false;
+            _browserCleanCts?.Dispose();
+            _browserCleanCts = null;
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanStopBrowserClean))]
+    private void StopBrowserClean()
+    {
+        _browserCleanCts?.Cancel();
+    }
+
+    [RelayCommand]
+    private void SelectAllSafeBrowser()
+    {
+        foreach (var item in BrowserCleanupItems)
+            item.IsSelected = item.IsSafe;
+    }
+
+    [RelayCommand]
+    private void SelectAllBrowser()
+    {
+        foreach (var item in BrowserCleanupItems)
+            item.IsSelected = true;
+    }
+
+    [RelayCommand]
+    private void DeselectAllBrowser()
+    {
+        foreach (var item in BrowserCleanupItems)
+            item.IsSelected = false;
     }
 }

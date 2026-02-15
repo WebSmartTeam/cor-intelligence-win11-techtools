@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using CORCleanup.Core.Interfaces;
 using CORCleanup.Core.Models;
 using CORCleanup.Core.Services.Network;
+using CORCleanup.Helpers;
 
 namespace CORCleanup.ViewModels;
 
@@ -157,6 +158,42 @@ public partial class NetworkViewModel : ObservableObject
     public ObservableCollection<WifiProfile> WifiProfiles { get; } = new();
 
     // ================================================================
+    // Network Scanner (Advanced IP Scanner style)
+    // ================================================================
+
+    private readonly INetworkScannerService _networkScannerService;
+    private CancellationTokenSource? _scanCts;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(StartScanCommand))]
+    [NotifyCanExecuteChangedFor(nameof(StopScanCommand))]
+    private bool _isScanning;
+
+    [ObservableProperty] private string _scanSubnet = "192.168.1.0/24";
+    [ObservableProperty] private string _scanStatus = "";
+    [ObservableProperty] private int _scannedCount;
+    [ObservableProperty] private int _onlineCount;
+    [ObservableProperty] private NetworkDevice? _selectedDevice;
+    [ObservableProperty] private bool _showOnlineOnly;
+
+    public ObservableCollection<NetworkDevice> ScannedDevices { get; } = new();
+    public ObservableCollection<NetworkDevice> FilteredDevices { get; } = new();
+    public ObservableCollection<NetworkAdapterInfo> ScanAdapters { get; } = new();
+
+    // ================================================================
+    // Active Connections (TCPView style)
+    // ================================================================
+
+    private readonly IConnectionMonitorService _connectionMonitorService;
+
+    [ObservableProperty] private bool _isLoadingConnections;
+    [ObservableProperty] private string _connectionFilter = "";
+    [ObservableProperty] private ConnectionEntry? _selectedConnection;
+
+    public ObservableCollection<ConnectionEntry> Connections { get; } = new();
+    public ObservableCollection<ConnectionEntry> FilteredConnections { get; } = new();
+
+    // ================================================================
     // Constructor
     // ================================================================
 
@@ -168,7 +205,9 @@ public partial class NetworkViewModel : ObservableObject
         INetworkInfoService networkInfoService,
         ISubnetCalculatorService subnetCalculatorService,
         IWifiService wifiService,
-        IWifiScannerService wifiScannerService)
+        IWifiScannerService wifiScannerService,
+        INetworkScannerService networkScannerService,
+        IConnectionMonitorService connectionMonitorService)
     {
         _pingService = pingService;
         _tracerouteService = tracerouteService;
@@ -178,6 +217,8 @@ public partial class NetworkViewModel : ObservableObject
         _subnetCalculatorService = subnetCalculatorService;
         _wifiService = wifiService;
         _wifiScannerService = wifiScannerService;
+        _networkScannerService = networkScannerService;
+        _connectionMonitorService = connectionMonitorService;
     }
 
     // ================================================================
@@ -724,6 +765,258 @@ public partial class NetworkViewModel : ObservableObject
         finally
         {
             IsLoadingWifi = false;
+        }
+    }
+
+    // ================================================================
+    // Network Scanner Commands
+    // ================================================================
+
+    private bool CanStartScan() => !IsScanning;
+    private bool CanStopScan() => IsScanning;
+
+    [RelayCommand]
+    private async Task LoadScanAdaptersAsync()
+    {
+        ScanAdapters.Clear();
+        ScanStatus = "Detecting network adapters...";
+
+        try
+        {
+            var adapters = await _networkScannerService.GetAdaptersWithSubnetsAsync();
+
+            foreach (var adapter in adapters)
+                ScanAdapters.Add(adapter);
+
+            // Auto-select the first active adapter's subnet
+            var active = adapters.FirstOrDefault(a =>
+                a.Status == "Up" && !string.IsNullOrEmpty(a.IpAddress) && !string.IsNullOrEmpty(a.SubnetMask));
+
+            if (active is not null)
+            {
+                var cidr = SubnetMaskToCidr(active.SubnetMask!);
+                var baseIp = CalculateNetworkAddress(active.IpAddress!, active.SubnetMask!);
+                ScanSubnet = $"{baseIp}/{cidr}";
+            }
+
+            ScanStatus = $"{adapters.Count} adapter(s) detected";
+        }
+        catch (Exception ex)
+        {
+            ScanStatus = $"Adapter detection error: {ex.Message}";
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanStartScan))]
+    private async Task StartScanAsync()
+    {
+        _scanCts = new CancellationTokenSource();
+        IsScanning = true;
+        ScannedDevices.Clear();
+        FilteredDevices.Clear();
+        ScannedCount = 0;
+        OnlineCount = 0;
+
+        // Parse subnet string (e.g. "192.168.1.0/24")
+        var parts = ScanSubnet.Split('/');
+        var baseIp = parts[0].Trim();
+        var cidr = parts.Length > 1 && int.TryParse(parts[1].Trim(), out var c) ? c : 24;
+
+        ScanStatus = $"Scanning {baseIp}/{cidr}...";
+        StatusText = ScanStatus;
+
+        try
+        {
+            await foreach (var device in _networkScannerService.ScanSubnetAsync(baseIp, cidr, _scanCts.Token))
+            {
+                ScannedDevices.Add(device);
+                ScannedCount++;
+                if (device.IsOnline) OnlineCount++;
+                ApplyScanFilter();
+
+                ScanStatus = $"Scanned {ScannedCount} — {OnlineCount} online";
+            }
+
+            ScanStatus = $"Scan complete: {ScannedCount} host(s) scanned, {OnlineCount} online";
+            StatusText = ScanStatus;
+        }
+        catch (OperationCanceledException)
+        {
+            ScanStatus = $"Scan stopped: {ScannedCount} scanned, {OnlineCount} online";
+            StatusText = ScanStatus;
+        }
+        catch (Exception ex)
+        {
+            ScanStatus = $"Scan error: {ex.Message}";
+            StatusText = ScanStatus;
+        }
+        finally
+        {
+            IsScanning = false;
+            _scanCts?.Dispose();
+            _scanCts = null;
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanStopScan))]
+    private void StopScan() => _scanCts?.Cancel();
+
+    partial void OnShowOnlineOnlyChanged(bool value) => ApplyScanFilter();
+
+    private void ApplyScanFilter()
+    {
+        FilteredDevices.Clear();
+        var source = ShowOnlineOnly
+            ? ScannedDevices.Where(d => d.IsOnline)
+            : ScannedDevices;
+
+        foreach (var device in source)
+            FilteredDevices.Add(device);
+    }
+
+    [RelayCommand]
+    private void CopyDeviceIp()
+    {
+        if (SelectedDevice is null) return;
+
+        try
+        {
+            System.Windows.Clipboard.SetText(SelectedDevice.IpAddress);
+            StatusText = $"Copied {SelectedDevice.IpAddress} to clipboard";
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Copy failed: {ex.Message}";
+        }
+    }
+
+    /// <summary>
+    /// Converts a dotted-decimal subnet mask (e.g. "255.255.255.0") to CIDR prefix length (e.g. 24).
+    /// </summary>
+    private static int SubnetMaskToCidr(string subnetMask)
+    {
+        if (!IPAddress.TryParse(subnetMask, out var mask))
+            return 24;
+
+        var bytes = mask.GetAddressBytes();
+        int cidr = 0;
+        foreach (var b in bytes)
+        {
+            cidr += b switch
+            {
+                255 => 8,
+                254 => 7,
+                252 => 6,
+                248 => 5,
+                240 => 4,
+                224 => 3,
+                192 => 2,
+                128 => 1,
+                _ => 0
+            };
+        }
+        return cidr;
+    }
+
+    /// <summary>
+    /// Calculates the network address from an IP and subnet mask.
+    /// </summary>
+    private static string CalculateNetworkAddress(string ipAddress, string subnetMask)
+    {
+        if (!IPAddress.TryParse(ipAddress, out var ip) || !IPAddress.TryParse(subnetMask, out var mask))
+            return ipAddress;
+
+        var ipBytes = ip.GetAddressBytes();
+        var maskBytes = mask.GetAddressBytes();
+        var networkBytes = new byte[ipBytes.Length];
+
+        for (int i = 0; i < ipBytes.Length; i++)
+            networkBytes[i] = (byte)(ipBytes[i] & maskBytes[i]);
+
+        return new IPAddress(networkBytes).ToString();
+    }
+
+    // ================================================================
+    // Active Connections Commands
+    // ================================================================
+
+    [RelayCommand]
+    private async Task LoadConnectionsAsync()
+    {
+        IsLoadingConnections = true;
+        Connections.Clear();
+        FilteredConnections.Clear();
+        StatusText = "Loading active connections...";
+
+        try
+        {
+            var connections = await _connectionMonitorService.GetActiveConnectionsAsync();
+
+            foreach (var conn in connections)
+                Connections.Add(conn);
+
+            ApplyConnectionFilter();
+            StatusText = $"{connections.Count} active connection(s) found";
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Connection error: {ex.Message}";
+        }
+        finally
+        {
+            IsLoadingConnections = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task RefreshConnectionsAsync() => await LoadConnectionsAsync();
+
+    partial void OnConnectionFilterChanged(string value) => ApplyConnectionFilter();
+
+    private void ApplyConnectionFilter()
+    {
+        FilteredConnections.Clear();
+
+        var source = string.IsNullOrWhiteSpace(ConnectionFilter)
+            ? Connections
+            : new ObservableCollection<ConnectionEntry>(
+                Connections.Where(c =>
+                    c.ProcessName.Contains(ConnectionFilter, StringComparison.OrdinalIgnoreCase) ||
+                    c.LocalAddress.Contains(ConnectionFilter, StringComparison.OrdinalIgnoreCase) ||
+                    c.RemoteAddress.Contains(ConnectionFilter, StringComparison.OrdinalIgnoreCase) ||
+                    c.State.Contains(ConnectionFilter, StringComparison.OrdinalIgnoreCase) ||
+                    c.Protocol.Contains(ConnectionFilter, StringComparison.OrdinalIgnoreCase) ||
+                    c.LocalPort.ToString().Contains(ConnectionFilter) ||
+                    c.RemotePort.ToString().Contains(ConnectionFilter) ||
+                    c.ProcessId.ToString().Contains(ConnectionFilter)));
+
+        foreach (var conn in source)
+            FilteredConnections.Add(conn);
+    }
+
+    [RelayCommand]
+    private async Task KillConnectionProcessAsync()
+    {
+        if (SelectedConnection is null) return;
+
+        var confirmed = DialogHelper.Confirm(
+            $"Terminate process \"{SelectedConnection.ProcessName}\" (PID {SelectedConnection.ProcessId})?\n\n" +
+            "This will close the process and all its network connections.",
+            "COR Cleanup — Kill Process");
+
+        if (!confirmed) return;
+
+        try
+        {
+            await _connectionMonitorService.KillProcessAsync(SelectedConnection.ProcessId);
+            StatusText = $"Process {SelectedConnection.ProcessName} (PID {SelectedConnection.ProcessId}) terminated";
+
+            // Refresh the connections list
+            await LoadConnectionsAsync();
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Kill failed: {ex.Message}";
         }
     }
 }

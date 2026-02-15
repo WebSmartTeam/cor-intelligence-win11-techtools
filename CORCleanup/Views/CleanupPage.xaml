@@ -7,113 +7,270 @@
 
     <Grid Margin="12,8">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Action buttons -->
-        <Grid Grid.Row="0" Margin="0,0,0,16">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+        <TabControl Grid.Row="0"
+                    SelectedIndex="{Binding ViewModel.CleanupTabIndex}">
 
-            <ui:Button Grid.Column="0"
-                       Content="Scan"
-                       Appearance="Primary"
-                       Command="{Binding ViewModel.ScanCommand}"
-                       MinWidth="100"
-                       Margin="0,0,8,0" />
-            <ui:Button Grid.Column="1"
-                       Content="Clean Selected"
-                       Appearance="Success"
-                       Command="{Binding ViewModel.CleanCommand}"
-                       MinWidth="120"
-                       Margin="0,0,8,0" />
-            <ui:Button Grid.Column="2"
-                       Content="Stop"
-                       Appearance="Danger"
-                       Command="{Binding ViewModel.StopCleanCommand}"
-                       MinWidth="80"
-                       Margin="0,0,8,0" />
+            <!-- ============================================================ -->
+            <!--  TAB 1: System Cleanup (existing content)                    -->
+            <!-- ============================================================ -->
+            <TabItem Header="System Cleanup">
+                <Grid Margin="8,12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-            <ui:Button Grid.Column="4"
-                       Content="Select All"
-                       Command="{Binding ViewModel.SelectAllCommand}"
-                       MinWidth="80"
-                       Margin="0,0,4,0" />
-            <ui:Button Grid.Column="5"
-                       Content="Select None"
-                       Command="{Binding ViewModel.SelectNoneCommand}"
-                       MinWidth="80"
-                       Margin="0,0,4,0" />
-            <ui:Button Grid.Column="6"
-                       Content="Defaults"
-                       Command="{Binding ViewModel.SelectDefaultsCommand}"
-                       MinWidth="80" />
-        </Grid>
+                    <!-- Action buttons -->
+                    <Grid Grid.Row="0" Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
 
-        <!-- Summary card -->
-        <ui:Card Grid.Row="1" Margin="0,0,0,16" Padding="16"
-                 Visibility="{Binding ViewModel.HasScanned, Converter={StaticResource BoolToVis}}">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Total cleanable space: "
-                           VerticalAlignment="Center"
-                           Opacity="0.7" />
-                <TextBlock Text="{Binding ViewModel.TotalSizeText}"
-                           FontSize="18"
-                           FontWeight="SemiBold"
-                           VerticalAlignment="Center" />
-            </StackPanel>
-        </ui:Card>
+                        <ui:Button Grid.Column="0"
+                                   Content="Scan"
+                                   Appearance="Primary"
+                                   Command="{Binding ViewModel.ScanCommand}"
+                                   MinWidth="100"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Grid.Column="1"
+                                   Content="Clean Selected"
+                                   Appearance="Success"
+                                   Command="{Binding ViewModel.CleanCommand}"
+                                   MinWidth="120"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Grid.Column="2"
+                                   Content="Stop"
+                                   Appearance="Danger"
+                                   Command="{Binding ViewModel.StopCleanCommand}"
+                                   MinWidth="80"
+                                   Margin="0,0,8,0" />
 
-        <!-- Cleanup items list -->
-        <DataGrid Grid.Row="2"
-                  ItemsSource="{Binding ViewModel.CleanupItems}"
-                  IsReadOnly="False"
-                  SelectionMode="Single">
-            <DataGrid.Columns>
-                <DataGridCheckBoxColumn Header=""
-                                         Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
-                                         Width="40" />
-                <DataGridTextColumn Header="Category"
-                                    Binding="{Binding DisplayName}"
-                                    Width="200"
-                                    IsReadOnly="True" />
-                <DataGridTextColumn Header="Description"
-                                    Binding="{Binding Description}"
-                                    Width="*"
-                                    IsReadOnly="True" />
-                <DataGridTextColumn Header="Size"
-                                    Binding="{Binding SizeFormatted}"
-                                    Width="100"
-                                    IsReadOnly="True" />
-            </DataGrid.Columns>
-        </DataGrid>
+                        <ui:Button Grid.Column="4"
+                                   Content="Select All"
+                                   Command="{Binding ViewModel.SelectAllCommand}"
+                                   MinWidth="80"
+                                   Margin="0,0,4,0" />
+                        <ui:Button Grid.Column="5"
+                                   Content="Select None"
+                                   Command="{Binding ViewModel.SelectNoneCommand}"
+                                   MinWidth="80"
+                                   Margin="0,0,4,0" />
+                        <ui:Button Grid.Column="6"
+                                   Content="Defaults"
+                                   Command="{Binding ViewModel.SelectDefaultsCommand}"
+                                   MinWidth="80" />
+                    </Grid>
 
-        <!-- Results output -->
-        <TextBox Grid.Row="3"
-                 Text="{Binding ViewModel.ResultText, Mode=OneWay}"
-                 IsReadOnly="True"
-                 FontFamily="Consolas"
-                 FontSize="12"
-                 AcceptsReturn="True"
-                 TextWrapping="Wrap"
-                 VerticalScrollBarVisibility="Auto"
-                 MaxHeight="200"
-                 Margin="0,12,0,0"
-                 Visibility="{Binding ViewModel.ResultText, Converter={StaticResource StringToVis}}" />
+                    <!-- Summary card -->
+                    <ui:Card Grid.Row="1" Margin="0,0,0,16" Padding="16"
+                             Visibility="{Binding ViewModel.HasScanned, Converter={StaticResource BoolToVis}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Total cleanable space: "
+                                       VerticalAlignment="Center"
+                                       Opacity="0.7" />
+                            <TextBlock Text="{Binding ViewModel.TotalSizeText}"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </ui:Card>
 
-        <!-- Status bar -->
-        <TextBlock Grid.Row="4"
+                    <!-- Cleanup items list -->
+                    <DataGrid Grid.Row="2"
+                              ItemsSource="{Binding ViewModel.CleanupItems}"
+                              IsReadOnly="False"
+                              SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Header=""
+                                                     Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
+                                                     Width="40" />
+                            <DataGridTextColumn Header="Category"
+                                                Binding="{Binding DisplayName}"
+                                                Width="200"
+                                                IsReadOnly="True" />
+                            <DataGridTextColumn Header="Description"
+                                                Binding="{Binding Description}"
+                                                Width="*"
+                                                IsReadOnly="True" />
+                            <DataGridTextColumn Header="Size"
+                                                Binding="{Binding SizeFormatted}"
+                                                Width="100"
+                                                IsReadOnly="True" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Results output -->
+                    <TextBox Grid.Row="3"
+                             Text="{Binding ViewModel.ResultText, Mode=OneWay}"
+                             IsReadOnly="True"
+                             FontFamily="Consolas"
+                             FontSize="12"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             VerticalScrollBarVisibility="Auto"
+                             MaxHeight="200"
+                             Margin="0,12,0,0"
+                             Visibility="{Binding ViewModel.ResultText, Converter={StaticResource StringToVis}}" />
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================ -->
+            <!--  TAB 2: Browser Cleanup (new)                                -->
+            <!-- ============================================================ -->
+            <TabItem Header="Browser Cleanup">
+                <Grid Margin="8,12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Warning card -->
+                    <ui:Card Grid.Row="0" Margin="0,0,0,12" Padding="12">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE7BA;"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="16"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,8,0"
+                                       Foreground="Orange" />
+                            <TextBlock Text="Close browsers before cleaning for best results. Cache and session data can only be fully removed when the browser is not running."
+                                       TextWrapping="Wrap"
+                                       VerticalAlignment="Center"
+                                       Opacity="0.8" />
+                        </StackPanel>
+                    </ui:Card>
+
+                    <!-- Action buttons -->
+                    <Grid Grid.Row="1" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <ui:Button Grid.Column="0"
+                                   Content="Scan Browser Data"
+                                   Appearance="Primary"
+                                   Command="{Binding ViewModel.ScanBrowserDataCommand}"
+                                   MinWidth="140"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Grid.Column="1"
+                                   Content="Clean Selected"
+                                   Appearance="Success"
+                                   Command="{Binding ViewModel.CleanBrowserDataCommand}"
+                                   MinWidth="120"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Grid.Column="2"
+                                   Content="Stop"
+                                   Appearance="Danger"
+                                   Command="{Binding ViewModel.StopBrowserCleanCommand}"
+                                   MinWidth="80"
+                                   Margin="0,0,8,0" />
+
+                        <ui:Button Grid.Column="4"
+                                   Content="Select Safe"
+                                   Command="{Binding ViewModel.SelectAllSafeBrowserCommand}"
+                                   MinWidth="90"
+                                   Margin="0,0,4,0" />
+                        <ui:Button Grid.Column="5"
+                                   Content="Select All"
+                                   Command="{Binding ViewModel.SelectAllBrowserCommand}"
+                                   MinWidth="80"
+                                   Margin="0,0,4,0" />
+                        <ui:Button Grid.Column="6"
+                                   Content="Deselect All"
+                                   Command="{Binding ViewModel.DeselectAllBrowserCommand}"
+                                   MinWidth="90" />
+                    </Grid>
+
+                    <!-- Summary card -->
+                    <ui:Card Grid.Row="2" Margin="0,0,0,12" Padding="16"
+                             Visibility="{Binding ViewModel.HasBrowserScanned, Converter={StaticResource BoolToVis}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Safe to clean: "
+                                       VerticalAlignment="Center"
+                                       Opacity="0.7" />
+                            <TextBlock Text="{Binding ViewModel.BrowserTotalSize}"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </ui:Card>
+
+                    <!-- Browser cleanup items DataGrid -->
+                    <DataGrid Grid.Row="3"
+                              ItemsSource="{Binding ViewModel.BrowserCleanupItems}"
+                              IsReadOnly="False"
+                              SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Header=""
+                                                     Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
+                                                     Width="40" />
+                            <DataGridTextColumn Header="Browser"
+                                                Binding="{Binding BrowserName}"
+                                                Width="120"
+                                                IsReadOnly="True" />
+                            <DataGridTextColumn Header="Category"
+                                                Binding="{Binding Category}"
+                                                Width="*"
+                                                IsReadOnly="True" />
+                            <DataGridTextColumn Header="Size"
+                                                Binding="{Binding SizeFormatted}"
+                                                Width="100"
+                                                IsReadOnly="True" />
+                            <DataGridTextColumn Header="Safe"
+                                                Binding="{Binding IsSafe}"
+                                                Width="60"
+                                                IsReadOnly="True" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Results output -->
+                    <TextBox Grid.Row="4"
+                             Text="{Binding ViewModel.BrowserResultText, Mode=OneWay}"
+                             IsReadOnly="True"
+                             FontFamily="Consolas"
+                             FontSize="12"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             VerticalScrollBarVisibility="Auto"
+                             MaxHeight="200"
+                             Margin="0,12,0,0"
+                             Visibility="{Binding ViewModel.BrowserResultText, Converter={StaticResource StringToVis}}" />
+
+                    <!-- Browser status -->
+                    <TextBlock Grid.Row="5"
+                               Text="{Binding ViewModel.BrowserStatusText}"
+                               Opacity="0.6"
+                               FontSize="12"
+                               Margin="0,8,0,0" />
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+
+        <!-- Status bar (system cleanup — shown below tabs for tab 0) -->
+        <TextBlock Grid.Row="1"
                    Text="{Binding ViewModel.StatusText}"
                    Opacity="0.6"
                    FontSize="12"

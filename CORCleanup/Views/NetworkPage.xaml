@@ -672,7 +672,122 @@
             </TabItem>
 
             <!-- ============================================================ -->
-            <!-- TAB 7: Wi-Fi (Scanner / Signal Monitor / Saved Profiles) -->
+            <!-- TAB 7: Network Scanner (Advanced IP Scanner style)        -->
+            <!-- ============================================================ -->
+            <TabItem Header="Network Scanner">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Subnet input + Adapter dropdown + Start/Stop -->
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="220" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <ui:TextBox Grid.Column="0"
+                                    PlaceholderText="Subnet (e.g. 192.168.1.0/24)"
+                                    Text="{Binding ViewModel.ScanSubnet, UpdateSourceTrigger=PropertyChanged}"
+                                    Margin="0,0,8,0" />
+                        <ComboBox Grid.Column="1"
+                                  ItemsSource="{Binding ViewModel.ScanAdapters}"
+                                  DisplayMemberPath="Name"
+                                  Margin="0,0,8,0" />
+                        <ui:Button Grid.Column="2"
+                                   Content="Detect"
+                                   Command="{Binding ViewModel.LoadScanAdaptersCommand}"
+                                   Margin="0,0,4,0" MinWidth="70" />
+                        <ui:Button Grid.Column="3"
+                                   Content="Start Scan"
+                                   Appearance="Primary"
+                                   Command="{Binding ViewModel.StartScanCommand}"
+                                   Margin="0,0,4,0" MinWidth="90" />
+                        <ui:Button Grid.Column="4"
+                                   Content="Stop"
+                                   Appearance="Danger"
+                                   Command="{Binding ViewModel.StopScanCommand}"
+                                   MinWidth="70" />
+                    </Grid>
+
+                    <!-- Stats bar -->
+                    <ui:Card Grid.Row="1" Padding="12" Margin="0,0,0,8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                <TextBlock Text="Scanned" Opacity="0.6" HorizontalAlignment="Center" />
+                                <TextBlock Text="{Binding ViewModel.ScannedCount}"
+                                           FontSize="20" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                <TextBlock Text="Online" Opacity="0.6" HorizontalAlignment="Center" />
+                                <TextBlock Text="{Binding ViewModel.OnlineCount}"
+                                           FontSize="20" FontWeight="SemiBold" HorizontalAlignment="Center"
+                                           Foreground="#7DBF8E" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                <TextBlock Text="Status" Opacity="0.6" HorizontalAlignment="Center" />
+                                <TextBlock Text="{Binding ViewModel.ScanStatus}"
+                                           FontSize="12" HorizontalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis" MaxWidth="300" />
+                            </StackPanel>
+                        </Grid>
+                    </ui:Card>
+
+                    <!-- Filter + Copy IP -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,8">
+                        <CheckBox Content="Show online only"
+                                  IsChecked="{Binding ViewModel.ShowOnlineOnly}"
+                                  VerticalAlignment="Center" Margin="0,0,16,0" />
+                        <ui:Button Content="Copy IP"
+                                   Command="{Binding ViewModel.CopyDeviceIpCommand}"
+                                   MinWidth="80" />
+                    </StackPanel>
+
+                    <!-- Scanned devices table -->
+                    <DataGrid Grid.Row="3"
+                              ItemsSource="{Binding ViewModel.FilteredDevices}"
+                              SelectedItem="{Binding ViewModel.SelectedDevice, Mode=TwoWay}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Status" Binding="{Binding StatusDisplay}" Width="70" />
+                            <DataGridTextColumn Header="IP Address" Binding="{Binding IpAddress}" Width="130" />
+                            <DataGridTextColumn Header="Hostname" Binding="{Binding Hostname}" Width="180" />
+                            <DataGridTextColumn Header="MAC Address" Binding="{Binding MacAddress}" Width="150" />
+                            <DataGridTextColumn Header="Manufacturer" Binding="{Binding Manufacturer}" Width="*" />
+                            <DataGridTextColumn Header="Response" Binding="{Binding ResponseTimeDisplay}" Width="100" />
+                        </DataGrid.Columns>
+
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow"
+                                   BasedOn="{StaticResource {x:Type DataGridRow}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsOnline}" Value="True">
+                                        <Setter Property="Foreground" Value="#7DBF8E" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsOnline}" Value="False">
+                                        <Setter Property="Foreground" Value="#888888" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================ -->
+            <!-- TAB 8: Wi-Fi (Scanner / Signal Monitor / Saved Profiles) -->
             <!-- ============================================================ -->
             <TabItem Header="Wi-Fi">
                 <Grid Margin="16">
@@ -898,6 +1013,83 @@
                         </TabItem>
 
                     </TabControl>
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================ -->
+            <!-- TAB 9: Active Connections (TCPView style)                   -->
+            <!-- ============================================================ -->
+            <TabItem Header="Connections">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Controls: Load/Refresh + Filter + Kill Process -->
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <ui:Button Grid.Column="0"
+                                   Content="Load Connections"
+                                   Appearance="Primary"
+                                   Command="{Binding ViewModel.LoadConnectionsCommand}"
+                                   Margin="0,0,4,0" MinWidth="140" />
+                        <ui:Button Grid.Column="1"
+                                   Content="Refresh"
+                                   Command="{Binding ViewModel.RefreshConnectionsCommand}"
+                                   Margin="0,0,12,0" MinWidth="80" />
+                        <ui:TextBox Grid.Column="2"
+                                    PlaceholderText="Filter by process, address, port, state..."
+                                    Text="{Binding ViewModel.ConnectionFilter, UpdateSourceTrigger=PropertyChanged}"
+                                    Margin="0,0,12,0" />
+                        <ui:Button Grid.Column="3"
+                                   Content="Kill Process"
+                                   Appearance="Danger"
+                                   Command="{Binding ViewModel.KillConnectionProcessCommand}"
+                                   MinWidth="100" />
+                    </Grid>
+
+                    <!-- Active connections table -->
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding ViewModel.FilteredConnections}"
+                              SelectedItem="{Binding ViewModel.SelectedConnection, Mode=TwoWay}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Protocol" Binding="{Binding Protocol}" Width="70" />
+                            <DataGridTextColumn Header="Local Address" Binding="{Binding LocalAddress}" Width="140" />
+                            <DataGridTextColumn Header="Local Port" Binding="{Binding LocalPort}" Width="90" />
+                            <DataGridTextColumn Header="Remote Address" Binding="{Binding RemoteAddress}" Width="140" />
+                            <DataGridTextColumn Header="Remote Port" Binding="{Binding RemotePort}" Width="90" />
+                            <DataGridTextColumn Header="State" Binding="{Binding State}" Width="110" />
+                            <DataGridTextColumn Header="PID" Binding="{Binding ProcessId}" Width="60" />
+                            <DataGridTextColumn Header="Process" Binding="{Binding ProcessName}" Width="*" />
+                        </DataGrid.Columns>
+
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow"
+                                   BasedOn="{StaticResource {x:Type DataGridRow}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding State}" Value="Established">
+                                        <Setter Property="Foreground" Value="#7DBF8E" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding State}" Value="Listen">
+                                        <Setter Property="Foreground" Value="#6CA6D4" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding State}" Value="TimeWait">
+                                        <Setter Property="Foreground" Value="#D4A843" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding State}" Value="CloseWait">
+                                        <Setter Property="Foreground" Value="#D4A843" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </DataGrid>
                 </Grid>
             </TabItem>
 

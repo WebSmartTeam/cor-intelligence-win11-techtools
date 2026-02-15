@@ -9,6 +9,8 @@ namespace CORCleanup.ViewModels;
 public partial class HardwareViewModel : ObservableObject
 {
     private readonly ISystemInfoService _systemInfo;
+    private readonly IWifiService _wifiService;
+    private readonly IDriverService _driverService;
 
     [ObservableProperty] private string _pageTitle = "Hardware Information";
     [ObservableProperty] private bool _isLoading;
@@ -43,16 +45,21 @@ public partial class HardwareViewModel : ObservableObject
     [ObservableProperty] private string _productKey = "";
 
     // Wi-Fi Passwords
-    private readonly IWifiService _wifiService;
     public ObservableCollection<WifiProfile> WifiProfiles { get; } = new();
+
+    // Drivers
+    [ObservableProperty] private string _driverFilter = "";
+    public ObservableCollection<DriverInfo> Drivers { get; } = new();
+    public ObservableCollection<DriverInfo> FilteredDrivers { get; } = new();
 
     // Active sub-tab
     [ObservableProperty] private int _selectedTabIndex;
 
-    public HardwareViewModel(ISystemInfoService systemInfo, IWifiService wifiService)
+    public HardwareViewModel(ISystemInfoService systemInfo, IWifiService wifiService, IDriverService driverService)
     {
         _systemInfo = systemInfo;
         _wifiService = wifiService;
+        _driverService = driverService;
     }
 
     [RelayCommand]
@@ -220,6 +227,54 @@ public partial class HardwareViewModel : ObservableObject
         {
             IsLoading = false;
             StatusText = $"{WifiProfiles.Count} Wi-Fi profile(s) found";
+        }
+    }
+
+    [RelayCommand]
+    private async Task LoadDriversAsync()
+    {
+        IsLoading = true;
+        StatusText = "Enumerating device drivers...";
+
+        try
+        {
+            var drivers = await _driverService.GetAllDriversAsync();
+            Drivers.Clear();
+            FilteredDrivers.Clear();
+            foreach (var driver in drivers)
+            {
+                Drivers.Add(driver);
+                FilteredDrivers.Add(driver);
+            }
+            ApplyDriverFilter();
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+            StatusText = $"{Drivers.Count} driver(s) found";
+        }
+    }
+
+    partial void OnDriverFilterChanged(string value) => ApplyDriverFilter();
+
+    private void ApplyDriverFilter()
+    {
+        FilteredDrivers.Clear();
+        var filter = DriverFilter.Trim();
+
+        foreach (var driver in Drivers)
+        {
+            if (string.IsNullOrEmpty(filter)
+                || driver.DeviceName.Contains(filter, StringComparison.OrdinalIgnoreCase)
+                || driver.Manufacturer.Contains(filter, StringComparison.OrdinalIgnoreCase)
+                || driver.DeviceClass.Contains(filter, StringComparison.OrdinalIgnoreCase))
+            {
+                FilteredDrivers.Add(driver);
+            }
         }
     }
 

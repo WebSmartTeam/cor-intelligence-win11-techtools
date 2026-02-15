@@ -237,6 +237,43 @@
                 </StackPanel>
             </TabItem>
 
+            <!-- Drivers Tab -->
+            <TabItem Header="Drivers">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                        <ui:Button Content="Load Drivers"
+                                   Command="{Binding ViewModel.LoadDriversCommand}"
+                                   Appearance="Primary" Margin="0,0,12,0" />
+                        <ui:TextBox PlaceholderText="Filter by name, manufacturer, or class..."
+                                    Text="{Binding ViewModel.DriverFilter, UpdateSourceTrigger=PropertyChanged}"
+                                    MinWidth="300" />
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="1" Margin="0,0,0,8" Opacity="0.6" FontSize="12"
+                               Text="Sorted oldest-first — outdated drivers appear at the top." />
+
+                    <DataGrid Grid.Row="2"
+                              ItemsSource="{Binding ViewModel.FilteredDrivers}"
+                              IsReadOnly="True"
+                              AutoGenerateColumns="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Device Name" Binding="{Binding DeviceName}" Width="250" />
+                            <DataGridTextColumn Header="Class" Binding="{Binding DeviceClass}" Width="100" />
+                            <DataGridTextColumn Header="Manufacturer" Binding="{Binding Manufacturer}" Width="150" />
+                            <DataGridTextColumn Header="Version" Binding="{Binding DriverVersion}" Width="120" />
+                            <DataGridTextColumn Header="Date" Binding="{Binding DriverDateFormatted}" Width="100" />
+                            <DataGridTextColumn Header="Age" Binding="{Binding AgeSummary}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
             <!-- Wi-Fi Passwords Tab -->
             <TabItem Header="Wi-Fi Passwords">
                 <Grid Margin="16">

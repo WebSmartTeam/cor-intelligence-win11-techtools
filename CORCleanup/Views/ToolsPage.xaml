@@ -2,6 +2,7 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:local="clr-namespace:CORCleanup.ViewModels"
       Title="Tools"
       Background="{DynamicResource ApplicationBackgroundBrush}">
 
@@ -688,6 +689,396 @@
                         </DataGrid.RowStyle>
                     </DataGrid>
                 </Grid>
+            </TabItem>
+
+            <!-- ============================================================ -->
+            <!-- TAB 8: Disk Analyser -->
+            <!-- ============================================================ -->
+            <TabItem Header="Disk Analyser">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Path input and controls -->
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <ui:TextBox Grid.Column="0"
+                                    PlaceholderText="Folder path to analyse..."
+                                    Text="{Binding ViewModel.DiskAnalysePath, UpdateSourceTrigger=PropertyChanged}"
+                                    Margin="0,0,8,0" />
+                        <ui:Button Grid.Column="1"
+                                   Content="Browse"
+                                   Command="{Binding ViewModel.BrowseDiskFolderCommand}"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Grid.Column="2"
+                                   Content="Analyse"
+                                   Appearance="Primary"
+                                   Command="{Binding ViewModel.AnalyseDiskCommand}"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Grid.Column="3"
+                                   Content="Cancel"
+                                   Command="{Binding ViewModel.CancelDiskAnalysisCommand}"
+                                   Visibility="{Binding ViewModel.IsAnalysingDisk, Converter={StaticResource BoolToVis}}" />
+                    </Grid>
+
+                    <!-- Summary card -->
+                    <ui:Card Grid.Row="1" Padding="12" Margin="0,0,0,12"
+                             Visibility="{Binding ViewModel.CurrentFolderInfo, Converter={StaticResource NullToVis}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Total: " FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding ViewModel.CurrentFolderInfo.SizeFormatted}"
+                                       FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Margin="0,0,16,0" />
+                            <TextBlock Text="Files: " Opacity="0.6" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding ViewModel.CurrentFolderInfo.FileCount, StringFormat={}{0:N0}}"
+                                       VerticalAlignment="Center" Margin="0,0,16,0" />
+                            <TextBlock Text="Folders: " Opacity="0.6" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding ViewModel.CurrentFolderInfo.FolderCount, StringFormat={}{0:N0}}"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </ui:Card>
+
+                    <!-- Split view: folder breakdown + largest files -->
+                    <Grid Grid.Row="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="8" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <!-- Folder breakdown -->
+                        <DockPanel Grid.Row="0">
+                            <TextBlock DockPanel.Dock="Top" Text="Folder Breakdown"
+                                       FontWeight="SemiBold" Margin="0,0,0,6" />
+                            <DataGrid ItemsSource="{Binding ViewModel.FolderChildren}"
+                                      IsReadOnly="True"
+                                      AutoGenerateColumns="False">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Folder" Binding="{Binding Name}" Width="*" />
+                                    <DataGridTextColumn Header="Size" Binding="{Binding SizeFormatted}" Width="100">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="HorizontalAlignment" Value="Right" />
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Files" Binding="{Binding FileCount, StringFormat={}{0:N0}}" Width="80">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="HorizontalAlignment" Value="Right" />
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Folders" Binding="{Binding FolderCount, StringFormat={}{0:N0}}" Width="80">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="HorizontalAlignment" Value="Right" />
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="%" Binding="{Binding Percentage, StringFormat={}{0:F1}%}" Width="70">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="HorizontalAlignment" Value="Right" />
+                                                <Setter Property="FontFamily" Value="Consolas" />
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+
+                        <!-- Largest files -->
+                        <DockPanel Grid.Row="2">
+                            <TextBlock DockPanel.Dock="Top" Text="Largest Files (Top 50)"
+                                       FontWeight="SemiBold" Margin="0,0,0,6" />
+                            <DataGrid ItemsSource="{Binding ViewModel.LargestFiles}"
+                                      IsReadOnly="True"
+                                      AutoGenerateColumns="False">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
+                                    <DataGridTextColumn Header="Size" Binding="{Binding SizeFormatted}" Width="100">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="HorizontalAlignment" Value="Right" />
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Type" Binding="{Binding Extension}" Width="70" />
+                                    <DataGridTextColumn Header="Modified" Binding="{Binding LastModifiedFormatted}" Width="130" />
+                                    <DataGridTextColumn Header="Path" Binding="{Binding FullPath}" Width="300">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="FontFamily" Value="Consolas" />
+                                                <Setter Property="FontSize" Value="11" />
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================ -->
+            <!-- TAB 9: Duplicate Finder -->
+            <!-- ============================================================ -->
+            <TabItem Header="Duplicate Finder">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Path and controls -->
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <ui:TextBox Grid.Column="0"
+                                    PlaceholderText="Folder path to search..."
+                                    Text="{Binding ViewModel.DuplicateSearchPath, UpdateSourceTrigger=PropertyChanged}"
+                                    Margin="0,0,8,0" />
+                        <ui:Button Grid.Column="1"
+                                   Content="Browse"
+                                   Command="{Binding ViewModel.BrowseDuplicateFolderCommand}"
+                                   Margin="0,0,8,0" />
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
+                            <TextBlock Text="Min size (KB):" VerticalAlignment="Center" Margin="0,0,4,0" Opacity="0.7" />
+                            <ui:TextBox Text="{Binding ViewModel.DuplicateMinSizeKb, UpdateSourceTrigger=PropertyChanged}"
+                                        MinWidth="60" />
+                        </StackPanel>
+                        <ui:Button Grid.Column="3"
+                                   Content="Search"
+                                   Appearance="Primary"
+                                   Command="{Binding ViewModel.SearchDuplicatesCommand}"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Grid.Column="4"
+                                   Content="Stop"
+                                   Command="{Binding ViewModel.StopDuplicateSearchCommand}"
+                                   Visibility="{Binding ViewModel.IsSearchingDuplicates, Converter={StaticResource BoolToVis}}"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Grid.Column="5"
+                                   Content="Delete Selected"
+                                   Appearance="Danger"
+                                   Command="{Binding ViewModel.DeleteSelectedDuplicatesCommand}" />
+                    </Grid>
+
+                    <!-- Summary bar -->
+                    <ui:Card Grid.Row="1" Padding="10" Margin="0,0,0,12"
+                             Visibility="{Binding ViewModel.DuplicateTotalWasted, Converter={StaticResource StringToVis}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Duplicate groups: " Opacity="0.6" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding ViewModel.DuplicateGroupCount}"
+                                       FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,16,0" />
+                            <TextBlock Text="Wasted space: " Opacity="0.6" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding ViewModel.DuplicateTotalWasted}"
+                                       FontWeight="Bold" FontSize="14" Foreground="#FF9800" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </ui:Card>
+
+                    <!-- Duplicate groups list -->
+                    <DataGrid Grid.Row="2"
+                              ItemsSource="{Binding ViewModel.DuplicateGroups}"
+                              SelectedItem="{Binding ViewModel.SelectedDuplicateGroup}"
+                              SelectionMode="Single"
+                              IsReadOnly="True"
+                              AutoGenerateColumns="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Hash (SHA-256)" Binding="{Binding Hash}" Width="180">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontFamily" Value="Consolas" />
+                                        <Setter Property="FontSize" Value="11" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="File Size" Binding="{Binding FileSizeFormatted}" Width="100">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Copies" Binding="{Binding Count}" Width="65">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Wasted" Binding="{Binding WastedFormatted}" Width="100">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                        <Setter Property="Foreground" Value="#FF9800" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Files in selected group -->
+                    <TextBlock Grid.Row="3" Text="Files in Selected Group"
+                               FontWeight="SemiBold" Margin="0,12,0,6"
+                               Visibility="{Binding ViewModel.SelectedDuplicateGroup, Converter={StaticResource NullToVis}}" />
+
+                    <DataGrid Grid.Row="4"
+                              ItemsSource="{Binding ViewModel.SelectedDuplicateGroup.Files}"
+                              Visibility="{Binding ViewModel.SelectedDuplicateGroup, Converter={StaticResource NullToVis}}"
+                              AutoGenerateColumns="False"
+                              MaxHeight="200">
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Header="Select" Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" Width="55" />
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Size" Binding="{Binding SizeFormatted}" Width="90" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Modified" Binding="{Binding LastModifiedFormatted}" Width="130" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Directory" Binding="{Binding Directory}" Width="300" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontFamily" Value="Consolas" />
+                                        <Setter Property="FontSize" Value="11" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================ -->
+            <!-- TAB 10: File Shredder -->
+            <!-- ============================================================ -->
+            <TabItem Header="File Shredder">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
+                    <StackPanel Margin="16">
+
+                        <TextBlock Text="Securely overwrite and permanently delete files — data cannot be recovered"
+                                   Opacity="0.7" Margin="0,0,0,16" />
+
+                        <!-- Shred method selection -->
+                        <Grid Margin="0,0,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="250" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="Shred Method:"
+                                       FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,12,0" />
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{x:Static local:ToolsViewModel.ShredMethods}"
+                                      SelectedIndex="{Binding ViewModel.ShredMethodIndex}" />
+                        </Grid>
+
+                        <!-- File list section -->
+                        <ui:Card Padding="16" Margin="0,0,0,16">
+                            <DockPanel>
+                                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,12">
+                                    <TextBlock Text="Files to Shred" FontWeight="SemiBold"
+                                               VerticalAlignment="Center" Margin="0,0,16,0" />
+                                    <ui:Button Content="Add Files"
+                                               Command="{Binding ViewModel.AddShredFilesCommand}"
+                                               Margin="0,0,8,0" />
+                                    <ui:Button Content="Clear All"
+                                               Command="{Binding ViewModel.ClearShredFilesCommand}" />
+                                </StackPanel>
+
+                                <ListBox ItemsSource="{Binding ViewModel.ShredFiles}"
+                                         MinHeight="100" MaxHeight="200">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="{Binding}"
+                                                           FontFamily="Consolas" FontSize="11"
+                                                           VerticalAlignment="Center"
+                                                           TextTrimming="CharacterEllipsis" />
+                                                <ui:Button Grid.Column="1" Content="Remove"
+                                                           Command="{Binding DataContext.ViewModel.RemoveShredFileCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                           CommandParameter="{Binding}"
+                                                           Margin="8,0,0,0" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </DockPanel>
+                        </ui:Card>
+
+                        <!-- Shred action + progress -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <ui:Button Content="SHRED FILES"
+                                       Appearance="Danger"
+                                       Command="{Binding ViewModel.ShredFilesExecuteCommand}"
+                                       MinWidth="160" FontWeight="Bold"
+                                       Margin="0,0,12,0" />
+                            <ui:Button Content="Stop"
+                                       Command="{Binding ViewModel.StopShredCommand}"
+                                       Visibility="{Binding ViewModel.IsShredding, Converter={StaticResource BoolToVis}}" />
+                        </StackPanel>
+
+                        <ProgressBar Value="{Binding ViewModel.ShredProgress}"
+                                     Maximum="100" Height="8" Margin="0,0,0,24"
+                                     Visibility="{Binding ViewModel.IsShredding, Converter={StaticResource BoolToVis}}" />
+
+                        <!-- Free space wipe section -->
+                        <Separator Margin="0,0,0,16" />
+
+                        <TextBlock Text="Free Space Wipe" FontWeight="Bold" FontSize="16" Margin="0,0,0,8" />
+                        <TextBlock Text="Overwrite all free space on a drive to prevent data recovery from previously deleted files"
+                                   Opacity="0.7" Margin="0,0,0,16" TextWrapping="Wrap" />
+
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="60" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="Drive:"
+                                       FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <ui:TextBox Grid.Column="1"
+                                        Text="{Binding ViewModel.WipeDriveLetter, UpdateSourceTrigger=PropertyChanged}"
+                                        Margin="0,0,12,0" />
+                            <ui:Button Grid.Column="2"
+                                       Content="WIPE FREE SPACE"
+                                       Appearance="Danger"
+                                       Command="{Binding ViewModel.WipeFreeSpaceCommand}"
+                                       FontWeight="Bold" />
+                        </Grid>
+
+                        <TextBlock Text="Warning: This operation can take hours on large drives. The drive will temporarily have almost zero free space."
+                                   Opacity="0.5" FontSize="11" FontStyle="Italic" Margin="0,4,0,0" TextWrapping="Wrap" />
+
+                    </StackPanel>
+                </ScrollViewer>
             </TabItem>
 
         </TabControl>

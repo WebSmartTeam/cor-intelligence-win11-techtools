@@ -512,6 +512,230 @@
                     </ui:Card>
                 </Grid>
             </TabItem>
+
+            <!-- ============================================================ -->
+            <!-- TAB 8: Firewall Rules -->
+            <!-- ============================================================ -->
+            <TabItem Header="Firewall">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Toolbar -->
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <ui:Button Grid.Column="0"
+                                   Content="Load Firewall Rules"
+                                   Command="{Binding ViewModel.LoadFirewallRulesCommand}"
+                                   Appearance="Primary"
+                                   MinWidth="160"
+                                   Margin="0,0,12,0" />
+
+                        <ui:TextBox Grid.Column="1"
+                                    PlaceholderText="Filter by name, program, or port..."
+                                    Text="{Binding ViewModel.FirewallFilter, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock Grid.Column="2"
+                                   Text="Direction:"
+                                   VerticalAlignment="Center"
+                                   Margin="12,0,6,0" />
+
+                        <ComboBox Grid.Column="3"
+                                  ItemsSource="{Binding ViewModel.FirewallDirectionOptions}"
+                                  SelectedItem="{Binding ViewModel.FirewallDirectionFilter}"
+                                  Width="90" />
+                    </Grid>
+
+                    <!-- Rules grid -->
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding ViewModel.FilteredFirewallRules}"
+                              SelectedItem="{Binding ViewModel.SelectedFirewallRule}"
+                              SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Status" Binding="{Binding StatusDisplay}" Width="70" />
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="220" />
+                            <DataGridTextColumn Header="Direction" Binding="{Binding Direction}" Width="70" />
+                            <DataGridTextColumn Header="Action" Binding="{Binding ActionDisplay}" Width="65" />
+                            <DataGridTextColumn Header="Protocol" Binding="{Binding Protocol}" Width="70" />
+                            <DataGridTextColumn Header="Local Port" Binding="{Binding LocalPort}" Width="90" />
+                            <DataGridTextColumn Header="Program" Binding="{Binding Program}" Width="200" />
+                            <DataGridTextColumn Header="Profile" Binding="{Binding Profile}" Width="*" />
+                        </DataGrid.Columns>
+
+                        <!-- Dim disabled rules -->
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow"
+                                   BasedOn="{StaticResource {x:Type DataGridRow}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding StatusDisplay}" Value="Disabled">
+                                        <Setter Property="Opacity" Value="0.5" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </DataGrid>
+
+                    <!-- Bottom bar -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,12,0,0">
+                        <ui:Button Content="Toggle Selected Rule"
+                                   Command="{Binding ViewModel.ToggleFirewallRuleCommand}"
+                                   MinWidth="160"
+                                   Margin="0,0,12,0"
+                                   ToolTip="Enable or disable the selected firewall rule" />
+                        <TextBlock VerticalAlignment="Center" Opacity="0.5" FontSize="11">
+                            <Run Text="Showing " />
+                            <Run Text="{Binding ViewModel.FilteredFirewallRules.Count, Mode=OneWay}" />
+                            <Run Text=" of " />
+                            <Run Text="{Binding ViewModel.FirewallRules.Count, Mode=OneWay}" />
+                            <Run Text=" rule(s)" />
+                        </TextBlock>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================ -->
+            <!-- TAB 9: Environment Variables -->
+            <!-- ============================================================ -->
+            <TabItem Header="Env Vars">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Toolbar -->
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <ui:Button Grid.Column="0"
+                                   Content="Load Variables"
+                                   Command="{Binding ViewModel.LoadEnvVariablesCommand}"
+                                   Appearance="Primary"
+                                   MinWidth="130"
+                                   Margin="0,0,12,0" />
+
+                        <ui:TextBox Grid.Column="1"
+                                    PlaceholderText="Filter by name or value..."
+                                    Text="{Binding ViewModel.EnvVarFilter, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock Grid.Column="2"
+                                   Text="Scope:"
+                                   VerticalAlignment="Center"
+                                   Margin="12,0,6,0" />
+
+                        <ComboBox Grid.Column="3"
+                                  ItemsSource="{Binding ViewModel.EnvVarScopes}"
+                                  SelectedItem="{Binding ViewModel.EnvVarScopeFilter}"
+                                  Width="100"
+                                  Margin="0,0,8,0" />
+
+                        <ui:Button Grid.Column="4"
+                                   Content="Delete"
+                                   Appearance="Danger"
+                                   Command="{Binding ViewModel.DeleteEnvVariableCommand}"
+                                   MinWidth="70" />
+                    </Grid>
+
+                    <!-- Add new variable -->
+                    <ui:Card Grid.Row="1" Padding="12" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <ui:TextBox Grid.Column="0"
+                                        PlaceholderText="Variable name"
+                                        Text="{Binding ViewModel.NewEnvVarName, UpdateSourceTrigger=PropertyChanged}"
+                                        FontFamily="Consolas"
+                                        Margin="0,0,8,0" />
+                            <ui:TextBox Grid.Column="1"
+                                        PlaceholderText="Value"
+                                        Text="{Binding ViewModel.NewEnvVarValue, UpdateSourceTrigger=PropertyChanged}"
+                                        Margin="0,0,8,0" />
+                            <ComboBox Grid.Column="2"
+                                      ItemsSource="{Binding ViewModel.EnvVarEditScopes}"
+                                      SelectedItem="{Binding ViewModel.NewEnvVarScope}"
+                                      Margin="0,0,8,0" />
+                            <ui:Button Grid.Column="3"
+                                       Content="Add / Set"
+                                       Appearance="Primary"
+                                       Command="{Binding ViewModel.AddEnvVariableCommand}"
+                                       MinWidth="90" />
+                        </Grid>
+                    </ui:Card>
+
+                    <!-- Variables grid -->
+                    <DataGrid Grid.Row="2"
+                              ItemsSource="{Binding ViewModel.FilteredEnvVariables}"
+                              SelectedItem="{Binding ViewModel.SelectedEnvVar}"
+                              SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="220">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontFamily" Value="Consolas" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontFamily" Value="Consolas" />
+                                        <Setter Property="FontSize" Value="11" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Scope" Binding="{Binding Scope}" Width="80" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- PATH entries section -->
+                    <ui:Card Grid.Row="3" Padding="12" Margin="0,12,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
+                                <TextBlock Text="PATH Entries"
+                                           FontWeight="SemiBold"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,12,0" />
+                                <ui:Button Content="Load PATH"
+                                           Command="{Binding ViewModel.LoadPathEntriesCommand}"
+                                           MinWidth="100" />
+                            </StackPanel>
+
+                            <ListBox Grid.Row="1"
+                                     ItemsSource="{Binding ViewModel.PathEntries}"
+                                     MaxHeight="180"
+                                     FontFamily="Consolas"
+                                     FontSize="11" />
+                        </Grid>
+                    </ui:Card>
+                </Grid>
+            </TabItem>
         </TabControl>
 
         <!-- Status bar -->
