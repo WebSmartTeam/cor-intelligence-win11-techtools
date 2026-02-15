@@ -73,6 +73,20 @@ public partial class App : Application
             services.AddSingleton<Core.Interfaces.IDebloatService, Core.Services.Admin.DebloatService>();
             services.AddSingleton<Core.Interfaces.IAutoToolService, Core.Services.Tools.AutoToolService>();
 
+            // New services — v1.0.8 feature completion
+            services.AddSingleton<Core.Interfaces.INetworkScannerService, Core.Services.Network.NetworkScannerService>();
+            services.AddSingleton<Core.Interfaces.IConnectionMonitorService, Core.Services.Network.ConnectionMonitorService>();
+            services.AddSingleton<Core.Interfaces.ISmartService, Core.Services.Hardware.SmartService>();
+            services.AddSingleton<Core.Interfaces.IBatteryService, Core.Services.Hardware.BatteryService>();
+            services.AddSingleton<Core.Interfaces.IProductKeyService, Core.Services.Hardware.ProductKeyService>();
+            services.AddSingleton<Core.Interfaces.IDriverService, Core.Services.Hardware.DriverService>();
+            services.AddSingleton<Core.Interfaces.IDiskAnalyserService, Core.Services.Tools.DiskAnalyserService>();
+            services.AddSingleton<Core.Interfaces.IDuplicateFinderService, Core.Services.Tools.DuplicateFinderService>();
+            services.AddSingleton<Core.Interfaces.IFileShredderService, Core.Services.Tools.FileShredderService>();
+            services.AddSingleton<Core.Interfaces.IFirewallService, Core.Services.Admin.FirewallService>();
+            services.AddSingleton<Core.Interfaces.IEnvironmentService, Core.Services.Admin.EnvironmentService>();
+            services.AddSingleton<Core.Interfaces.IBrowserCleanupService, Core.Services.Cleanup.BrowserCleanupService>();
+
             // Auto Tool page
             services.AddTransient<AutoToolViewModel>();
             services.AddTransient<AutoToolPage>();
