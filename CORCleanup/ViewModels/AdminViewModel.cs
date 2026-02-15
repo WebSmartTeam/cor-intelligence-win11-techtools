@@ -48,7 +48,7 @@ public partial class AdminViewModel : ObservableObject
     // ================================================================
 
     [ObservableProperty] private double _eventLogDays = 7;
-    public ObservableCollection<EventLogEntry> EventLogEntries { get; } = new();
+    public ObservableCollection<Core.Models.EventLogEntry> EventLogEntries { get; } = new();
 
     // ================================================================
     // System Repair
