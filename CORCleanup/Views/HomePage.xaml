@@ -37,7 +37,8 @@
             </DockPanel>
 
             <!-- ============================================================ -->
-            <!-- Row 0: System Identity — 4 metric tiles                      -->
+            <!-- Row 0: System Identity — 4 tiles                             -->
+            <!--   PC Name | CPU | Network | GPU                              -->
             <!-- ============================================================ -->
             <Grid Margin="0,0,0,8">
                 <Grid.ColumnDefinitions>
@@ -95,7 +96,7 @@
                     </DockPanel>
                 </Border>
 
-                <!-- RAM -->
+                <!-- Network (moved from middle section to top bar) -->
                 <Border Grid.Column="2" Margin="4,0,4,0" Padding="12,8"
                         CornerRadius="6"
                         Background="{DynamicResource ControlFillColorDefaultBrush}">
@@ -103,16 +104,18 @@
                         <Border DockPanel.Dock="Left"
                                 Width="32" Height="32" CornerRadius="8"
                                 Margin="0,0,8,0"
-                                Background="#1A10B981">
-                            <ui:SymbolIcon Symbol="SlideSize24" FontSize="14"
+                                Background="#1A06B6D4">
+                            <ui:SymbolIcon Symbol="Globe24" FontSize="14"
                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                          Foreground="#10B981" />
+                                          Foreground="#06B6D4" />
                         </Border>
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="{Binding ViewModel.RamDisplay, FallbackValue='RAM'}"
-                                       FontSize="12" FontWeight="SemiBold" />
-                            <TextBlock Text="{Binding ViewModel.RamSlots, FallbackValue='...'}"
-                                       FontSize="10" Opacity="0.5" />
+                            <TextBlock Text="{Binding ViewModel.LocalIpAddress, FallbackValue='Network'}"
+                                       FontSize="12" FontWeight="SemiBold"
+                                       TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding ViewModel.WanIpAddress, FallbackValue='...'}"
+                                       FontSize="10" Opacity="0.5"
+                                       TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                     </DockPanel>
                 </Border>
@@ -142,9 +145,9 @@
             </Grid>
 
             <!-- ============================================================ -->
-            <!-- Row 1-3: Two-column layout                                   -->
+            <!-- Row 1: Two-column layout                                     -->
             <!--   LEFT  (~55%): Storage + Disk Health                        -->
-            <!--   RIGHT (~45%): Network + Memory                             -->
+            <!--   RIGHT (~45%): RAM Info + Memory Gauge                      -->
             <!-- ============================================================ -->
             <Grid Margin="0,0,0,8">
                 <Grid.ColumnDefinitions>
@@ -243,56 +246,36 @@
 
                 </StackPanel>
 
-                <!-- ======== RIGHT COLUMN: Network + Memory ======== -->
+                <!-- ======== RIGHT COLUMN: RAM Info + Memory Gauge ======== -->
                 <StackPanel Grid.Column="1" Margin="4,0,0,0">
 
-                    <!-- Network Panel -->
+                    <!-- RAM Info (slots, type, speed) -->
                     <Border Padding="12,10" CornerRadius="6" Margin="0,0,0,6"
                             Background="{DynamicResource ControlFillColorDefaultBrush}">
-                        <StackPanel>
-                            <TextBlock Text="NETWORK" FontSize="9" FontWeight="SemiBold"
-                                       Opacity="0.35" Margin="0,0,0,6" />
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Local IP"
-                                           FontSize="10" Opacity="0.5" Margin="0,0,10,4"
-                                           VerticalAlignment="Center" />
-                                <TextBlock Grid.Row="0" Grid.Column="1"
-                                           Text="{Binding ViewModel.LocalIpAddress}"
-                                           FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"
-                                           Foreground="#06B6D4" VerticalAlignment="Center" />
-
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="WAN IP"
-                                           FontSize="10" Opacity="0.5" Margin="0,0,10,4"
-                                           VerticalAlignment="Center" />
-                                <TextBlock Grid.Row="1" Grid.Column="1"
-                                           Text="{Binding ViewModel.WanIpAddress}"
-                                           FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"
-                                           Foreground="#06B6D4" VerticalAlignment="Center" />
-
-                                <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
-                                           Text="{Binding ViewModel.NetworkAdapter}"
-                                           FontSize="10" Opacity="0.4" Margin="0,2,0,0"
-                                           TextWrapping="Wrap" />
-                            </Grid>
-                        </StackPanel>
+                        <DockPanel>
+                            <Border DockPanel.Dock="Left"
+                                    Width="32" Height="32" CornerRadius="8"
+                                    Margin="0,0,8,0"
+                                    Background="#1A10B981">
+                                <ui:SymbolIcon Symbol="SlideSize24" FontSize="14"
+                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              Foreground="#10B981" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{Binding ViewModel.RamDisplay, FallbackValue='RAM'}"
+                                           FontSize="12" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding ViewModel.RamSlots, FallbackValue='...'}"
+                                           FontSize="10" Opacity="0.5" />
+                            </StackPanel>
+                        </DockPanel>
                     </Border>
 
-                    <!-- Memory Gauge -->
+                    <!-- Memory Gauge (usage bar) -->
                     <Border Padding="12,10" CornerRadius="6"
                             Background="{DynamicResource ControlFillColorDefaultBrush}">
                         <StackPanel>
                             <DockPanel Margin="0,0,0,6">
-                                <TextBlock Text="MEMORY" FontSize="9" FontWeight="SemiBold"
+                                <TextBlock Text="MEMORY USAGE" FontSize="9" FontWeight="SemiBold"
                                            Opacity="0.35" DockPanel.Dock="Left"
                                            VerticalAlignment="Center" />
                                 <TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right"
@@ -318,7 +301,7 @@
             </Grid>
 
             <!-- ============================================================ -->
-            <!-- Row 4: Top 5 CPU + Top 5 Memory — side by side               -->
+            <!-- Row 2: Top 5 CPU + Top 5 Memory — side by side              -->
             <!-- ============================================================ -->
             <Grid Margin="0,0,0,8">
                 <Grid.ColumnDefinitions>
@@ -390,7 +373,8 @@
             </Grid>
 
             <!-- ============================================================ -->
-            <!-- Row 5: Recent Errors + Outdated Drivers — side by side        -->
+            <!-- Row 3: Recent Errors + Outdated Drivers — side by side       -->
+            <!--   Drivers list constrained with MaxHeight + scroll           -->
             <!-- ============================================================ -->
             <Grid Margin="0,0,0,8">
                 <Grid.ColumnDefinitions>
@@ -448,35 +432,38 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Outdated Drivers -->
+                <!-- Outdated Drivers — scrollable with MaxHeight -->
                 <Border Grid.Column="1" Margin="4,0,0,0" Padding="12,10"
                         CornerRadius="6"
                         Background="{DynamicResource ControlFillColorDefaultBrush}">
                     <StackPanel>
                         <TextBlock Text="OUTDATED DRIVERS (&gt;3 YEARS)" FontSize="9" FontWeight="SemiBold"
                                    Opacity="0.35" Margin="0,0,0,6" />
-                        <ItemsControl ItemsSource="{Binding ViewModel.OutdatedDrivers}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Margin="0,2">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <Ellipse Grid.Column="0" Width="6" Height="6"
-                                                 Fill="#F59E0B" Margin="0,0,6,0"
-                                                 VerticalAlignment="Center" />
-                                        <TextBlock Grid.Column="1" Text="{Binding DeviceName}"
-                                                   FontSize="10.5" TextTrimming="CharacterEllipsis"
-                                                   VerticalAlignment="Center" />
-                                        <TextBlock Grid.Column="2" Text="{Binding AgeSummary}"
-                                                   FontSize="9.5" Opacity="0.5"
-                                                   Margin="8,0,0,0" VerticalAlignment="Center" />
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <ScrollViewer MaxHeight="160" VerticalScrollBarVisibility="Auto"
+                                      CanContentScroll="False">
+                            <ItemsControl ItemsSource="{Binding ViewModel.OutdatedDrivers}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <Ellipse Grid.Column="0" Width="6" Height="6"
+                                                     Fill="#F59E0B" Margin="0,0,6,0"
+                                                     VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="1" Text="{Binding DeviceName}"
+                                                       FontSize="10.5" TextTrimming="CharacterEllipsis"
+                                                       VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="2" Text="{Binding AgeSummary}"
+                                                       FontSize="9.5" Opacity="0.5"
+                                                       Margin="8,0,0,0" VerticalAlignment="Center" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
                         <!-- Empty state -->
                         <TextBlock Text="All drivers are up to date"
                                    FontSize="10.5" Opacity="0.3" FontStyle="Italic">
@@ -496,7 +483,7 @@
             </Grid>
 
             <!-- ============================================================ -->
-            <!-- Row 6: Quick Actions — feature shortcuts                     -->
+            <!-- Row 4: Quick Actions — feature shortcuts                     -->
             <!-- ============================================================ -->
             <TextBlock Text="QUICK ACTIONS" FontSize="9" FontWeight="SemiBold"
                        Opacity="0.35" Margin="0,4,0,4" />
