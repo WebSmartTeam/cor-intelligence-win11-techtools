@@ -6,4 +6,7 @@ public interface IUninstallService
 {
     Task<List<InstalledProgram>> GetInstalledProgramsAsync();
     Task<bool> UninstallAsync(InstalledProgram program);
+    Task<bool> QuietUninstallAsync(InstalledProgram program);
+    Task<List<UninstallLeftover>> ScanLeftoversAsync(InstalledProgram program);
+    Task<int> RemoveLeftoversAsync(IEnumerable<UninstallLeftover> leftovers);
 }

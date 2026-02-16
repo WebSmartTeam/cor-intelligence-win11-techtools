@@ -11,6 +11,8 @@ public sealed class InstalledProgram
     public string? InstallLocation { get; init; }
     public string? RegistryKeyPath { get; init; }
     public bool IsWindowsApp { get; init; }
+    public string? QuietUninstallString { get; init; }
+    public InstallSource Source { get; init; }
 
     public string SizeFormatted =>
         EstimatedSizeBytes.HasValue
@@ -19,4 +21,12 @@ public sealed class InstalledProgram
 
     public string InstallDateFormatted =>
         InstallDate?.ToString("dd/MM/yyyy") ?? "Unknown";
+
+    public string SourceLabel => Source switch
+    {
+        InstallSource.Msi => "MSI",
+        InstallSource.Exe => "EXE",
+        InstallSource.StoreApp => "Store",
+        _ => "\u2014"
+    };
 }

@@ -129,7 +129,7 @@
                                Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                 </StackPanel>
                 <TextBlock DockPanel.Dock="Right"
-                           Text="v1.0.18"
+                           Text="v1.0.19"
                            FontSize="10.5"
                            Opacity="0.4"
                            VerticalAlignment="Center"
