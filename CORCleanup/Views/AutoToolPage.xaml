@@ -540,7 +540,7 @@
                                    Command="{Binding ViewModel.CancelCommand}" />
                     </DockPanel>
 
-                    <ProgressBar Value="{Binding ViewModel.ProgressPercent}"
+                    <ProgressBar Value="{Binding ViewModel.ProgressPercent, Mode=OneWay}"
                                  Height="4"
                                  Margin="0,0,0,4" />
 

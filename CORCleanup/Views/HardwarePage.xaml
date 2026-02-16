@@ -287,7 +287,7 @@
                                                         <Run Text=" " />
                                                         <Run Text="{Binding FileSystem, Mode=OneWay}" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" />
                                                     </TextBlock>
-                                                    <ProgressBar Grid.Column="1" Value="{Binding UsedPercent}" Maximum="100" Height="8"
+                                                    <ProgressBar Grid.Column="1" Value="{Binding UsedPercent, Mode=OneWay}" Maximum="100" Height="8"
                                                                  Margin="0,4,8,0" />
                                                     <TextBlock Grid.Column="2" FontSize="12" Opacity="0.7" VerticalAlignment="Center">
                                                         <Run Text="{Binding FreeFormatted, Mode=OneWay}" />
@@ -503,7 +503,8 @@
                     </ui:Card>
 
                     <DataGrid Grid.Row="3"
-                              ItemsSource="{Binding ViewModel.RamDimms}">
+                              ItemsSource="{Binding ViewModel.RamDimms}"
+                              IsReadOnly="True">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Slot" Binding="{Binding SlotLabel}" Width="80" />
                             <DataGridTextColumn Header="Capacity" Binding="{Binding CapacityFormatted}" Width="80" />
@@ -553,7 +554,7 @@
                                 <TextBlock Grid.Row="1" Grid.Column="0" Text="Current Charge"
                                            FontWeight="SemiBold" Margin="0,0,0,8" />
                                 <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,8">
-                                    <ProgressBar Value="{Binding ViewModel.BatteryPercent}"
+                                    <ProgressBar Value="{Binding ViewModel.BatteryPercent, Mode=OneWay}"
                                                  Maximum="100" Height="12" />
                                     <TextBlock Text="{Binding ViewModel.BatteryPercent, StringFormat={}{0}%}"
                                                HorizontalAlignment="Right" FontSize="11" Opacity="0.7" />
@@ -633,7 +634,8 @@
                                Appearance="Primary" Margin="0,0,0,12" />
 
                     <DataGrid Grid.Row="1"
-                              ItemsSource="{Binding ViewModel.WifiProfiles}">
+                              ItemsSource="{Binding ViewModel.WifiProfiles}"
+                              IsReadOnly="True">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Network Name (SSID)"
                                                 Binding="{Binding Ssid}" Width="200" />
@@ -903,7 +905,7 @@
                             <StackPanel>
                                 <TextBlock Text="Physical RAM" FontWeight="SemiBold"
                                            Opacity="0.7" Margin="0,0,0,8" />
-                                <ProgressBar Value="{Binding ViewModel.CurrentMemoryInfo.UsedPhysicalPercent}"
+                                <ProgressBar Value="{Binding ViewModel.CurrentMemoryInfo.UsedPhysicalPercent, Mode=OneWay}"
                                              Maximum="100" Height="8" Margin="0,0,0,8" />
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -934,7 +936,7 @@
                             <StackPanel>
                                 <TextBlock Text="Page File" FontWeight="SemiBold"
                                            Opacity="0.7" Margin="0,0,0,8" />
-                                <ProgressBar Value="{Binding ViewModel.CurrentMemoryInfo.UsedPageFilePercent}"
+                                <ProgressBar Value="{Binding ViewModel.CurrentMemoryInfo.UsedPageFilePercent, Mode=OneWay}"
                                              Maximum="100" Height="8" Margin="0,0,0,8" />
                                 <Grid>
                                     <Grid.ColumnDefinitions>
