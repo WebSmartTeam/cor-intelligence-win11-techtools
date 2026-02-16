@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CORCleanup.Core;
 using CORCleanup.Core.Interfaces;
 using CORCleanup.Core.Models;
 
@@ -14,6 +15,7 @@ public partial class HardwareViewModel : ObservableObject
     private readonly ISoftwareInventoryService _softwareInventoryService;
     private readonly IProcessExplorerService _processExplorerService;
     private readonly IMemoryExplorerService _memoryExplorerService;
+    private readonly INetworkInfoService _networkInfo;
 
     [ObservableProperty] private string _pageTitle = "System Info";
     [ObservableProperty] private bool _isLoading;
@@ -71,6 +73,10 @@ public partial class HardwareViewModel : ObservableObject
     [ObservableProperty] private MemoryInfo? _currentMemoryInfo;
     public ObservableCollection<MemoryConsumer> MemoryConsumers { get; } = new();
 
+    // COR Spec
+    [ObservableProperty] private CorSpecReport? _corSpecReport;
+    [ObservableProperty] private bool _isLoadingCorSpec;
+
     // Active sub-tab
     [ObservableProperty] private int _selectedTabIndex;
 
@@ -80,7 +86,8 @@ public partial class HardwareViewModel : ObservableObject
         IDriverService driverService,
         ISoftwareInventoryService softwareInventoryService,
         IProcessExplorerService processExplorerService,
-        IMemoryExplorerService memoryExplorerService)
+        IMemoryExplorerService memoryExplorerService,
+        INetworkInfoService networkInfo)
     {
         _systemInfo = systemInfo;
         _wifiService = wifiService;
@@ -88,6 +95,7 @@ public partial class HardwareViewModel : ObservableObject
         _softwareInventoryService = softwareInventoryService;
         _processExplorerService = processExplorerService;
         _memoryExplorerService = memoryExplorerService;
+        _networkInfo = networkInfo;
     }
 
     [RelayCommand]
@@ -480,6 +488,89 @@ public partial class HardwareViewModel : ObservableObject
         {
             IsLoadingMemory = false;
         }
+    }
+
+    // ================================================================
+    // COR Spec Commands
+    // ================================================================
+
+    [RelayCommand]
+    private async Task LoadCorSpecAsync()
+    {
+        IsLoadingCorSpec = true;
+        StatusText = "Building COR Spec report...";
+
+        SystemInfo? sysInfo = null;
+        RamSummary? ram = null;
+        List<DiskHealthInfo>? disks = null;
+        List<LogicalVolumeInfo>? volumes = null;
+        BatteryInfo? battery = null;
+        List<NetworkAdapterInfo>? adapters = null;
+        List<AudioDeviceInfo>? audio = null;
+
+        await Task.WhenAll(
+            SafeLoad(async () => sysInfo = await _systemInfo.GetSystemInfoAsync()),
+            SafeLoad(async () => ram = await _systemInfo.GetRamSummaryAsync()),
+            SafeLoad(async () => disks = await _systemInfo.GetDiskHealthAsync()),
+            SafeLoad(async () => volumes = await _systemInfo.GetLogicalVolumesAsync()),
+            SafeLoad(async () => battery = await _systemInfo.GetBatteryInfoAsync()),
+            SafeLoad(async () => adapters = await _networkInfo.GetAdaptersAsync()),
+            SafeLoad(async () => audio = await _systemInfo.GetAudioDevicesAsync()));
+
+        CorSpecReport = new CorSpecReport
+        {
+            ComputerName = sysInfo?.ComputerName ?? Environment.MachineName,
+            GeneratedAt = DateTime.Now,
+            System = sysInfo,
+            Ram = ram,
+            PhysicalDisks = disks ?? [],
+            LogicalVolumes = volumes ?? [],
+            Battery = battery,
+            NetworkAdapters = adapters ?? [],
+            AudioDevices = audio ?? []
+        };
+
+        IsLoadingCorSpec = false;
+        StatusText = "COR Spec report ready";
+    }
+
+    [RelayCommand]
+    private void CopyCorSpecToClipboard()
+    {
+        if (CorSpecReport is null) return;
+
+        var text = CorSpecExporter.ToPlainText(CorSpecReport);
+        System.Windows.Clipboard.SetText(text);
+        StatusText = "COR Spec copied to clipboard";
+    }
+
+    [RelayCommand]
+    private async Task ExportCorSpecAsync()
+    {
+        if (CorSpecReport is null) return;
+
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            Title = "Export COR Spec Report",
+            Filter = "HTML Report (*.html)|*.html|Plain Text (*.txt)|*.txt",
+            FileName = $"COR_Spec_{CorSpecReport.ComputerName}_{DateTime.Now:yyyyMMdd}"
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            var content = dialog.FileName.EndsWith(".html", StringComparison.OrdinalIgnoreCase)
+                ? CorSpecExporter.ToHtml(CorSpecReport)
+                : CorSpecExporter.ToPlainText(CorSpecReport);
+
+            await System.IO.File.WriteAllTextAsync(dialog.FileName, content);
+            StatusText = $"COR Spec exported to {System.IO.Path.GetFileName(dialog.FileName)}";
+        }
+    }
+
+    private static async Task SafeLoad(Func<Task> action)
+    {
+        try { await action(); }
+        catch { /* Section failed — other sections continue */ }
     }
 
     [RelayCommand]

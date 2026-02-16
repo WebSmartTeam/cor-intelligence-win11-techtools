@@ -351,6 +351,64 @@ public sealed class SystemInfoService : ISystemInfoService
             .ToList();
     });
 
+    public Task<List<AudioDeviceInfo>> GetAudioDevicesAsync() => Task.Run(() =>
+    {
+        var devices = new List<AudioDeviceInfo>();
+        try
+        {
+            using var searcher = new ManagementObjectSearcher(
+                "SELECT Name, Manufacturer, Status, DeviceID FROM Win32_SoundDevice");
+
+            foreach (var obj in searcher.Get())
+            {
+                devices.Add(new AudioDeviceInfo
+                {
+                    Name = GetString(obj, "Name", "Unknown"),
+                    Manufacturer = GetString(obj, "Manufacturer", "Unknown"),
+                    Status = GetString(obj, "Status", "Unknown"),
+                    DeviceId = GetString(obj, "DeviceID", "")
+                });
+            }
+        }
+        catch (ManagementException)
+        {
+            // WMI query failure — return empty
+        }
+        return devices;
+    });
+
+    public Task<List<LogicalVolumeInfo>> GetLogicalVolumesAsync() => Task.Run(() =>
+    {
+        var volumes = new List<LogicalVolumeInfo>();
+        try
+        {
+            using var searcher = new ManagementObjectSearcher(
+                "SELECT DeviceID, VolumeName, FileSystem, Size, FreeSpace, DriveType FROM Win32_LogicalDisk");
+
+            foreach (var obj in searcher.Get())
+            {
+                var driveType = GetInt(obj, "DriveType");
+                // Only show Fixed (3) and Removable (2) drives
+                if (driveType is not (2 or 3)) continue;
+
+                volumes.Add(new LogicalVolumeInfo
+                {
+                    DriveLetter = GetString(obj, "DeviceID", "?:"),
+                    VolumeLabel = GetString(obj, "VolumeName", ""),
+                    FileSystem = GetString(obj, "FileSystem", "Unknown"),
+                    SizeBytes = GetLong(obj, "Size"),
+                    FreeSpaceBytes = GetLong(obj, "FreeSpace"),
+                    DriveType = driveType
+                });
+            }
+        }
+        catch (ManagementException)
+        {
+            // WMI query failure — return empty
+        }
+        return volumes.OrderBy(v => v.DriveLetter).ToList();
+    });
+
     // --- SMART data population via Storage namespace (MSFT_PhysicalDisk + MSFT_StorageReliabilityCounter) ---
 
     /// <summary>

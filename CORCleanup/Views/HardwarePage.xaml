@@ -17,6 +17,407 @@
                     SelectedIndex="{Binding ViewModel.SelectedTabIndex}">
 
             <!-- ============================================================ -->
+            <!-- TAB 0: COR Spec (Speccy-style full system summary) -->
+            <!-- ============================================================ -->
+            <TabItem Header="COR Spec">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Header bar -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="16,12,16,0">
+                        <TextBlock Text="COR Spec" FontSize="20" FontWeight="Bold"
+                                   Foreground="{DynamicResource SystemAccentColorPrimaryBrush}"
+                                   VerticalAlignment="Center" Margin="0,0,16,0" />
+                        <ui:Button Content="Refresh"
+                                   Command="{Binding ViewModel.LoadCorSpecCommand}"
+                                   Appearance="Primary" Margin="0,0,8,0" />
+                        <ui:Button Content="Copy to Clipboard"
+                                   Command="{Binding ViewModel.CopyCorSpecToClipboardCommand}"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Content="Export"
+                                   Command="{Binding ViewModel.ExportCorSpecCommand}" />
+                    </StackPanel>
+
+                    <!-- Loading bar -->
+                    <ProgressBar Grid.Row="1" IsIndeterminate="True" Height="3" Margin="16,8,16,0"
+                                 Visibility="{Binding ViewModel.IsLoadingCorSpec, Converter={StaticResource BoolToVis}}" />
+
+                    <!-- Scrollable content -->
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Padding="16,8,16,16">
+                        <StackPanel Visibility="{Binding ViewModel.CorSpecReport, Converter={StaticResource NullToVis}}">
+
+                            <!-- Operating System -->
+                            <ui:Card Padding="16" Margin="0,0,0,12">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <ui:SymbolIcon Symbol="Desktop24" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Text="Operating System" FontSize="15" FontWeight="SemiBold" />
+                                    </StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="140" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Edition" Opacity="0.6" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ViewModel.CorSpecReport.System.OsEdition}" TextWrapping="Wrap" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Version" Opacity="0.6" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ViewModel.CorSpecReport.System.OsVersion}" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Build" Opacity="0.6" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ViewModel.CorSpecReport.System.OsBuild}" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Install Date" Opacity="0.6" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding ViewModel.CorSpecReport.System.InstallDate, StringFormat=dd/MM/yyyy}" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Computer Name" Opacity="0.6" />
+                                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding ViewModel.CorSpecReport.ComputerName}" />
+                                    </Grid>
+                                </StackPanel>
+                            </ui:Card>
+
+                            <!-- Processor -->
+                            <ui:Card Padding="16" Margin="0,0,0,12">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <ui:SymbolIcon Symbol="TopSpeed24" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Text="Processor" FontSize="15" FontWeight="SemiBold" />
+                                    </StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="140" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="CPU" Opacity="0.6" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ViewModel.CorSpecReport.System.CpuName}" TextWrapping="Wrap" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Cores / Threads" Opacity="0.6" Margin="0,0,0,4" />
+                                        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,4">
+                                            <TextBlock Text="{Binding ViewModel.CorSpecReport.System.CpuCores}" />
+                                            <TextBlock Text=" / " />
+                                            <TextBlock Text="{Binding ViewModel.CorSpecReport.System.CpuThreads}" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Max Clock" Opacity="0.6" />
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ViewModel.CorSpecReport.System.CpuMaxClockMhz, StringFormat={}{0} MHz}" />
+                                    </Grid>
+                                </StackPanel>
+                            </ui:Card>
+
+                            <!-- Memory -->
+                            <ui:Card Padding="16" Margin="0,0,0,12"
+                                     Visibility="{Binding ViewModel.CorSpecReport.Ram, Converter={StaticResource NullToVis}}">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <ui:SymbolIcon Symbol="SlideSize24" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Text="Memory" FontSize="15" FontWeight="SemiBold" />
+                                    </StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="140" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Installed" Opacity="0.6" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ViewModel.CorSpecReport.Ram.InstalledFormatted}" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Slots" Opacity="0.6" Margin="0,0,0,4" />
+                                        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,4">
+                                            <TextBlock Text="{Binding ViewModel.CorSpecReport.Ram.UsedSlots}" />
+                                            <TextBlock Text=" of " />
+                                            <TextBlock Text="{Binding ViewModel.CorSpecReport.Ram.TotalSlots}" />
+                                            <TextBlock Text=" used" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Max Capacity" Opacity="0.6" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ViewModel.CorSpecReport.Ram.MaxCapacityFormatted}" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Channel Config" Opacity="0.6" />
+                                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding ViewModel.CorSpecReport.Ram.ChannelConfig}" />
+                                    </Grid>
+
+                                    <!-- Per-DIMM breakdown -->
+                                    <ItemsControl ItemsSource="{Binding ViewModel.CorSpecReport.Ram.Dimms}" Margin="0,8,0,0">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,2">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="140" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="{Binding SlotLabel}" Opacity="0.6" />
+                                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding CapacityFormatted}" />
+                                                        <TextBlock Text=" " />
+                                                        <TextBlock Text="{Binding MemoryType}" />
+                                                        <TextBlock Text="-" />
+                                                        <TextBlock Text="{Binding SpeedMhz}" />
+                                                        <TextBlock Text=" (" />
+                                                        <TextBlock Text="{Binding Manufacturer}" />
+                                                        <TextBlock Text=")" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </ui:Card>
+
+                            <!-- Motherboard -->
+                            <ui:Card Padding="16" Margin="0,0,0,12">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <ui:SymbolIcon Symbol="Desktop24" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Text="Motherboard" FontSize="15" FontWeight="SemiBold" />
+                                    </StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="140" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Manufacturer" Opacity="0.6" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ViewModel.CorSpecReport.System.MotherboardManufacturer}" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Product" Opacity="0.6" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ViewModel.CorSpecReport.System.MotherboardProduct}" TextWrapping="Wrap" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="BIOS" Opacity="0.6" />
+                                        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+                                            <TextBlock Text="{Binding ViewModel.CorSpecReport.System.BiosVersion}" />
+                                            <TextBlock Text=" (" />
+                                            <TextBlock Text="{Binding ViewModel.CorSpecReport.System.BiosDate}" />
+                                            <TextBlock Text=")" />
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </ui:Card>
+
+                            <!-- Graphics -->
+                            <ui:Card Padding="16" Margin="0,0,0,12">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <ui:SymbolIcon Symbol="Video24" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Text="Graphics" FontSize="15" FontWeight="SemiBold" />
+                                    </StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="140" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="GPU" Opacity="0.6" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ViewModel.CorSpecReport.System.GpuName}" TextWrapping="Wrap" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="VRAM" Opacity="0.6" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ViewModel.CorSpecReport.System.GpuVramFormatted}" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Driver" Opacity="0.6" />
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ViewModel.CorSpecReport.System.GpuDriverVersion}" />
+                                    </Grid>
+                                </StackPanel>
+                            </ui:Card>
+
+                            <!-- Storage -->
+                            <ui:Card Padding="16" Margin="0,0,0,12">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <ui:SymbolIcon Symbol="SlideSize24" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Text="Storage" FontSize="15" FontWeight="SemiBold" />
+                                    </StackPanel>
+
+                                    <!-- Physical Disks -->
+                                    <ItemsControl ItemsSource="{Binding ViewModel.CorSpecReport.PhysicalDisks}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Margin="0,0,0,8">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Model}" FontWeight="SemiBold" />
+                                                        <TextBlock Text=" — " Opacity="0.5" />
+                                                        <TextBlock Text="{Binding TypeSummary}" Opacity="0.7" />
+                                                        <TextBlock Text=" — " Opacity="0.5" />
+                                                        <TextBlock Text="{Binding SizeFormatted}" Opacity="0.7" />
+                                                    </StackPanel>
+                                                    <StackPanel Orientation="Horizontal" Margin="140,2,0,0">
+                                                        <TextBlock Text="Health: " Opacity="0.6" />
+                                                        <TextBlock Text="{Binding HealthDisplay}" FontWeight="SemiBold" />
+                                                        <TextBlock Text="  Temp: " Opacity="0.6" Margin="12,0,0,0" />
+                                                        <TextBlock Text="{Binding TemperatureDisplay}" />
+                                                        <TextBlock Text="  Power-On: " Opacity="0.6" Margin="12,0,0,0" />
+                                                        <TextBlock Text="{Binding PowerOnDisplay}" />
+                                                        <TextBlock Text=" hrs" Opacity="0.6" />
+                                                        <TextBlock Text="  Wear: " Opacity="0.6" Margin="12,0,0,0" />
+                                                        <TextBlock Text="{Binding WearDisplay}" />
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <!-- Logical Volumes -->
+                                    <TextBlock Text="Logical Volumes" FontWeight="SemiBold" Opacity="0.8" Margin="0,8,0,6"
+                                               Visibility="{Binding ViewModel.CorSpecReport.HasVolumes, Converter={StaticResource BoolToVis}}" />
+                                    <ItemsControl ItemsSource="{Binding ViewModel.CorSpecReport.LogicalVolumes}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,2,0,4">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="140" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="120" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Opacity="0.6">
+                                                        <Run Text="{Binding DisplayLabel, Mode=OneWay}" />
+                                                        <Run Text=" " />
+                                                        <Run Text="{Binding FileSystem, Mode=OneWay}" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" />
+                                                    </TextBlock>
+                                                    <ProgressBar Grid.Column="1" Value="{Binding UsedPercent}" Maximum="100" Height="8"
+                                                                 Margin="0,4,8,0" />
+                                                    <TextBlock Grid.Column="2" FontSize="12" Opacity="0.7" VerticalAlignment="Center">
+                                                        <Run Text="{Binding FreeFormatted, Mode=OneWay}" />
+                                                        <Run Text=" free / " />
+                                                        <Run Text="{Binding SizeFormatted, Mode=OneWay}" />
+                                                    </TextBlock>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </ui:Card>
+
+                            <!-- Audio -->
+                            <ui:Card Padding="16" Margin="0,0,0,12">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <ui:SymbolIcon Symbol="Speaker224" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Text="Audio" FontSize="15" FontWeight="SemiBold" />
+                                    </StackPanel>
+                                    <ItemsControl ItemsSource="{Binding ViewModel.CorSpecReport.AudioDevices}"
+                                                  Visibility="{Binding ViewModel.CorSpecReport.HasAudio, Converter={StaticResource BoolToVis}}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,2">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="140" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="{Binding Name}" TextWrapping="Wrap" />
+                                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Manufacturer}" Opacity="0.6" />
+                                                        <TextBlock Text=" — " Opacity="0.4" />
+                                                        <TextBlock Text="{Binding Status}" Opacity="0.6" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Text="No audio devices detected" Opacity="0.5" FontStyle="Italic"
+                                               Visibility="{Binding ViewModel.CorSpecReport.HasAudio, Converter={StaticResource InverseBoolToVis}}" />
+                                </StackPanel>
+                            </ui:Card>
+
+                            <!-- Network -->
+                            <ui:Card Padding="16" Margin="0,0,0,12"
+                                     Visibility="{Binding ViewModel.CorSpecReport.HasNetwork, Converter={StaticResource BoolToVis}}">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <ui:SymbolIcon Symbol="Globe24" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Text="Network" FontSize="15" FontWeight="SemiBold" />
+                                    </StackPanel>
+                                    <ItemsControl ItemsSource="{Binding ViewModel.CorSpecReport.NetworkAdapters}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Margin="0,0,0,6">
+                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                                    <Grid Margin="140,2,0,0">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="60" />
+                                                            <ColumnDefinition Width="*" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto" />
+                                                            <RowDefinition Height="Auto" />
+                                                            <RowDefinition Height="Auto" />
+                                                            <RowDefinition Height="Auto" />
+                                                        </Grid.RowDefinitions>
+                                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Status" Opacity="0.6" />
+                                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Status}" />
+                                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="IP" Opacity="0.6" />
+                                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding IpAddress}" />
+                                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="MAC" Opacity="0.6" />
+                                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding MacAddress}" FontFamily="Consolas" />
+                                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Speed" Opacity="0.6" />
+                                                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SpeedDisplay}" />
+                                                    </Grid>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </ui:Card>
+
+                            <!-- Battery (hidden on desktops) -->
+                            <ui:Card Padding="16" Margin="0,0,0,12"
+                                     Visibility="{Binding ViewModel.CorSpecReport.HasBattery, Converter={StaticResource BoolToVis}}">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <ui:SymbolIcon Symbol="Battery524" Foreground="{DynamicResource SystemAccentColorPrimaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Text="Battery" FontSize="15" FontWeight="SemiBold" />
+                                    </StackPanel>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="140" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Health" Opacity="0.6" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ViewModel.CorSpecReport.Battery.HealthPercent, StringFormat={}{0:F1}%}" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Design Capacity" Opacity="0.6" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ViewModel.CorSpecReport.Battery.DesignCapacityFormatted}" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Full Charge" Opacity="0.6" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ViewModel.CorSpecReport.Battery.FullChargeFormatted}" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Cycle Count" Opacity="0.6" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding ViewModel.CorSpecReport.Battery.CycleCount}" Margin="0,0,0,4" />
+                                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Chemistry" Opacity="0.6" />
+                                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding ViewModel.CorSpecReport.Battery.Chemistry}" />
+                                    </Grid>
+                                </StackPanel>
+                            </ui:Card>
+
+                            <!-- Footer -->
+                            <TextBlock HorizontalAlignment="Center" Opacity="0.4" FontSize="12" Margin="0,8,0,0">
+                                <Run Text="COR Intelligence — Generated " />
+                                <Run Text="{Binding ViewModel.CorSpecReport.GeneratedAtFormatted, Mode=OneWay}" />
+                            </TextBlock>
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================ -->
             <!-- TAB 1: System Overview -->
             <!-- ============================================================ -->
             <TabItem Header="System Info">

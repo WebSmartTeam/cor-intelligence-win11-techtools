@@ -10,4 +10,6 @@ public interface ISystemInfoService
     Task<BatteryInfo> GetBatteryInfoAsync();
     Task<string?> GetProductKeyAsync();
     Task<List<DriverInfo>> GetOutdatedDriversAsync(int olderThanYears = 3);
+    Task<List<AudioDeviceInfo>> GetAudioDevicesAsync();
+    Task<List<LogicalVolumeInfo>> GetLogicalVolumesAsync();
 }

@@ -16,10 +16,10 @@ public partial class HardwarePage : INavigableView<HardwareViewModel>
 
     private async void Page_Loaded(object sender, System.Windows.RoutedEventArgs e)
     {
-        // Auto-load system info on first visit
-        if (string.IsNullOrEmpty(ViewModel.OsInfo))
+        // Auto-load COR Spec on first visit (Tab 0)
+        if (ViewModel.CorSpecReport is null)
         {
-            await ViewModel.LoadSystemInfoCommand.ExecuteAsync(null);
+            await ViewModel.LoadCorSpecCommand.ExecuteAsync(null);
         }
     }
 }
