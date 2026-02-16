@@ -212,6 +212,31 @@ public partial class CleanupViewModel : ObservableObject
 
             ResultText = string.Join(Environment.NewLine, lines);
             StatusText = $"Cleanup complete — {result.TotalFreedFormatted} reclaimed";
+
+            // Remove successfully cleaned items from the list
+            var cleanedCategories = result.Details
+                .Where(d => d.Success)
+                .Select(d => d.Category)
+                .ToHashSet();
+
+            var toRemove = CleanupItems
+                .Where(i => i.IsSelected && cleanedCategories.Contains(i.Category))
+                .ToList();
+
+            foreach (var item in toRemove)
+                CleanupItems.Remove(item);
+
+            // Update totals for any remaining items
+            if (CleanupItems.Count > 0)
+            {
+                var remaining = CleanupItems.Sum(i => i.EstimatedSizeBytes);
+                TotalSizeText = ByteFormatter.Format(remaining);
+            }
+            else
+            {
+                TotalSizeText = "";
+                HasScanned = false;
+            }
         }
         catch (OperationCanceledException)
         {

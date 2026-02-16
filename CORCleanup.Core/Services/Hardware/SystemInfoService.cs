@@ -257,11 +257,40 @@ public sealed class SystemInfoService : ISystemInfoService
         var cutoff = DateTime.Now.AddYears(-olderThanYears);
         var drivers = new List<DriverInfo>();
 
-        // Skip generic device classes that don't represent real hardware
+        // Skip device classes that don't represent real updatable hardware
         var skipClasses = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "LEGACYDRIVER", "SYSTEM", "VOLUMESNAPSHOT", "VOLUME",
-            "COMPUTER", "PROCESSOR", "HIDCLASS"
+            "COMPUTER", "PROCESSOR", "HIDCLASS",
+            "PRINTQUEUE", "PRINTER", "NET", "NETCLIENT",
+            "NETTRANS", "NETSERVICE", "SECURITYDEVICES",
+            "SCSIADAPTER", "FIRMWARE", "SOFTWAREDEVICE",
+            "USB", "WPDBUSENUMROOT"
+        };
+
+        // Skip Windows built-in virtual devices by name pattern
+        var skipNamePatterns = new[]
+        {
+            "WAN Miniport",
+            "Microsoft Kernel",
+            "Microsoft ISATAP",
+            "Microsoft Wi-Fi Direct",
+            "Microsoft 6to4",
+            "Microsoft Teredo",
+            "Microsoft IP-HTTPS",
+            "Microsoft GS Wavetable",
+            "Microsoft XPS",
+            "Microsoft Print",
+            "Fax",
+            "Remote Desktop",
+            "RAS Async",
+            "WAN Async",
+            "Direct Parallel",
+            "Composite Bus",
+            "UMBus Root",
+            "NDIS Virtual",
+            "Generic software device",
+            "Root Print Queue",
         };
 
         try
@@ -288,6 +317,14 @@ public sealed class SystemInfoService : ISystemInfoService
 
                     var deviceName = GetString(obj, "DeviceName", "Unknown");
                     if (string.IsNullOrWhiteSpace(deviceName) || deviceName == "Unknown") continue;
+
+                    // Skip Windows built-in virtual devices
+                    if (skipNamePatterns.Any(p => deviceName.StartsWith(p, StringComparison.OrdinalIgnoreCase)))
+                        continue;
+
+                    // Skip Microsoft-published drivers — these are OS components, not updatable
+                    var manufacturer = GetString(obj, "Manufacturer", "Unknown").Trim();
+                    if (manufacturer.Equals("Microsoft", StringComparison.OrdinalIgnoreCase)) continue;
 
                     drivers.Add(new DriverInfo
                     {
