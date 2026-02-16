@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Windows.Navigation;
 using Wpf.Ui.Abstractions.Controls;
 using CORCleanup.ViewModels;
 
@@ -12,5 +14,14 @@ public partial class AdminPage : INavigableView<AdminViewModel>
         ViewModel = viewModel;
         DataContext = this;
         InitializeComponent();
+    }
+
+    private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+    {
+        Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri)
+        {
+            UseShellExecute = true
+        });
+        e.Handled = true;
     }
 }
