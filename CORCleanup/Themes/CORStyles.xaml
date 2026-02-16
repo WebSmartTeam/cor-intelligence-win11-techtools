@@ -33,6 +33,25 @@
     <SolidColorBrush x:Key="CorDangerBrush" Color="#EF4444" />
     <SolidColorBrush x:Key="CorInfoBrush" Color="#3B82F6" />
 
+    <!-- ===== Section Colours — one per tool type ===== -->
+    <Color x:Key="CorSectionAutoTool">#8B5CF6</Color>
+    <Color x:Key="CorSectionDashboard">#06B6D4</Color>
+    <Color x:Key="CorSectionNetwork">#3B82F6</Color>
+    <Color x:Key="CorSectionCleanup">#10B981</Color>
+    <Color x:Key="CorSectionUninstaller">#EF4444</Color>
+    <Color x:Key="CorSectionSystemInfo">#F59E0B</Color>
+    <Color x:Key="CorSectionDiskTools">#F97316</Color>
+    <Color x:Key="CorSectionAdmin">#6366F1</Color>
+
+    <SolidColorBrush x:Key="CorSectionAutoToolBrush" Color="{StaticResource CorSectionAutoTool}" />
+    <SolidColorBrush x:Key="CorSectionDashboardBrush" Color="{StaticResource CorSectionDashboard}" />
+    <SolidColorBrush x:Key="CorSectionNetworkBrush" Color="{StaticResource CorSectionNetwork}" />
+    <SolidColorBrush x:Key="CorSectionCleanupBrush" Color="{StaticResource CorSectionCleanup}" />
+    <SolidColorBrush x:Key="CorSectionUninstallerBrush" Color="{StaticResource CorSectionUninstaller}" />
+    <SolidColorBrush x:Key="CorSectionSystemInfoBrush" Color="{StaticResource CorSectionSystemInfo}" />
+    <SolidColorBrush x:Key="CorSectionDiskToolsBrush" Color="{StaticResource CorSectionDiskTools}" />
+    <SolidColorBrush x:Key="CorSectionAdminBrush" Color="{StaticResource CorSectionAdmin}" />
+
     <!-- ===== Layout Constants ===== -->
     <CornerRadius x:Key="CorButtonRadius">8</CornerRadius>
     <CornerRadius x:Key="CorCardRadius">8</CornerRadius>

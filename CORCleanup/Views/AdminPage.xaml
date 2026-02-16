@@ -5,8 +5,15 @@
       Title="Admin"
       Background="{DynamicResource ApplicationBackgroundBrush}">
 
-
-    <Grid Margin="12,8">
+    <DockPanel Margin="12,0,12,8">
+        <!-- Section Header -->
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,8,0,6">
+            <Border Width="4" Height="18" CornerRadius="2"
+                    Background="{StaticResource CorSectionAdminBrush}" Margin="0,0,8,0" VerticalAlignment="Center" />
+            <TextBlock Text="Admin" FontSize="16" FontWeight="SemiBold"
+                       Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+        </StackPanel>
+        <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -965,4 +972,5 @@
                    FontSize="12"
                    Margin="0,8,0,0" />
     </Grid>
+    </DockPanel>
 </Page>

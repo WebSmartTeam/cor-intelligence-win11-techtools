@@ -37,29 +37,53 @@
 
             <ui:NavigationView.MenuItems>
                 <ui:NavigationViewItem Content="Auto Tool"
-                                       Icon="{ui:SymbolIcon Wand24}"
-                                       TargetPageType="{x:Type views:AutoToolPage}" />
+                                       TargetPageType="{x:Type views:AutoToolPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Wand24" Foreground="{StaticResource CorSectionAutoToolBrush}" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
                 <ui:NavigationViewItem Content="Dashboard"
-                                       Icon="{ui:SymbolIcon Home24}"
-                                       TargetPageType="{x:Type views:HomePage}" />
+                                       TargetPageType="{x:Type views:HomePage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Home24" Foreground="{StaticResource CorSectionDashboardBrush}" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
                 <ui:NavigationViewItem Content="Network"
-                                       Icon="{ui:SymbolIcon Globe24}"
-                                       TargetPageType="{x:Type views:NetworkPage}" />
+                                       TargetPageType="{x:Type views:NetworkPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Globe24" Foreground="{StaticResource CorSectionNetworkBrush}" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
                 <ui:NavigationViewItem Content="Cleanup"
-                                       Icon="{ui:SymbolIcon Broom24}"
-                                       TargetPageType="{x:Type views:CleanupPage}" />
+                                       TargetPageType="{x:Type views:CleanupPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Broom24" Foreground="{StaticResource CorSectionCleanupBrush}" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
                 <ui:NavigationViewItem Content="Uninstaller"
-                                       Icon="{ui:SymbolIcon AppsList24}"
-                                       TargetPageType="{x:Type views:UninstallerPage}" />
+                                       TargetPageType="{x:Type views:UninstallerPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="AppsList24" Foreground="{StaticResource CorSectionUninstallerBrush}" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
                 <ui:NavigationViewItem Content="System Info"
-                                       Icon="{ui:SymbolIcon Desktop24}"
-                                       TargetPageType="{x:Type views:HardwarePage}" />
+                                       TargetPageType="{x:Type views:HardwarePage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Desktop24" Foreground="{StaticResource CorSectionSystemInfoBrush}" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
                 <ui:NavigationViewItem Content="Disk Tools"
-                                       Icon="{ui:SymbolIcon Wrench24}"
-                                       TargetPageType="{x:Type views:ToolsPage}" />
+                                       TargetPageType="{x:Type views:ToolsPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Wrench24" Foreground="{StaticResource CorSectionDiskToolsBrush}" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
                 <ui:NavigationViewItem Content="Admin"
-                                       Icon="{ui:SymbolIcon ShieldTask24}"
-                                       TargetPageType="{x:Type views:AdminPage}" />
+                                       TargetPageType="{x:Type views:AdminPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="ShieldTask24" Foreground="{StaticResource CorSectionAdminBrush}" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
             </ui:NavigationView.MenuItems>
 
             <!-- Brand mark — full-width logo above footer items in the sidebar -->
@@ -105,7 +129,7 @@
                                Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                 </StackPanel>
                 <TextBlock DockPanel.Dock="Right"
-                           Text="v1.0.17"
+                           Text="v1.0.18"
                            FontSize="10.5"
                            Opacity="0.4"
                            VerticalAlignment="Center"
