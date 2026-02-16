@@ -48,9 +48,8 @@
         <Setter Property="CornerRadius" Value="8" />
     </Style>
 
-    <!-- ===== Global Card Style — Consistent Radius + White Background ===== -->
-    <Style TargetType="{x:Type ui:Card}" BasedOn="{StaticResource {x:Type ui:Card}}">
-        <Setter Property="CornerRadius" Value="8" />
-    </Style>
+    <!-- Note: ui:Card does not expose a CornerRadius DependencyProperty.
+         Card corner radius is controlled by its internal template.
+         Use CorCardRadius resource on custom Border-based cards instead. -->
 
 </ResourceDictionary>
