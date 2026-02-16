@@ -206,12 +206,13 @@ public async IAsyncEnumerable<PingResult> ContinuousPingAsync(
 
 ## UI Conventions
 
-- **Dark mode default** — Fluent theme with dark/light toggle
-- **Sidebar navigation** — 7 sections, each with sub-tabs within the view
-- **DataTable control** — Reuse for ALL tabular data (network scan, drivers, services, startup, software, event log, firewall rules)
-- **ProgressPanel control** — Reuse for ALL long-running ops (cleanup, registry scan, disk analysis, SFC/DISM)
-- **ConfirmDialog** — Before ANY destructive operation (delete, registry fix, uninstall, shred)
-- **Toast notifications** — For completed background operations
+- **UI library**: WPF-UI v4.2.0 (`Wpf.Ui`) — provides `FluentWindow`, `NavigationView`, `CardControl`, `SymbolIcon`, etc.
+- **Design system**: `CORCleanup/Themes/CORStyles.xaml` — centralised colour palette, button/card CornerRadius=8, typography
+- **Window**: `FluentWindow` with `ExtendsContentIntoTitleBar="True"`, `WindowCornerPreference="Round"`, `WindowBackdropType="None"`
+- **Sidebar navigation**: 8 sections (Auto Tool, Dashboard, Network, Cleanup, Uninstaller, System Info, Disk Tools, Admin) + Help, Idea Portal, Settings in footer
+- **MVVM toolkit**: `CommunityToolkit.Mvvm` v8.4.0 — `[ObservableProperty]`, `[RelayCommand]` source generators
+- **DI**: `Microsoft.Extensions.Hosting` — all ViewModels and Pages registered in `App.xaml.cs`
+- **Views implement**: `INavigableView<TViewModel>` for NavigationView integration
 - **UK English** — All user-facing strings: "colour", "organisation", "optimisation", "analyse"
 - **Export everywhere** — Every table view has CSV export. Reports export HTML/PDF.
 
@@ -225,28 +226,58 @@ public async IAsyncEnumerable<PingResult> ContinuousPingAsync(
 - Log all operations to `%APPDATA%\COR Cleanup\Logs\{date}.log`
 - Portable mode: detect `portable.flag` file next to .exe → store data alongside
 
+## Versioning
+
+Version is stored in **4 places** — ALL must be updated together:
+
+| File | Location | Format |
+|------|----------|--------|
+| `CORCleanup/CORCleanup.csproj` | `<Version>` element | `1.0.16` |
+| `CORCleanup/MainWindow.xaml` | Status bar `TextBlock` | `v1.0.16` |
+| `CORCleanup.Core/Services/Tools/ReportService.cs` | HTML footer string | `COR Cleanup v1.0.16` |
+| `CORCleanup.Core/Models/DiagnosticReport.cs` | `AppVersion` default | `"1.0.16"` |
+
+**Version bump workflow:**
+1. Update all 4 files with the new version
+2. Commit: `chore: Bump version to 1.0.17`
+3. Push commit to `main`
+4. Tag and push: `git tag v1.0.17 && git push origin v1.0.17`
+5. CI detects the tag → builds → creates release → attaches installers
+
 ## Build & CI/CD
 
-```yaml
-# .github/workflows/build-windows.yml
-name: Build COR Cleanup
-on: [push, pull_request]
-jobs:
-  build:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-      - run: dotnet restore
-      - run: dotnet build --configuration Release --no-restore
-      - run: dotnet test --no-restore --verbosity normal
-      - run: dotnet publish -c Release -r win-x64 --self-contained -o ./publish
-      - uses: actions/upload-artifact@v4
-        with:
-          name: CORCleanup-win-x64
-          path: ./publish/
+**Workflow file**: `.github/workflows/build-windows.yml`
+
+**Triggers**:
+- Every push to `main` → build + test (no release)
+- Every tag push matching `v*` → build + test + NSIS installer + GitHub Release with assets
+
+**Pipeline steps** (on `windows-latest`):
+1. Checkout + setup .NET 8
+2. `dotnet restore` → `dotnet build --configuration Release`
+3. `dotnet test`
+4. `dotnet publish` — single-file self-contained x64
+5. Extract version from csproj (PowerShell)
+6. Install NSIS via `choco install nsis`
+7. Build NSIS installer: `makensis.exe /DVERSION=x.y.z installer/cor-cleanup.nsi`
+8. Upload artifacts (portable exe + installer)
+9. **Tag builds only**: Create GitHub Release + attach `COR.Cleanup.exe` (portable) and `CORCleanup-Setup-*.exe` (installer)
+
+**Release assets attached by CI:**
+- `COR.Cleanup.exe` — Portable single-file exe (run from USB, no install)
+- `CORCleanup-Setup-{version}.exe` — NSIS installer with Start Menu shortcuts, uninstaller
+
+**NEVER manually create releases** with `gh release create`. Always push a tag — CI handles everything.
+
+```bash
+# Correct release process
+git tag v1.0.17
+git push origin v1.0.17
+# CI builds, creates release, attaches installer + portable exe
+
+# Check CI status
+gh run list --limit 3
+gh run watch  # live tail the build
 ```
 
 ## Win11 Pro vs Home
@@ -256,6 +287,25 @@ Detect early via registry `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Edi
 - `"Core"` = Home
 
 Gate features: BitLocker, Group Policy, Hyper-V, Remote Desktop → greyed out on Home with tooltip.
+
+## Security Patterns
+
+All user-supplied input that reaches system APIs must go through `CORCleanup.Core.Security.InputSanitiser`:
+
+| Method | Use Case |
+|--------|----------|
+| `EscapeForPowerShell(string)` | Before embedding in PowerShell commands |
+| `EscapeWql(string)` | Before embedding in WMI/WQL queries |
+| `SanitiseForProcessArgument(string)` | Before passing to `ProcessStartInfo` arguments |
+| `IsValidHostsIp(string)` | Validate IP before writing to hosts file |
+| `IsValidHostsHostname(string)` | Validate hostname before writing to hosts file |
+
+**Key rules:**
+- Never use `-like` wildcards with user-supplied package names — use `-eq` exact match
+- Always resolve file paths with `Path.GetFullPath()` before directory confinement checks (prevents `..` traversal)
+- Strip `\r` and `\n` from any string written to line-based config files (hosts, etc.)
+- After `proc.Kill()`, always call `proc.WaitForExit(TimeSpan.FromSeconds(5))` to prevent zombie processes
+- Registry backup before ANY modification — `.reg` files in `%APPDATA%\COR Cleanup\Backups\`
 
 ## NuGet Packages (Recommended)
 

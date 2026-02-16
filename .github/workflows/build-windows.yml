@@ -71,6 +71,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) {
             Write-Host "Release already exists for $tag — continuing to upload"
           }
+          exit 0
 
       - name: Attach assets to GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
