@@ -1,0 +1,56 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+
+    <!-- ================================================================ -->
+    <!-- COR Cleanup Design System                                        -->
+    <!-- Centralised colour palette, typography, and component styles      -->
+    <!-- ================================================================ -->
+
+    <!-- ===== Brand Colours ===== -->
+    <SolidColorBrush x:Key="CorAccentBrush" Color="#06B6D4" />
+    <SolidColorBrush x:Key="CorAccentLightBrush" Color="#22D3EE" />
+    <SolidColorBrush x:Key="CorAccentDarkBrush" Color="#0891B2" />
+
+    <!-- ===== Backgrounds ===== -->
+    <SolidColorBrush x:Key="CorSidebarBrush" Color="#EBEBEF" />
+    <SolidColorBrush x:Key="CorContentBrush" Color="#F5F5F8" />
+    <SolidColorBrush x:Key="CorCardBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="CorTitleBarBrush" Color="#E8E8EC" />
+
+    <!-- ===== Text ===== -->
+    <SolidColorBrush x:Key="CorTextPrimaryBrush" Color="#1A1A2E" />
+    <SolidColorBrush x:Key="CorTextSecondaryBrush" Color="#6B7280" />
+    <SolidColorBrush x:Key="CorTextMutedBrush" Color="#9CA3AF" />
+
+    <!-- ===== Borders ===== -->
+    <SolidColorBrush x:Key="CorBorderBrush" Color="#E5E7EB" />
+    <SolidColorBrush x:Key="CorBorderStrongBrush" Color="#D1D5DB" />
+
+    <!-- ===== Semantic Colours ===== -->
+    <SolidColorBrush x:Key="CorSuccessBrush" Color="#10B981" />
+    <SolidColorBrush x:Key="CorWarningBrush" Color="#F59E0B" />
+    <SolidColorBrush x:Key="CorDangerBrush" Color="#EF4444" />
+    <SolidColorBrush x:Key="CorInfoBrush" Color="#3B82F6" />
+
+    <!-- ===== Layout Constants ===== -->
+    <CornerRadius x:Key="CorButtonRadius">8</CornerRadius>
+    <CornerRadius x:Key="CorCardRadius">8</CornerRadius>
+    <CornerRadius x:Key="CorBadgeRadius">4</CornerRadius>
+    <CornerRadius x:Key="CorInputRadius">6</CornerRadius>
+
+    <!-- ===== WPF-UI Theme Overrides ===== -->
+    <!-- Override the default page background to off-white -->
+    <SolidColorBrush x:Key="ApplicationBackgroundBrush" Color="#F5F5F8" />
+
+    <!-- ===== Global Button Style — Rounded Corners ===== -->
+    <Style TargetType="{x:Type ui:Button}" BasedOn="{StaticResource {x:Type ui:Button}}">
+        <Setter Property="CornerRadius" Value="8" />
+    </Style>
+
+    <!-- ===== Global Card Style — Consistent Radius + White Background ===== -->
+    <Style TargetType="{x:Type ui:Card}" BasedOn="{StaticResource {x:Type ui:Card}}">
+        <Setter Property="CornerRadius" Value="8" />
+    </Style>
+
+</ResourceDictionary>

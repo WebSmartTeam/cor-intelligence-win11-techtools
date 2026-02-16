@@ -10,6 +10,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ui:ThemesDictionary Theme="Light" />
                 <ui:ControlsDictionary />
+                <!-- COR Cleanup design system — overrides WPF-UI defaults -->
+                <ResourceDictionary Source="/Themes/CORStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Global converters (shared across all pages) -->

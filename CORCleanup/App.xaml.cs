@@ -31,6 +31,7 @@ public partial class App : Application
             services.AddTransient<ToolsPage>();
             services.AddTransient<AdminPage>();
             services.AddTransient<SettingsPage>();
+            services.AddTransient<HelpPage>();
 
             // ViewModels — transient (tied to page lifecycle)
             services.AddTransient<HomeViewModel>();
@@ -41,6 +42,7 @@ public partial class App : Application
             services.AddTransient<ToolsViewModel>();
             services.AddTransient<AdminViewModel>();
             services.AddTransient<SettingsViewModel>();
+            services.AddTransient<HelpViewModel>();
 
             // Core services — singletons (one instance, reused)
             services.AddSingleton<Core.Interfaces.IPingService, Core.Services.Network.PingService>();

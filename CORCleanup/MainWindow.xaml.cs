@@ -1,12 +1,14 @@
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
 using Wpf.Ui;
 using Wpf.Ui.Appearance;
+using Wpf.Ui.Controls;
 using CORCleanup.ViewModels;
 
 namespace CORCleanup;
 
-public partial class MainWindow : Window
+public partial class MainWindow : FluentWindow
 {
     private readonly INavigationService _navigationService;
 
@@ -33,11 +35,22 @@ public partial class MainWindow : Window
         NavigationView.SetServiceProvider(serviceProvider);
         navigationService.SetNavigationControl(NavigationView);
 
+        // Idea Portal — opens browser instead of navigating to a page
+        IdeaPortalItem.Click += OnIdeaPortalClick;
+
         Loaded += OnLoaded;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         _navigationService.Navigate(typeof(Views.HomePage));
+    }
+
+    private void OnIdeaPortalClick(object sender, RoutedEventArgs e)
+    {
+        Process.Start(new ProcessStartInfo("https://corintelligence.co.uk/ideasportal")
+        {
+            UseShellExecute = true
+        });
     }
 }
