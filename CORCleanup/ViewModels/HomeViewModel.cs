@@ -19,6 +19,16 @@ public partial class HomeViewModel : ObservableObject
 
     private readonly int _ownPid = System.Diagnostics.Process.GetCurrentProcess().Id;
 
+    // Exclude our own overhead from the dashboard Top 5 — these are artefacts
+    // of our WMI queries, not genuine user workload
+    private static readonly HashSet<string> DashboardExcludedProcesses = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "WmiPrvSE",       // WMI Provider Host — spun up by our queries
+        "WmiApSrv",       // WMI Performance Adapter
+        "mofcomp",        // MOF compiler (WMI maintenance)
+        "unsecapp",       // WMI sink for async callbacks
+    };
+
     public HomeViewModel(
         INavigationService navigationService,
         ISystemInfoService systemInfoService,
@@ -237,7 +247,9 @@ public partial class HomeViewModel : ObservableObject
         {
             var entries = await _processExplorerService.GetProcessesAsync();
             var top5 = entries
-                .Where(e => !e.IsSystem && e.Pid != _ownPid)
+                .Where(e => !e.IsSystem
+                    && e.Pid != _ownPid
+                    && !DashboardExcludedProcesses.Contains(e.Name))
                 .OrderByDescending(e => e.CpuPercent)
                 .Take(5)
                 .ToList();
@@ -281,10 +293,23 @@ public partial class HomeViewModel : ObservableObject
     [RelayCommand]
     private async Task RefreshDashboardAsync()
     {
+        IsLoading = true;
+
+        // Clear collections that append (not replace)
+        LogicalDrives.Clear();
+        PhysicalDisks.Clear();
+        OutdatedDrivers.Clear();
+
+        var sysTask = LoadSystemInfoAsync();
+        var netTask = LoadNetworkAsync();
         var memTask = LoadMemoryAsync();
         var processTask = LoadTopProcessesAsync();
         var errorTask = LoadRecentErrorsAsync();
-        await Task.WhenAll(memTask, processTask, errorTask);
+        var driverTask = LoadOutdatedDriversAsync();
+
+        await Task.WhenAll(sysTask, netTask, memTask, processTask, errorTask, driverTask);
+
+        IsLoading = false;
         StatusText = $"Refreshed {DateTime.Now:HH:mm:ss}";
     }
 
