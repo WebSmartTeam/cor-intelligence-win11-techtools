@@ -56,7 +56,7 @@ public sealed class DiagnosticReport
 
     // Metadata
     public DateTime GeneratedAt { get; init; } = DateTime.UtcNow;
-    public string AppVersion { get; init; } = "1.0.16";
+    public string AppVersion { get; init; } = "1.0.17";
 
     // Computed summaries for the report card UI
     [JsonIgnore]
