@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using CORCleanup.Core.Models;
 
 namespace CORCleanup.Core.Interfaces;
@@ -32,7 +31,7 @@ public interface INetworkScannerService
     IAsyncEnumerable<NetworkDevice> ScanSubnetAsync(
         string baseIp,
         int cidr,
-        [EnumeratorCancellation] CancellationToken ct = default);
+        CancellationToken ct = default);
 
     /// <summary>
     /// Resolves the MAC address for a single IP by querying the local ARP cache.

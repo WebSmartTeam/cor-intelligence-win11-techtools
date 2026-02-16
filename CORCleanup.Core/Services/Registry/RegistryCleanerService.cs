@@ -590,7 +590,6 @@ public sealed class RegistryCleanerService : IRegistryCleanerService
         IProgress<(RegistryScanCategory, int)>? progress,
         CancellationToken ct)
     {
-        const string keyPath = @"SOFTWARE\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\Repository\Families";
         int found = 0;
 
         // MUI scanning is conservative — we only check the MUI cache for orphaned entries
