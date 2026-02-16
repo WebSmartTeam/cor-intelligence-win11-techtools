@@ -178,7 +178,7 @@ public sealed class SystemInfoService : ISystemInfoService
                     1 => "Other", 2 => "Unknown", 3 => "Lead Acid",
                     4 => "Nickel Cadmium", 5 => "Nickel Metal Hydride",
                     6 => "Lithium-ion", 7 => "Zinc Air", 8 => "Lithium Polymer",
-                    _ => $"Type {chemCode}"
+                    _ => DecodeAcpiChemistry(chemCode)
                 };
                 manufacturer = GetString(obj, "ManufactureName", "Unknown");
             }
@@ -678,4 +678,45 @@ public sealed class SystemInfoService : ISystemInfoService
         12 => "SO-DIMM",
         _ => $"Form {formFactor}"
     };
+
+    /// <summary>
+    /// ACPI batteries often store chemistry as a 4-byte ASCII string packed into an integer
+    /// rather than using the standard SMBIOS codes 1-8.
+    /// e.g. "LiP\0" = 0x0050694C = 5269836 decimal → Lithium Polymer.
+    /// </summary>
+    private static string DecodeAcpiChemistry(int rawValue)
+    {
+        if (rawValue <= 0) return "Unknown";
+
+        try
+        {
+            var bytes = BitConverter.GetBytes(rawValue);
+            var len = 0;
+            for (var i = 0; i < 4; i++)
+            {
+                if (bytes[i] == 0) break;
+                if (bytes[i] < 0x20 || bytes[i] > 0x7E) return $"Type {rawValue}";
+                len++;
+            }
+
+            if (len == 0) return $"Type {rawValue}";
+
+            var decoded = System.Text.Encoding.ASCII.GetString(bytes, 0, len);
+
+            return decoded.ToUpperInvariant() switch
+            {
+                "LIP" => "Lithium Polymer",
+                "LION" or "LI-I" => "Lithium-ion",
+                "PBAC" => "Lead Acid",
+                "NICD" => "Nickel Cadmium",
+                "NIMH" => "Nickel Metal Hydride",
+                "RAMR" => "Rechargeable RAM",
+                _ => decoded
+            };
+        }
+        catch
+        {
+            return $"Type {rawValue}";
+        }
+    }
 }

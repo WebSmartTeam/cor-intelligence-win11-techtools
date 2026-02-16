@@ -11,12 +11,12 @@
       Background="{DynamicResource ApplicationBackgroundBrush}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" CanContentScroll="False">
-        <StackPanel Margin="12,8">
+        <StackPanel Margin="12,6">
 
             <!-- ============================================================ -->
             <!-- Header: Title + Refresh + Status                             -->
             <!-- ============================================================ -->
-            <DockPanel Margin="0,0,0,10">
+            <DockPanel Margin="0,0,0,6">
                 <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="Dashboard" FontSize="16" FontWeight="SemiBold" />
                     <TextBlock Text="  Loading..." FontSize="11" Opacity="0.4"
@@ -37,27 +37,26 @@
             </DockPanel>
 
             <!-- ============================================================ -->
-            <!-- Row 0: System Identity — 4 tiles                             -->
-            <!--   PC Name | CPU | Network | GPU                              -->
+            <!-- Row 0: System Identity — 3 tiles (wider, more room)          -->
+            <!--   PC Name | CPU | GPU                                        -->
             <!-- ============================================================ -->
-            <Grid Margin="0,0,0,8">
+            <Grid Margin="0,0,0,6">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
                 <!-- PC Name + OS -->
-                <Border Grid.Column="0" Margin="0,0,4,0" Padding="12,8"
+                <Border Grid.Column="0" Margin="0,0,3,0" Padding="10,6"
                         CornerRadius="6"
                         Background="{DynamicResource ControlFillColorDefaultBrush}">
                     <DockPanel>
                         <Border DockPanel.Dock="Left"
-                                Width="32" Height="32" CornerRadius="8"
+                                Width="30" Height="30" CornerRadius="7"
                                 Margin="0,0,8,0"
                                 Background="#1A06B6D4">
-                            <ui:SymbolIcon Symbol="Desktop24" FontSize="14"
+                            <ui:SymbolIcon Symbol="Desktop24" FontSize="13"
                                           HorizontalAlignment="Center" VerticalAlignment="Center"
                                           Foreground="#06B6D4" />
                         </Border>
@@ -73,15 +72,15 @@
                 </Border>
 
                 <!-- CPU -->
-                <Border Grid.Column="1" Margin="4,0,4,0" Padding="12,8"
+                <Border Grid.Column="1" Margin="3,0,3,0" Padding="10,6"
                         CornerRadius="6"
                         Background="{DynamicResource ControlFillColorDefaultBrush}">
                     <DockPanel>
                         <Border DockPanel.Dock="Left"
-                                Width="32" Height="32" CornerRadius="8"
+                                Width="30" Height="30" CornerRadius="7"
                                 Margin="0,0,8,0"
                                 Background="#1A8B5CF6">
-                            <ui:SymbolIcon Symbol="TopSpeed24" FontSize="14"
+                            <ui:SymbolIcon Symbol="TopSpeed24" FontSize="13"
                                           HorizontalAlignment="Center" VerticalAlignment="Center"
                                           Foreground="#8B5CF6" />
                         </Border>
@@ -96,40 +95,16 @@
                     </DockPanel>
                 </Border>
 
-                <!-- Network (moved from middle section to top bar) -->
-                <Border Grid.Column="2" Margin="4,0,4,0" Padding="12,8"
-                        CornerRadius="6"
-                        Background="{DynamicResource ControlFillColorDefaultBrush}">
-                    <DockPanel>
-                        <Border DockPanel.Dock="Left"
-                                Width="32" Height="32" CornerRadius="8"
-                                Margin="0,0,8,0"
-                                Background="#1A06B6D4">
-                            <ui:SymbolIcon Symbol="Globe24" FontSize="14"
-                                          HorizontalAlignment="Center" VerticalAlignment="Center"
-                                          Foreground="#06B6D4" />
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="{Binding ViewModel.LocalIpAddress, FallbackValue='Network'}"
-                                       FontSize="12" FontWeight="SemiBold"
-                                       TextTrimming="CharacterEllipsis" />
-                            <TextBlock Text="{Binding ViewModel.WanIpAddress, FallbackValue='...'}"
-                                       FontSize="10" Opacity="0.5"
-                                       TextTrimming="CharacterEllipsis" />
-                        </StackPanel>
-                    </DockPanel>
-                </Border>
-
                 <!-- GPU -->
-                <Border Grid.Column="3" Margin="4,0,0,0" Padding="12,8"
+                <Border Grid.Column="2" Margin="3,0,0,0" Padding="10,6"
                         CornerRadius="6"
                         Background="{DynamicResource ControlFillColorDefaultBrush}">
                     <DockPanel>
                         <Border DockPanel.Dock="Left"
-                                Width="32" Height="32" CornerRadius="8"
+                                Width="30" Height="30" CornerRadius="7"
                                 Margin="0,0,8,0"
                                 Background="#1AF59E0B">
-                            <ui:SymbolIcon Symbol="Video24" FontSize="14"
+                            <ui:SymbolIcon Symbol="Video24" FontSize="13"
                                           HorizontalAlignment="Center" VerticalAlignment="Center"
                                           Foreground="#F59E0B" />
                         </Border>
@@ -145,110 +120,60 @@
             </Grid>
 
             <!-- ============================================================ -->
-            <!-- Row 1: Two-column layout                                     -->
-            <!--   LEFT:  Memory Usage + Storage                              -->
-            <!--   RIGHT: RAM Slots/Channel + Disk Health                     -->
+            <!-- Row 1: Memory gauge | RAM + Network                          -->
             <!-- ============================================================ -->
-            <Grid Margin="0,0,0,8">
+            <Grid Margin="0,0,0,6">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="55*" />
                     <ColumnDefinition Width="45*" />
                 </Grid.ColumnDefinitions>
 
-                <!-- ======== LEFT COLUMN: Memory Usage + Storage ======== -->
-                <StackPanel Grid.Column="0" Margin="0,0,4,0">
-
-                    <!-- Memory Gauge (usage bar) -->
-                    <Border Padding="12,10" CornerRadius="6" Margin="0,0,0,6"
-                            Background="{DynamicResource ControlFillColorDefaultBrush}">
-                        <StackPanel>
-                            <DockPanel Margin="0,0,0,6">
-                                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
-                                    <TextBlock Text="MEMORY USAGE" FontSize="9" FontWeight="SemiBold"
-                                               Opacity="0.35" VerticalAlignment="Center" />
-                                    <ui:Button Appearance="Transparent"
-                                               Command="{Binding ViewModel.RefreshMemoryCommand}"
-                                               ToolTip="Refresh memory"
-                                               Padding="2" Margin="4,0,0,0"
-                                               VerticalAlignment="Center">
-                                        <ui:SymbolIcon Symbol="ArrowClockwise20" FontSize="10" Opacity="0.35" />
-                                    </ui:Button>
-                                </StackPanel>
-                                <TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right"
-                                           FontSize="10.5" VerticalAlignment="Center">
-                                    <Run Text="{Binding ViewModel.MemoryUsed, Mode=OneWay}" FontWeight="SemiBold" />
-                                    <Run Text=" / " Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                    <Run Text="{Binding ViewModel.MemoryTotal, Mode=OneWay}" />
-                                    <Run Text=" (" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                    <Run Text="{Binding ViewModel.MemoryPercent, Mode=OneWay, StringFormat={}{0}}" FontWeight="SemiBold" />
-                                    <Run Text="%)" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                </TextBlock>
-                            </DockPanel>
-                            <ProgressBar Value="{Binding ViewModel.MemoryPercent, Mode=OneWay}"
-                                         Maximum="100" Height="14" />
-                            <TextBlock Margin="0,4,0,0" FontSize="10" Opacity="0.4">
-                                <Run Text="Health: " />
-                                <Run Text="{Binding ViewModel.MemoryHealth, Mode=OneWay}" />
+                <!-- Memory Gauge (left — usage bar, first thing you see) -->
+                <Border Grid.Column="0" Margin="0,0,3,0" Padding="10,8" CornerRadius="6"
+                        Background="{DynamicResource ControlFillColorDefaultBrush}">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,4">
+                            <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="MEMORY USAGE" FontSize="9" FontWeight="SemiBold"
+                                           Opacity="0.35" VerticalAlignment="Center" />
+                                <ui:Button Appearance="Transparent"
+                                           Command="{Binding ViewModel.RefreshMemoryCommand}"
+                                           ToolTip="Refresh memory"
+                                           Padding="2" Margin="4,0,0,0"
+                                           VerticalAlignment="Center">
+                                    <ui:SymbolIcon Symbol="ArrowClockwise20" FontSize="10" Opacity="0.35" />
+                                </ui:Button>
+                            </StackPanel>
+                            <TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right"
+                                       FontSize="10.5" VerticalAlignment="Center">
+                                <Run Text="{Binding ViewModel.MemoryUsed, Mode=OneWay}" FontWeight="SemiBold" />
+                                <Run Text=" / " Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <Run Text="{Binding ViewModel.MemoryTotal, Mode=OneWay}" />
+                                <Run Text=" (" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <Run Text="{Binding ViewModel.MemoryPercent, Mode=OneWay, StringFormat={}{0}}" FontWeight="SemiBold" />
+                                <Run Text="%)" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             </TextBlock>
-                        </StackPanel>
-                    </Border>
+                        </DockPanel>
+                        <ProgressBar Value="{Binding ViewModel.MemoryPercent, Mode=OneWay}"
+                                     Maximum="100" Height="12" />
+                        <TextBlock Margin="0,3,0,0" FontSize="9.5" Opacity="0.4">
+                            <Run Text="Health: " />
+                            <Run Text="{Binding ViewModel.MemoryHealth, Mode=OneWay}" />
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
 
-                    <!-- Storage section -->
-                    <Border Padding="12,10" CornerRadius="6"
-                            Background="{DynamicResource ControlFillColorDefaultBrush}">
-                        <StackPanel>
-                            <TextBlock Text="STORAGE" FontSize="9" FontWeight="SemiBold"
-                                       Opacity="0.35" Margin="0,0,0,6" />
-                            <ItemsControl ItemsSource="{Binding ViewModel.LogicalDrives}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid Margin="0,0,0,5">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="100" />
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-
-                                            <TextBlock Grid.Column="0" Text="{Binding Label}" FontSize="11.5"
-                                                       FontWeight="SemiBold" VerticalAlignment="Center"
-                                                       TextTrimming="CharacterEllipsis" />
-
-                                            <ProgressBar Grid.Column="1"
-                                                         Value="{Binding UsedPercent, Mode=OneWay}"
-                                                         Maximum="100" Height="12"
-                                                         VerticalAlignment="Center"
-                                                         Margin="0,0,10,0" />
-
-                                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                                <TextBlock FontSize="10" Opacity="0.7">
-                                                    <Run Text="{Binding UsedDisplay, Mode=OneWay}" />
-                                                    <Run Text=" / " />
-                                                    <Run Text="{Binding TotalDisplay, Mode=OneWay}" />
-                                                </TextBlock>
-                                                <TextBlock Text="{Binding FreeDisplay}" FontSize="9.5" Opacity="0.4"
-                                                           Margin="6,0,0,0" VerticalAlignment="Center" />
-                                            </StackPanel>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-                    </Border>
-
-                </StackPanel>
-
-                <!-- ======== RIGHT COLUMN: RAM Slots + Disk Health ======== -->
-                <StackPanel Grid.Column="1" Margin="4,0,0,0">
-
-                    <!-- RAM Info (slots, type, speed, channel) -->
-                    <Border Padding="12,10" CornerRadius="6" Margin="0,0,0,6"
+                <!-- RAM + Network (right — stacked compact cards) -->
+                <StackPanel Grid.Column="1" Margin="3,0,0,0">
+                    <!-- RAM Info -->
+                    <Border Padding="10,7" CornerRadius="6" Margin="0,0,0,6"
                             Background="{DynamicResource ControlFillColorDefaultBrush}">
                         <DockPanel>
                             <Border DockPanel.Dock="Left"
-                                    Width="32" Height="32" CornerRadius="8"
+                                    Width="30" Height="30" CornerRadius="7"
                                     Margin="0,0,8,0"
                                     Background="#1A10B981">
-                                <ui:SymbolIcon Symbol="SlideSize24" FontSize="14"
+                                <ui:SymbolIcon Symbol="SlideSize24" FontSize="13"
                                               HorizontalAlignment="Center" VerticalAlignment="Center"
                                               Foreground="#10B981" />
                             </Border>
@@ -260,69 +185,134 @@
                             </StackPanel>
                         </DockPanel>
                     </Border>
-
-                    <!-- Disk Health section -->
-                    <Border Padding="12,10" CornerRadius="6"
+                    <!-- Network (LAN + WAN) -->
+                    <Border Padding="10,7" CornerRadius="6"
                             Background="{DynamicResource ControlFillColorDefaultBrush}">
-                        <StackPanel>
-                            <TextBlock Text="DISK HEALTH" FontSize="9" FontWeight="SemiBold"
-                                       Opacity="0.35" Margin="0,0,0,6" />
-                            <ItemsControl ItemsSource="{Binding ViewModel.PhysicalDisks}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Margin="0,0,0,5" Padding="10,7"
-                                                CornerRadius="5"
-                                                Background="{DynamicResource ApplicationBackgroundBrush}">
-                                            <StackPanel>
-                                                <TextBlock Text="{Binding Model}" FontSize="11" FontWeight="SemiBold"
-                                                           TextTrimming="CharacterEllipsis" />
-                                                <WrapPanel Margin="0,4,0,0">
-                                                    <!-- Bus + Media Type badge -->
-                                                    <Border Padding="5,1" CornerRadius="3" Margin="0,0,5,0"
-                                                            Background="#1A8B5CF6">
-                                                        <TextBlock Text="{Binding TypeSummary}" FontSize="9.5"
-                                                                   Foreground="#8B5CF6" />
-                                                    </Border>
-                                                    <!-- Health badge -->
-                                                    <Border Padding="5,1" CornerRadius="3" Margin="0,0,5,0"
-                                                            Background="#1A10B981">
-                                                        <TextBlock Text="{Binding HealthDisplay}" FontSize="9.5"
-                                                                   Foreground="#10B981" />
-                                                    </Border>
-                                                    <!-- Size -->
-                                                    <TextBlock Text="{Binding SizeFormatted}" FontSize="9.5"
-                                                               Opacity="0.5" VerticalAlignment="Center"
-                                                               Margin="0,0,5,0" />
-                                                    <!-- Temperature -->
-                                                    <TextBlock Text="{Binding TemperatureDisplay}" FontSize="9.5"
-                                                               Opacity="0.5" VerticalAlignment="Center" />
-                                                </WrapPanel>
-                                            </StackPanel>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
+                        <DockPanel>
+                            <Border DockPanel.Dock="Left"
+                                    Width="30" Height="30" CornerRadius="7"
+                                    Margin="0,0,8,0"
+                                    Background="#1A06B6D4">
+                                <ui:SymbolIcon Symbol="Globe24" FontSize="13"
+                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              Foreground="#06B6D4" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{Binding ViewModel.LocalIpAddress, FallbackValue='Network'}"
+                                           FontSize="12" FontWeight="SemiBold"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock Text="{Binding ViewModel.WanIpAddress, FallbackValue='...'}"
+                                           FontSize="10" Opacity="0.5"
+                                           TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </DockPanel>
                     </Border>
-
                 </StackPanel>
+            </Grid>
+
+            <!-- ============================================================ -->
+            <!-- Row 2: Storage | Disk Health — side by side                  -->
+            <!-- ============================================================ -->
+            <Grid Margin="0,0,0,6">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="45*" />
+                    <ColumnDefinition Width="55*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Storage bars (left) -->
+                <Border Grid.Column="0" Margin="0,0,3,0" Padding="10,8" CornerRadius="6"
+                        Background="{DynamicResource ControlFillColorDefaultBrush}">
+                    <StackPanel>
+                        <TextBlock Text="STORAGE" FontSize="9" FontWeight="SemiBold"
+                                   Opacity="0.35" Margin="0,0,0,4" />
+                        <ItemsControl ItemsSource="{Binding ViewModel.LogicalDrives}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="70" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0" Text="{Binding Label}" FontSize="11"
+                                                   FontWeight="SemiBold" VerticalAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis" />
+
+                                        <ProgressBar Grid.Column="1"
+                                                     Value="{Binding UsedPercent, Mode=OneWay}"
+                                                     Maximum="100" Height="10"
+                                                     VerticalAlignment="Center"
+                                                     Margin="0,0,6,0" />
+
+                                        <TextBlock Grid.Column="2" FontSize="9" Opacity="0.6"
+                                                   VerticalAlignment="Center">
+                                            <Run Text="{Binding FreeDisplay, Mode=OneWay}" />
+                                            <Run Text=" free" />
+                                        </TextBlock>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- Disk Health cards (right) -->
+                <Border Grid.Column="1" Margin="3,0,0,0" Padding="10,8" CornerRadius="6"
+                        Background="{DynamicResource ControlFillColorDefaultBrush}">
+                    <StackPanel>
+                        <TextBlock Text="DISK HEALTH" FontSize="9" FontWeight="SemiBold"
+                                   Opacity="0.35" Margin="0,0,0,4" />
+                        <ItemsControl ItemsSource="{Binding ViewModel.PhysicalDisks}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="0,0,0,4" Padding="8,5"
+                                            CornerRadius="5"
+                                            Background="{DynamicResource ApplicationBackgroundBrush}">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Model}" FontSize="10.5" FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <WrapPanel Margin="0,3,0,0">
+                                                <Border Padding="4,1" CornerRadius="3" Margin="0,0,4,0"
+                                                        Background="#1A8B5CF6">
+                                                    <TextBlock Text="{Binding TypeSummary}" FontSize="9"
+                                                               Foreground="#8B5CF6" />
+                                                </Border>
+                                                <Border Padding="4,1" CornerRadius="3" Margin="0,0,4,0"
+                                                        Background="#1A10B981">
+                                                    <TextBlock Text="{Binding HealthDisplay}" FontSize="9"
+                                                               Foreground="#10B981" />
+                                                </Border>
+                                                <TextBlock Text="{Binding SizeFormatted}" FontSize="9"
+                                                           Opacity="0.5" VerticalAlignment="Center"
+                                                           Margin="0,0,4,0" />
+                                                <TextBlock Text="{Binding TemperatureDisplay}" FontSize="9"
+                                                           Opacity="0.5" VerticalAlignment="Center" />
+                                            </WrapPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
             </Grid>
 
             <!-- ============================================================ -->
             <!-- Row 2: Top 5 CPU + Top 5 Memory — side by side              -->
             <!-- ============================================================ -->
-            <Grid Margin="0,0,0,8">
+            <Grid Margin="0,0,0,6">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
                 <!-- Top 5 CPU Processes -->
-                <Border Grid.Column="0" Margin="0,0,4,0" Padding="12,10"
+                <Border Grid.Column="0" Margin="0,0,3,0" Padding="10,8"
                         CornerRadius="6"
                         Background="{DynamicResource ControlFillColorDefaultBrush}">
                     <StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                             <TextBlock Text="TOP 5 — CPU USAGE" FontSize="9" FontWeight="SemiBold"
                                        Opacity="0.35" VerticalAlignment="Center" />
                             <ui:Button Appearance="Transparent"
@@ -337,15 +327,15 @@
                                       Grid.IsSharedSizeScope="True">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid Margin="0,2">
+                                    <Grid Margin="0,1">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" SharedSizeGroup="ProcName" />
                                             <ColumnDefinition Width="Auto" SharedSizeGroup="ProcCpu" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Grid.Column="0" Text="{Binding Name}"
-                                                   FontSize="11.5" TextTrimming="CharacterEllipsis"
+                                                   FontSize="11" TextTrimming="CharacterEllipsis"
                                                    VerticalAlignment="Center" />
-                                        <TextBlock Grid.Column="1" FontSize="11.5"
+                                        <TextBlock Grid.Column="1" FontSize="11"
                                                    HorizontalAlignment="Right" Margin="8,0,0,0"
                                                    VerticalAlignment="Center">
                                             <Run Text="{Binding CpuFormatted, Mode=OneWay}" FontWeight="SemiBold" />
@@ -359,11 +349,11 @@
                 </Border>
 
                 <!-- Top 5 Memory Hoggers -->
-                <Border Grid.Column="1" Margin="4,0,0,0" Padding="12,10"
+                <Border Grid.Column="1" Margin="3,0,0,0" Padding="10,8"
                         CornerRadius="6"
                         Background="{DynamicResource ControlFillColorDefaultBrush}">
                     <StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                             <TextBlock Text="TOP 5 — MEMORY USAGE" FontSize="9" FontWeight="SemiBold"
                                        Opacity="0.35" VerticalAlignment="Center" />
                             <ui:Button Appearance="Transparent"
@@ -378,16 +368,16 @@
                                       Grid.IsSharedSizeScope="True">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid Margin="0,2">
+                                    <Grid Margin="0,1">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" SharedSizeGroup="MemName" />
                                             <ColumnDefinition Width="Auto" SharedSizeGroup="MemVal" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Grid.Column="0" Text="{Binding Name}"
-                                                   FontSize="11.5" TextTrimming="CharacterEllipsis"
+                                                   FontSize="11" TextTrimming="CharacterEllipsis"
                                                    VerticalAlignment="Center" />
                                         <TextBlock Grid.Column="1" Text="{Binding WorkingSetFormatted}"
-                                                   FontSize="11.5" FontWeight="SemiBold"
+                                                   FontSize="11" FontWeight="SemiBold"
                                                    HorizontalAlignment="Right" Margin="8,0,0,0"
                                                    VerticalAlignment="Center" />
                                     </Grid>
@@ -400,20 +390,20 @@
 
             <!-- ============================================================ -->
             <!-- Row 3: Recent Errors + Outdated Drivers — side by side       -->
-            <!--   Drivers list constrained with MaxHeight + scroll           -->
+            <!--   Both constrained with MaxHeight + scroll                   -->
             <!-- ============================================================ -->
-            <Grid Margin="0,0,0,8">
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
                 <!-- Latest 5 Errors -->
-                <Border Grid.Column="0" Margin="0,0,4,0" Padding="12,10"
+                <Border Grid.Column="0" Margin="0,0,3,0" Padding="10,8"
                         CornerRadius="6"
                         Background="{DynamicResource ControlFillColorDefaultBrush}">
                     <StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                             <TextBlock Text="RECENT ERRORS (7 DAYS)" FontSize="9" FontWeight="SemiBold"
                                        Opacity="0.35" VerticalAlignment="Center" />
                             <ui:Button Appearance="Transparent"
@@ -424,35 +414,38 @@
                                 <ui:SymbolIcon Symbol="ArrowClockwise20" FontSize="10" Opacity="0.35" />
                             </ui:Button>
                         </StackPanel>
-                        <ItemsControl ItemsSource="{Binding ViewModel.RecentErrors}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Margin="0,2">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <Ellipse Grid.Column="0" Width="6" Height="6"
-                                                 Fill="#EF4444" Margin="0,0,6,0"
-                                                 VerticalAlignment="Center" />
-                                        <TextBlock Grid.Column="1" FontSize="10.5"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   VerticalAlignment="Center">
-                                            <Run Text="{Binding Source, Mode=OneWay}" FontWeight="SemiBold" />
-                                            <Run Text=" " />
-                                            <Run Text="{Binding EventId, Mode=OneWay}" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                        </TextBlock>
-                                        <TextBlock Grid.Column="2" Text="{Binding TimeFormatted}"
-                                                   FontSize="9.5" Opacity="0.4" Margin="6,0,0,0"
-                                                   VerticalAlignment="Center" />
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <ScrollViewer MaxHeight="110" VerticalScrollBarVisibility="Auto"
+                                      CanContentScroll="False">
+                            <ItemsControl ItemsSource="{Binding ViewModel.RecentErrors}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <Ellipse Grid.Column="0" Width="5" Height="5"
+                                                     Fill="#EF4444" Margin="0,0,5,0"
+                                                     VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="1" FontSize="10"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       VerticalAlignment="Center">
+                                                <Run Text="{Binding Source, Mode=OneWay}" FontWeight="SemiBold" />
+                                                <Run Text=" " />
+                                                <Run Text="{Binding EventId, Mode=OneWay}" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            </TextBlock>
+                                            <TextBlock Grid.Column="2" Text="{Binding TimeFormatted}"
+                                                       FontSize="9" Opacity="0.4" Margin="4,0,0,0"
+                                                       VerticalAlignment="Center" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
                         <!-- Empty state -->
                         <TextBlock Text="No errors in the past 7 days"
-                                   FontSize="10.5" Opacity="0.3" FontStyle="Italic">
+                                   FontSize="10" Opacity="0.3" FontStyle="Italic">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Visibility" Value="Collapsed" />
@@ -468,11 +461,11 @@
                 </Border>
 
                 <!-- Outdated Drivers — scrollable with MaxHeight -->
-                <Border Grid.Column="1" Margin="4,0,0,0" Padding="12,10"
+                <Border Grid.Column="1" Margin="3,0,0,0" Padding="10,8"
                         CornerRadius="6"
                         Background="{DynamicResource ControlFillColorDefaultBrush}">
                     <StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                             <TextBlock Text="OUTDATED DRIVERS (&gt;3 YEARS)" FontSize="9" FontWeight="SemiBold"
                                        Opacity="0.35" VerticalAlignment="Center" />
                             <ui:Button Appearance="Transparent"
@@ -483,26 +476,26 @@
                                 <ui:SymbolIcon Symbol="ArrowClockwise20" FontSize="10" Opacity="0.35" />
                             </ui:Button>
                         </StackPanel>
-                        <ScrollViewer MaxHeight="160" VerticalScrollBarVisibility="Auto"
+                        <ScrollViewer MaxHeight="110" VerticalScrollBarVisibility="Auto"
                                       CanContentScroll="False">
                             <ItemsControl ItemsSource="{Binding ViewModel.OutdatedDrivers}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Margin="0,2">
+                                        <Grid Margin="0,1">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="Auto" />
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-                                            <Ellipse Grid.Column="0" Width="6" Height="6"
-                                                     Fill="#F59E0B" Margin="0,0,6,0"
+                                            <Ellipse Grid.Column="0" Width="5" Height="5"
+                                                     Fill="#F59E0B" Margin="0,0,5,0"
                                                      VerticalAlignment="Center" />
                                             <TextBlock Grid.Column="1" Text="{Binding DeviceName}"
-                                                       FontSize="10.5" TextTrimming="CharacterEllipsis"
+                                                       FontSize="10" TextTrimming="CharacterEllipsis"
                                                        VerticalAlignment="Center" />
                                             <TextBlock Grid.Column="2" Text="{Binding AgeSummary}"
-                                                       FontSize="9.5" Opacity="0.5"
-                                                       Margin="8,0,0,0" VerticalAlignment="Center" />
+                                                       FontSize="9" Opacity="0.5"
+                                                       Margin="6,0,0,0" VerticalAlignment="Center" />
                                         </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
@@ -510,7 +503,7 @@
                         </ScrollViewer>
                         <!-- Empty state -->
                         <TextBlock Text="All drivers are up to date"
-                                   FontSize="10.5" Opacity="0.3" FontStyle="Italic">
+                                   FontSize="10" Opacity="0.3" FontStyle="Italic">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Visibility" Value="Collapsed" />

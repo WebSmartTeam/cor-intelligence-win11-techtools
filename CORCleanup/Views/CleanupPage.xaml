@@ -127,7 +127,7 @@
             </TabItem>
 
             <!-- ============================================================ -->
-            <!--  TAB 2: Browser Cleanup (new)                                -->
+            <!--  TAB 2: Browser Cleanup (existing content)                   -->
             <!-- ============================================================ -->
             <TabItem Header="Browser Cleanup">
                 <Grid Margin="8,12">
@@ -296,6 +296,347 @@
                                Opacity="0.6"
                                FontSize="12"
                                Margin="0,8,0,0" />
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================ -->
+            <!--  TAB 3: Registry Scanner (moved from RegistryPage)           -->
+            <!--  Bindings remapped to Reg-prefixed properties on             -->
+            <!--  CleanupViewModel                                            -->
+            <!-- ============================================================ -->
+            <TabItem Header="Registry Scanner">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Action buttons -->
+                    <WrapPanel Grid.Row="0" Margin="0,0,0,12">
+                        <ui:Button Content="Scan Registry"
+                                   Appearance="Primary"
+                                   Command="{Binding ViewModel.ScanRegistryCommand}"
+                                   MinWidth="130"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Content="Stop"
+                                   Appearance="Danger"
+                                   Command="{Binding ViewModel.StopRegScanCommand}"
+                                   Visibility="{Binding ViewModel.RegIsScanning, Converter={StaticResource BoolToVis}}"
+                                   MinWidth="70"
+                                   Margin="0,0,16,0" />
+                        <ui:Button Content="Fix Selected"
+                                   Appearance="Success"
+                                   Command="{Binding ViewModel.RegFixSelectedCommand}"
+                                   Visibility="{Binding ViewModel.RegHasScanned, Converter={StaticResource BoolToVis}}"
+                                   MinWidth="110"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Content="Select All"
+                                   Command="{Binding ViewModel.RegSelectAllCommand}"
+                                   Visibility="{Binding ViewModel.RegHasScanned, Converter={StaticResource BoolToVis}}"
+                                   MinWidth="80"
+                                   Margin="0,0,4,0" />
+                        <ui:Button Content="Safe Only"
+                                   Command="{Binding ViewModel.RegSelectSafeOnlyCommand}"
+                                   Visibility="{Binding ViewModel.RegHasScanned, Converter={StaticResource BoolToVis}}"
+                                   MinWidth="80"
+                                   Margin="0,0,4,0" />
+                        <ui:Button Content="Select None"
+                                   Command="{Binding ViewModel.RegSelectNoneCommand}"
+                                   Visibility="{Binding ViewModel.RegHasScanned, Converter={StaticResource BoolToVis}}"
+                                   MinWidth="90" />
+                    </WrapPanel>
+
+                    <!-- Scan progress text -->
+                    <TextBlock Grid.Row="1"
+                               Text="{Binding ViewModel.RegScanProgress}"
+                               Visibility="{Binding ViewModel.RegScanProgress, Converter={StaticResource StringToVis}}"
+                               Opacity="0.7"
+                               Margin="0,0,0,8" />
+
+                    <!-- Results summary card -->
+                    <ui:Card Grid.Row="2"
+                             Padding="12"
+                             Margin="0,0,0,12"
+                             Visibility="{Binding ViewModel.RegHasScanned, Converter={StaticResource BoolToVis}}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="{Binding ViewModel.RegResultsSummary}"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <!-- Risk legend -->
+                                <Border Background="#2D7D46" CornerRadius="3"
+                                        Padding="8,2" Margin="0,0,6,0">
+                                    <TextBlock Text="Safe" FontSize="11"
+                                               Foreground="White" />
+                                </Border>
+                                <Border Background="#B8860B" CornerRadius="3"
+                                        Padding="8,2" Margin="0,0,6,0">
+                                    <TextBlock Text="Review" FontSize="11"
+                                               Foreground="White" />
+                                </Border>
+                                <Border Background="#C41E3A" CornerRadius="3"
+                                        Padding="8,2">
+                                    <TextBlock Text="Caution" FontSize="11"
+                                               Foreground="White" />
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </ui:Card>
+
+                    <!-- Issues DataGrid -->
+                    <DataGrid Grid.Row="3"
+                              ItemsSource="{Binding ViewModel.RegIssues}"
+                              IsReadOnly="False"
+                              SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Header=""
+                                                     Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
+                                                     Width="35" />
+                            <DataGridTextColumn Header="Risk"
+                                                Binding="{Binding RiskDisplayName}"
+                                                Width="65"
+                                                IsReadOnly="True" />
+                            <DataGridTextColumn Header="Category"
+                                                Binding="{Binding CategoryDisplayName}"
+                                                Width="180"
+                                                IsReadOnly="True" />
+                            <DataGridTextColumn Header="Description"
+                                                Binding="{Binding Description}"
+                                                Width="*"
+                                                IsReadOnly="True" />
+                            <DataGridTextColumn Header="Registry Path"
+                                                Binding="{Binding KeyPath}"
+                                                Width="300"
+                                                IsReadOnly="True" />
+                        </DataGrid.Columns>
+
+                        <!-- Row styling based on risk level -->
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow"
+                                   BasedOn="{StaticResource {x:Type DataGridRow}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Risk}" Value="Safe">
+                                        <Setter Property="Foreground" Value="#7DBF8E" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Risk}" Value="Review">
+                                        <Setter Property="Foreground" Value="#D4A843" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Risk}" Value="Caution">
+                                        <Setter Property="Foreground" Value="#E06666" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================ -->
+            <!--  TAB 4: Registry Backups (moved from RegistryPage)           -->
+            <!--  Bindings remapped to Reg-prefixed properties on             -->
+            <!--  CleanupViewModel                                            -->
+            <!-- ============================================================ -->
+            <TabItem Header="Registry Backups">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Backup action buttons -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+                        <ui:Button Content="Load Backups"
+                                   Appearance="Primary"
+                                   Command="{Binding ViewModel.LoadRegBackupsCommand}"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Content="Restore Selected"
+                                   Appearance="Success"
+                                   Command="{Binding ViewModel.RestoreRegBackupCommand}"
+                                   MinWidth="120"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Content="Delete Selected"
+                                   Appearance="Danger"
+                                   Command="{Binding ViewModel.DeleteRegBackupCommand}"
+                                   MinWidth="120"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Content="Open Folder"
+                                   Command="{Binding ViewModel.OpenRegBackupFolderCommand}"
+                                   MinWidth="100" />
+                    </StackPanel>
+
+                    <!-- Backups DataGrid -->
+                    <DataGrid Grid.Row="1"
+                              ItemsSource="{Binding ViewModel.RegBackups}"
+                              SelectedItem="{Binding ViewModel.SelectedRegBackup}"
+                              SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="File Name"
+                                                Binding="{Binding FileName}"
+                                                Width="250"
+                                                IsReadOnly="True" />
+                            <DataGridTextColumn Header="Created"
+                                                Binding="{Binding CreatedFormatted}"
+                                                Width="150"
+                                                IsReadOnly="True" />
+                            <DataGridTextColumn Header="Size"
+                                                Binding="{Binding SizeFormatted}"
+                                                Width="100"
+                                                IsReadOnly="True" />
+                            <DataGridTextColumn Header="Issues"
+                                                Binding="{Binding IssueCount}"
+                                                Width="70"
+                                                IsReadOnly="True" />
+                            <DataGridTextColumn Header="Full Path"
+                                                Binding="{Binding FilePath}"
+                                                Width="*"
+                                                IsReadOnly="True" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================ -->
+            <!--  TAB 5: Debloat (moved from AdminPage)                       -->
+            <!--  Bindings use same property names on CleanupViewModel        -->
+            <!-- ============================================================ -->
+            <TabItem Header="Debloat">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Toolbar -->
+                    <WrapPanel Grid.Row="0" Margin="0,0,0,12">
+                        <ui:Button Content="Scan for Bloatware"
+                                   Appearance="Primary"
+                                   Command="{Binding ViewModel.ScanBloatwareCommand}"
+                                   MinWidth="160"
+                                   Margin="0,0,8,4" />
+                        <ui:Button Content="Select All Safe"
+                                   Command="{Binding ViewModel.SelectAllSafeBloatwareCommand}"
+                                   MinWidth="120"
+                                   Margin="0,0,8,4"
+                                   ToolTip="Select all packages rated Safe (green) for removal" />
+                        <ui:Button Content="Deselect All"
+                                   Command="{Binding ViewModel.DeselectAllBloatwareCommand}"
+                                   MinWidth="100"
+                                   Margin="0,0,8,4" />
+                        <ui:Button Content="Remove Selected"
+                                   Appearance="Danger"
+                                   Command="{Binding ViewModel.RemoveSelectedBloatwareCommand}"
+                                   MinWidth="140"
+                                   Margin="0,0,16,4"
+                                   ToolTip="Remove selected packages for all users and deprovision" />
+
+                        <TextBlock Text="Filter:" VerticalAlignment="Center" Margin="0,0,6,4" />
+                        <ComboBox ItemsSource="{Binding ViewModel.DebloatCategories}"
+                                  SelectedItem="{Binding ViewModel.DebloatCategoryFilter}"
+                                  Width="160" Margin="0,0,0,4" />
+                    </WrapPanel>
+
+                    <!-- Quick Actions -->
+                    <ui:Card Grid.Row="1" Padding="12" Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="Quick Actions (Registry Policies)"
+                                       FontWeight="SemiBold" Margin="0,0,0,8" />
+                            <WrapPanel>
+                                <ui:Button Content="Disable Copilot"
+                                           Appearance="Caution"
+                                           Command="{Binding ViewModel.DisableCopilotCommand}"
+                                           MinWidth="140"
+                                           Margin="0,0,8,4"
+                                           ToolTip="Removes Copilot AppX package and disables via registry policies" />
+                                <ui:Button Content="Disable Recall"
+                                           Appearance="Caution"
+                                           Command="{Binding ViewModel.DisableRecallCommand}"
+                                           MinWidth="140"
+                                           Margin="0,0,8,4"
+                                           ToolTip="Disables Windows Recall on 24H2 Copilot+ PCs via registry" />
+                                <ui:Button Content="Apply Privacy Tweaks"
+                                           Command="{Binding ViewModel.ApplyPrivacyTweaksCommand}"
+                                           MinWidth="170"
+                                           Margin="0,0,8,4"
+                                           ToolTip="Disables telemetry, advertising ID, Start suggestions, Bing search, lock screen ads" />
+                            </WrapPanel>
+                        </StackPanel>
+                    </ui:Card>
+
+                    <!-- Package list -->
+                    <DataGrid Grid.Row="2"
+                              ItemsSource="{Binding ViewModel.FilteredBloatwarePackages}"
+                              IsReadOnly="False"
+                              SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Header=""
+                                                     Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
+                                                     Width="35" />
+                            <DataGridTextColumn Header="Name"
+                                                Binding="{Binding FriendlyName}"
+                                                Width="180"
+                                                IsReadOnly="True" />
+                            <DataGridTextColumn Header="Category"
+                                                Binding="{Binding CategoryDisplay}"
+                                                Width="120"
+                                                IsReadOnly="True" />
+                            <DataGridTextColumn Header="Safety"
+                                                Binding="{Binding SafetyDisplay}"
+                                                Width="70"
+                                                IsReadOnly="True" />
+                            <DataGridTextColumn Header="Status"
+                                                Binding="{Binding StatusDisplay}"
+                                                Width="90"
+                                                IsReadOnly="True" />
+                            <DataGridTextColumn Header="Package"
+                                                Binding="{Binding PackageName}"
+                                                Width="220"
+                                                IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontFamily" Value="Consolas" />
+                                        <Setter Property="FontSize" Value="11" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Description"
+                                                Binding="{Binding Description}"
+                                                Width="*"
+                                                IsReadOnly="True" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Output log -->
+                    <ui:Card Grid.Row="3" Padding="0" Margin="0,12,0,0"
+                             Visibility="{Binding ViewModel.IsLoadingBloatware, Converter={StaticResource BoolToVis}}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <ProgressBar Grid.Row="0" IsIndeterminate="True" Height="4" />
+                            <TextBox Grid.Row="1"
+                                     Text="{Binding ViewModel.DebloatOutput, Mode=OneWay}"
+                                     IsReadOnly="True"
+                                     FontFamily="Consolas"
+                                     FontSize="11"
+                                     TextWrapping="Wrap"
+                                     VerticalScrollBarVisibility="Auto"
+                                     MaxHeight="150"
+                                     Padding="12"
+                                     BorderThickness="0" />
+                        </Grid>
+                    </ui:Card>
                 </Grid>
             </TabItem>
 

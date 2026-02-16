@@ -138,21 +138,34 @@ public sealed class DiskAnalyserService : IDiskAnalyserService
 
     /// <summary>
     /// Calculates total size of a directory tree without building child nodes.
-    /// Used for directories beyond maxDepth.
+    /// Uses manual recursion instead of SearchOption.AllDirectories so that
+    /// an access-denied subdirectory only loses THAT subtree, not the entire enumeration.
     /// </summary>
     private static long CalculateDirectorySize(DirectoryInfo dir, CancellationToken ct)
     {
         long total = 0;
 
+        // Sum files in this directory
         try
         {
-            foreach (var file in dir.EnumerateFiles("*", SearchOption.AllDirectories))
+            foreach (var file in dir.EnumerateFiles())
             {
                 ct.ThrowIfCancellationRequested();
-                try
-                {
-                    total += file.Length;
-                }
+                try { total += file.Length; }
+                catch (UnauthorizedAccessException) { }
+                catch (IOException) { }
+            }
+        }
+        catch (UnauthorizedAccessException) { }
+        catch (IOException) { }
+
+        // Recurse into each subdirectory independently
+        try
+        {
+            foreach (var subDir in dir.EnumerateDirectories())
+            {
+                ct.ThrowIfCancellationRequested();
+                try { total += CalculateDirectorySize(subDir, ct); }
                 catch (UnauthorizedAccessException) { }
                 catch (IOException) { }
             }
@@ -181,7 +194,8 @@ public sealed class DiskAnalyserService : IDiskAnalyserService
 
     /// <summary>
     /// Enumerates all files recursively, maintaining a bounded set of the largest N.
-    /// When the set exceeds <paramref name="count"/>, the smallest entry is evicted.
+    /// Uses manual recursion instead of SearchOption.AllDirectories so that
+    /// an access-denied subdirectory only loses THAT subtree, not the entire enumeration.
     /// </summary>
     private static void EnumerateLargestFiles(
         DirectoryInfo dir,
@@ -189,33 +203,44 @@ public sealed class DiskAnalyserService : IDiskAnalyserService
         int count,
         CancellationToken ct)
     {
-        IEnumerable<FileInfo> files;
+        // Process files in this directory
         try
         {
-            files = dir.EnumerateFiles("*", SearchOption.AllDirectories);
-        }
-        catch (UnauthorizedAccessException) { return; }
-        catch (IOException) { return; }
-
-        foreach (var file in files)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            try
+            foreach (var file in dir.EnumerateFiles())
             {
-                long size = file.Length;
+                ct.ThrowIfCancellationRequested();
 
-                // Skip if this file is smaller than our current smallest and set is full
-                if (topFiles.Count >= count && size <= topFiles.Min.Size)
-                    continue;
+                try
+                {
+                    long size = file.Length;
 
-                topFiles.Add((size, file.FullName, file.LastWriteTime, file.Extension));
+                    if (topFiles.Count >= count && size <= topFiles.Min.Size)
+                        continue;
 
-                if (topFiles.Count > count)
-                    topFiles.Remove(topFiles.Min);
+                    topFiles.Add((size, file.FullName, file.LastWriteTime, file.Extension));
+
+                    if (topFiles.Count > count)
+                        topFiles.Remove(topFiles.Min);
+                }
+                catch (UnauthorizedAccessException) { }
+                catch (IOException) { }
             }
-            catch (UnauthorizedAccessException) { }
-            catch (IOException) { }
         }
+        catch (UnauthorizedAccessException) { }
+        catch (IOException) { }
+
+        // Recurse into each subdirectory independently
+        try
+        {
+            foreach (var subDir in dir.EnumerateDirectories())
+            {
+                ct.ThrowIfCancellationRequested();
+                try { EnumerateLargestFiles(subDir, topFiles, count, ct); }
+                catch (UnauthorizedAccessException) { }
+                catch (IOException) { }
+            }
+        }
+        catch (UnauthorizedAccessException) { }
+        catch (IOException) { }
     }
 }

@@ -203,31 +203,34 @@
                         <TextBlock Text="Run Windows repair tools (requires administrator privileges)"
                                    Opacity="0.7" Margin="0,0,0,16" />
 
-                        <!-- Repair buttons -->
+                        <!-- Repair buttons — each highlights only while its operation is running -->
                         <WrapPanel Margin="0,0,0,16">
                             <ui:Button Content="SFC Scan"
-                                       Appearance="Primary"
+                                       Appearance="{Binding ViewModel.IsSfcRunning, Converter={StaticResource BoolToAppearance}}"
                                        Command="{Binding ViewModel.RunSfcScanCommand}"
                                        MinWidth="140"
                                        Margin="0,0,8,8"
                                        ToolTip="System File Checker — scans and repairs protected system files" />
                             <ui:Button Content="DISM Repair"
-                                       Appearance="Primary"
+                                       Appearance="{Binding ViewModel.IsDismRunning, Converter={StaticResource BoolToAppearance}}"
                                        Command="{Binding ViewModel.RunDismRepairCommand}"
                                        MinWidth="140"
                                        Margin="0,0,8,8"
                                        ToolTip="DISM Restore Health — repairs the Windows component store" />
                             <ui:Button Content="Network Reset"
+                                       Appearance="{Binding ViewModel.IsNetworkResetRunning, Converter={StaticResource BoolToAppearance}}"
                                        Command="{Binding ViewModel.RunNetworkResetCommand}"
                                        MinWidth="140"
                                        Margin="0,0,8,8"
                                        ToolTip="Resets Winsock, TCP/IP, DNS cache, and TCP settings" />
                             <ui:Button Content="Flush DNS"
+                                       Appearance="{Binding ViewModel.IsDnsFlushRunning, Converter={StaticResource BoolToAppearance}}"
                                        Command="{Binding ViewModel.RunDnsFlushCommand}"
                                        MinWidth="110"
                                        Margin="0,0,8,8"
                                        ToolTip="Flushes the DNS resolver cache" />
                             <ui:Button Content="WU Reset"
+                                       Appearance="{Binding ViewModel.IsWuResetRunning, Converter={StaticResource BoolToAppearance}}"
                                        Command="{Binding ViewModel.RunWindowsUpdateResetCommand}"
                                        MinWidth="110"
                                        Margin="0,0,8,8"
@@ -433,123 +436,9 @@
                     </DataGrid>
                 </Grid>
             </TabItem>
-            <!-- ============================================================ -->
-            <!-- TAB 7: Debloat / Bloatware Removal -->
-            <!-- ============================================================ -->
-            <TabItem Header="Debloat">
-                <Grid Margin="16">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-
-                    <!-- Toolbar -->
-                    <WrapPanel Grid.Row="0" Margin="0,0,0,12">
-                        <ui:Button Content="Scan for Bloatware"
-                                   Appearance="Primary"
-                                   Command="{Binding ViewModel.ScanBloatwareCommand}"
-                                   MinWidth="160"
-                                   Margin="0,0,8,4" />
-                        <ui:Button Content="Select All Safe"
-                                   Command="{Binding ViewModel.SelectAllSafeBloatwareCommand}"
-                                   MinWidth="120"
-                                   Margin="0,0,8,4"
-                                   ToolTip="Select all packages rated Safe (green) for removal" />
-                        <ui:Button Content="Deselect All"
-                                   Command="{Binding ViewModel.DeselectAllBloatwareCommand}"
-                                   MinWidth="100"
-                                   Margin="0,0,8,4" />
-                        <ui:Button Content="Remove Selected"
-                                   Appearance="Danger"
-                                   Command="{Binding ViewModel.RemoveSelectedBloatwareCommand}"
-                                   MinWidth="140"
-                                   Margin="0,0,16,4"
-                                   ToolTip="Remove selected packages for all users and deprovision" />
-
-                        <TextBlock Text="Filter:" VerticalAlignment="Center" Margin="0,0,6,4" />
-                        <ComboBox ItemsSource="{Binding ViewModel.DebloatCategories}"
-                                  SelectedItem="{Binding ViewModel.DebloatCategoryFilter}"
-                                  Width="160" Margin="0,0,0,4" />
-                    </WrapPanel>
-
-                    <!-- Quick Actions -->
-                    <ui:Card Grid.Row="1" Padding="12" Margin="0,0,0,12">
-                        <StackPanel>
-                            <TextBlock Text="Quick Actions (Registry Policies)"
-                                       FontWeight="SemiBold" Margin="0,0,0,8" />
-                            <WrapPanel>
-                                <ui:Button Content="Disable Copilot"
-                                           Appearance="Caution"
-                                           Command="{Binding ViewModel.DisableCopilotCommand}"
-                                           MinWidth="140"
-                                           Margin="0,0,8,4"
-                                           ToolTip="Removes Copilot AppX package and disables via registry policies" />
-                                <ui:Button Content="Disable Recall"
-                                           Appearance="Caution"
-                                           Command="{Binding ViewModel.DisableRecallCommand}"
-                                           MinWidth="140"
-                                           Margin="0,0,8,4"
-                                           ToolTip="Disables Windows Recall on 24H2 Copilot+ PCs via registry" />
-                                <ui:Button Content="Apply Privacy Tweaks"
-                                           Command="{Binding ViewModel.ApplyPrivacyTweaksCommand}"
-                                           MinWidth="170"
-                                           Margin="0,0,8,4"
-                                           ToolTip="Disables telemetry, advertising ID, Start suggestions, Bing search, lock screen ads" />
-                            </WrapPanel>
-                        </StackPanel>
-                    </ui:Card>
-
-                    <!-- Package list -->
-                    <DataGrid Grid.Row="2"
-                              ItemsSource="{Binding ViewModel.FilteredBloatwarePackages}"
-                              IsReadOnly="False"
-                              SelectionMode="Single">
-                        <DataGrid.Columns>
-                            <DataGridCheckBoxColumn Header="" Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}" Width="35" />
-                            <DataGridTextColumn Header="Name" Binding="{Binding FriendlyName}" Width="180" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Category" Binding="{Binding CategoryDisplay}" Width="120" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Safety" Binding="{Binding SafetyDisplay}" Width="70" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Status" Binding="{Binding StatusDisplay}" Width="90" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Package" Binding="{Binding PackageName}" Width="220" IsReadOnly="True">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="FontFamily" Value="Consolas" />
-                                        <Setter Property="FontSize" Value="11" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                            <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*" IsReadOnly="True" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-
-                    <!-- Output log -->
-                    <ui:Card Grid.Row="3" Padding="0" Margin="0,12,0,0"
-                             Visibility="{Binding ViewModel.IsLoadingBloatware, Converter={StaticResource BoolToVis}}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            <ProgressBar Grid.Row="0" IsIndeterminate="True" Height="4" />
-                            <TextBox Grid.Row="1"
-                                     Text="{Binding ViewModel.DebloatOutput, Mode=OneWay}"
-                                     IsReadOnly="True"
-                                     FontFamily="Consolas"
-                                     FontSize="11"
-                                     TextWrapping="Wrap"
-                                     VerticalScrollBarVisibility="Auto"
-                                     MaxHeight="150"
-                                     Padding="12"
-                                     BorderThickness="0" />
-                        </Grid>
-                    </ui:Card>
-                </Grid>
-            </TabItem>
 
             <!-- ============================================================ -->
-            <!-- TAB 8: Firewall Rules -->
+            <!-- TAB 7: Firewall Rules -->
             <!-- ============================================================ -->
             <TabItem Header="Firewall">
                 <Grid Margin="16">
@@ -638,7 +527,7 @@
             </TabItem>
 
             <!-- ============================================================ -->
-            <!-- TAB 9: Environment Variables -->
+            <!-- TAB 8: Environment Variables -->
             <!-- ============================================================ -->
             <TabItem Header="Env Vars">
                 <Grid Margin="16">
@@ -770,6 +659,302 @@
                         </Grid>
                     </ui:Card>
                 </Grid>
+            </TabItem>
+
+            <!-- ============================================================ -->
+            <!-- TAB 9: AV Health (moved from Tools) -->
+            <!-- ============================================================ -->
+            <TabItem Header="AV Health">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Scan button and description -->
+                    <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <ui:Button Content="Scan Antivirus Products"
+                                       Appearance="Primary"
+                                       Command="{Binding ViewModel.ScanAntivirusCommand}"
+                                       MinWidth="200"
+                                       Margin="0,0,12,0" />
+                            <ProgressBar IsIndeterminate="True"
+                                         Width="120"
+                                         Height="4"
+                                         VerticalAlignment="Center"
+                                         Visibility="{Binding ViewModel.IsScanningAv, Converter={StaticResource BoolToVis}}" />
+                        </StackPanel>
+                        <TextBlock Text="Scans WMI Security Centre, registry uninstall keys, Windows services, and common file system paths to detect active, installed, and remnant antivirus products."
+                                   TextWrapping="Wrap"
+                                   Opacity="0.6"
+                                   FontSize="12" />
+                    </StackPanel>
+
+                    <!-- AV Products DataGrid -->
+                    <DataGrid Grid.Row="2"
+                              ItemsSource="{Binding ViewModel.AntivirusProducts}"
+                              SelectedItem="{Binding ViewModel.SelectedAvProduct}"
+                              SelectionMode="Single"
+                              IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Status" Binding="{Binding StatusDisplay}" Width="90">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Product" Binding="{Binding ProductName}" Width="*" />
+                            <DataGridTextColumn Header="Publisher" Binding="{Binding Publisher}" Width="140" />
+                            <DataGridTextColumn Header="Enabled" Binding="{Binding EnabledDisplay}" Width="70" />
+                            <DataGridTextColumn Header="Up to Date" Binding="{Binding UpToDateDisplay}" Width="80" />
+                            <DataGridTextColumn Header="Remnants" Binding="{Binding RemnantCount}" Width="80">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="TextAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+
+                        <!-- Row colour by status -->
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow"
+                                   BasedOn="{StaticResource {x:Type DataGridRow}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding StatusDisplay}" Value="Active">
+                                        <Setter Property="Foreground" Value="#4CAF50" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding StatusDisplay}" Value="Installed">
+                                        <Setter Property="Foreground" Value="#2196F3" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding StatusDisplay}" Value="Remnant">
+                                        <Setter Property="Foreground" Value="#FF9800" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding StatusDisplay}" Value="Conflict">
+                                        <Setter Property="Foreground" Value="#F44336" />
+                                        <Setter Property="FontWeight" Value="Bold" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </DataGrid>
+
+                    <!-- Remnant Details Expander -->
+                    <Expander Grid.Row="3"
+                              Header="Remnant Details"
+                              Margin="0,12,0,0"
+                              Visibility="{Binding ViewModel.SelectedAvProduct.HasRemnants, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}">
+                        <StackPanel Margin="8">
+                            <!-- Summary -->
+                            <TextBlock Text="{Binding ViewModel.SelectedAvProduct.RemnantSummary}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,0,0,12"
+                                       Opacity="0.8" />
+
+                            <!-- Remnant Paths (Folders) -->
+                            <TextBlock Text="Folders"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,4" />
+                            <ItemsControl ItemsSource="{Binding ViewModel.SelectedAvProduct.RemnantPaths}"
+                                          Margin="0,0,0,12">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}"
+                                                   FontFamily="Consolas"
+                                                   FontSize="12"
+                                                   Margin="0,1" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Remnant Services -->
+                            <TextBlock Text="Services"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,4" />
+                            <ItemsControl ItemsSource="{Binding ViewModel.SelectedAvProduct.RemnantServices}"
+                                          Margin="0,0,0,12">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}"
+                                                   FontFamily="Consolas"
+                                                   FontSize="12"
+                                                   Margin="0,1" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Remnant Registry Keys -->
+                            <TextBlock Text="Registry Keys"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,0,4" />
+                            <ItemsControl ItemsSource="{Binding ViewModel.SelectedAvProduct.RemnantRegistryKeys}"
+                                          Margin="0,0,0,12">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}"
+                                                   FontFamily="Consolas"
+                                                   FontSize="12"
+                                                   Margin="0,1" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Removal Tool Link -->
+                            <TextBlock Margin="0,4,0,0"
+                                       Visibility="{Binding ViewModel.SelectedAvProduct.RemovalToolUrl, Converter={StaticResource StringToVis}}">
+                                <Hyperlink NavigateUri="{Binding ViewModel.SelectedAvProduct.RemovalToolUrl}"
+                                           RequestNavigate="Hyperlink_RequestNavigate">
+                                    <Run Text="Official Removal Tool" />
+                                </Hyperlink>
+                            </TextBlock>
+                        </StackPanel>
+                    </Expander>
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================ -->
+            <!-- TAB 10: BSOD Viewer (moved from Tools) -->
+            <!-- ============================================================ -->
+            <TabItem Header="BSOD Viewer">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Load button and description -->
+                    <StackPanel Grid.Row="0" Margin="0,0,0,12">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <ui:Button Content="Load Crash History"
+                                       Appearance="Primary"
+                                       Command="{Binding ViewModel.LoadBsodCrashesCommand}"
+                                       MinWidth="180"
+                                       Margin="0,0,12,0" />
+                            <ProgressBar IsIndeterminate="True"
+                                         Width="120"
+                                         Height="4"
+                                         VerticalAlignment="Center"
+                                         Visibility="{Binding ViewModel.IsLoadingBsod, Converter={StaticResource BoolToVis}}" />
+                        </StackPanel>
+                        <TextBlock Text="Parses minidump files from C:\Windows\Minidump to show blue screen crash history without requiring WinDbg or debugging tools."
+                                   TextWrapping="Wrap"
+                                   Opacity="0.6"
+                                   FontSize="12" />
+                    </StackPanel>
+
+                    <!-- BSOD Crashes DataGrid -->
+                    <DataGrid Grid.Row="2"
+                              ItemsSource="{Binding ViewModel.BsodCrashes}"
+                              SelectionMode="Single"
+                              IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Date/Time" Binding="{Binding CrashTimeFormatted}" Width="160" />
+                            <DataGridTextColumn Header="Bug Check Code" Binding="{Binding BugCheckCode}" Width="130">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontFamily" Value="Consolas" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Bug Check Name" Binding="{Binding BugCheckName}" Width="*" />
+                            <DataGridTextColumn Header="Faulting Module" Binding="{Binding FaultingDisplay}" Width="180" />
+                            <DataGridTextColumn Header="Dump File" Binding="{Binding DumpFileName}" Width="140" />
+                            <DataGridTextColumn Header="Size" Binding="{Binding DumpSizeFormatted}" Width="80" />
+                        </DataGrid.Columns>
+
+                        <!-- Highlight critical crashes in red -->
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow"
+                                   BasedOn="{StaticResource {x:Type DataGridRow}}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding BugCheckName}" Value="CRITICAL_PROCESS_DIED">
+                                        <Setter Property="Foreground" Value="#E06666" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding BugCheckName}" Value="KERNEL_SECURITY_CHECK_FAILURE">
+                                        <Setter Property="Foreground" Value="#E06666" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- ============================================================ -->
+            <!-- TAB 11: Password Generator (moved from Tools) -->
+            <!-- ============================================================ -->
+            <TabItem Header="Password Gen">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
+                    <StackPanel MaxWidth="500" HorizontalAlignment="Left" Margin="16">
+
+                        <!-- Description -->
+                        <TextBlock Text="Generate cryptographically secure passwords using System.Security.Cryptography. Suitable for Wi-Fi keys, account passwords, and service credentials."
+                                   TextWrapping="Wrap"
+                                   Opacity="0.6"
+                                   FontSize="12"
+                                   Margin="0,0,0,16" />
+
+                        <!-- Length slider -->
+                        <TextBlock Margin="0,0,0,4">
+                            <Run Text="Password Length: " />
+                            <Run Text="{Binding ViewModel.PasswordLength, Mode=OneWay}" FontWeight="SemiBold" />
+                        </TextBlock>
+                        <Slider Minimum="8"
+                                Maximum="128"
+                                Value="{Binding ViewModel.PasswordLength}"
+                                TickFrequency="1"
+                                IsSnapToTickEnabled="True"
+                                Margin="0,0,0,16" />
+
+                        <!-- Options card -->
+                        <ui:Card Padding="12" Margin="0,0,0,16">
+                            <StackPanel>
+                                <TextBlock Text="Character Options"
+                                           FontWeight="SemiBold"
+                                           Margin="0,0,0,8" />
+                                <CheckBox Content="Uppercase (A-Z)"
+                                          IsChecked="{Binding ViewModel.IncludeUppercase}"
+                                          Margin="0,0,0,4" />
+                                <CheckBox Content="Lowercase (a-z)"
+                                          IsChecked="{Binding ViewModel.IncludeLowercase}"
+                                          Margin="0,0,0,4" />
+                                <CheckBox Content="Numbers (0-9)"
+                                          IsChecked="{Binding ViewModel.IncludeNumbers}"
+                                          Margin="0,0,0,4" />
+                                <CheckBox Content="Symbols (!@#$%...)"
+                                          IsChecked="{Binding ViewModel.IncludeSymbols}"
+                                          Margin="0,0,0,4" />
+                                <CheckBox Content="Exclude ambiguous characters (0/O, 1/l/I)"
+                                          IsChecked="{Binding ViewModel.ExcludeAmbiguous}" />
+                            </StackPanel>
+                        </ui:Card>
+
+                        <!-- Generate / Copy buttons -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                            <ui:Button Content="Generate Password"
+                                       Appearance="Primary"
+                                       Command="{Binding ViewModel.GeneratePasswordCommand}"
+                                       Width="150"
+                                       Margin="0,0,8,0" />
+                            <ui:Button Content="Copy"
+                                       Command="{Binding ViewModel.CopyPasswordCommand}"
+                                       Width="80" />
+                        </StackPanel>
+
+                        <!-- Generated password output -->
+                        <TextBox Text="{Binding ViewModel.GeneratedPassword, Mode=OneWay}"
+                                 IsReadOnly="True"
+                                 FontFamily="Consolas"
+                                 FontSize="16"
+                                 Padding="12"
+                                 TextWrapping="Wrap" />
+                    </StackPanel>
+                </ScrollViewer>
             </TabItem>
         </TabControl>
 

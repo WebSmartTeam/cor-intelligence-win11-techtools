@@ -328,7 +328,6 @@ public partial class HomeViewModel : ObservableObject
         {
             "Network" => typeof(Views.NetworkPage),
             "Cleanup" => typeof(Views.CleanupPage),
-            "Registry" => typeof(Views.RegistryPage),
             "Uninstaller" => typeof(Views.UninstallerPage),
             "Hardware" => typeof(Views.HardwarePage),
             "Tools" => typeof(Views.ToolsPage),

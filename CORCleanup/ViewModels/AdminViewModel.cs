@@ -16,10 +16,12 @@ public partial class AdminViewModel : ObservableObject
     private readonly ISystemRepairService _repairService;
     private readonly IPrinterService _printerService;
     private readonly IHostsFileService _hostsFileService;
-    private readonly IDebloatService _debloatService;
     private readonly IFirewallService _firewallService;
     private readonly IEnvironmentService _environmentService;
     private readonly IReportService _reportService;
+    private readonly IBsodViewerService _bsodViewerService;
+    private readonly IAntivirusService _antivirusService;
+    private readonly IPasswordGeneratorService _passwordGenerator;
 
     [ObservableProperty] private string _pageTitle = "System Administration";
     [ObservableProperty] private bool _isLoading;
@@ -56,6 +58,11 @@ public partial class AdminViewModel : ObservableObject
 
     [ObservableProperty] private bool _isRepairing;
     [ObservableProperty] private string _repairOutput = "";
+    [ObservableProperty] private bool _isSfcRunning;
+    [ObservableProperty] private bool _isDismRunning;
+    [ObservableProperty] private bool _isNetworkResetRunning;
+    [ObservableProperty] private bool _isDnsFlushRunning;
+    [ObservableProperty] private bool _isWuResetRunning;
     public ObservableCollection<SystemRepairResult> RepairResults { get; } = new();
 
     // ================================================================
@@ -76,18 +83,6 @@ public partial class AdminViewModel : ObservableObject
     [ObservableProperty] private string _newHostHostname = "";
     [ObservableProperty] private string _newHostComment = "";
     public ObservableCollection<HostsEntry> HostsEntries { get; } = new();
-
-    // ================================================================
-    // Debloat / Bloatware Removal
-    // ================================================================
-
-    [ObservableProperty] private bool _isLoadingBloatware;
-    [ObservableProperty] private string _debloatOutput = "";
-    [ObservableProperty] private string _debloatCategoryFilter = "All";
-    public ObservableCollection<AppxPackageInfo> BloatwarePackages { get; } = new();
-    public ObservableCollection<AppxPackageInfo> FilteredBloatwarePackages { get; } = new();
-
-    public string[] DebloatCategories { get; } = ["All", "AI / Copilot", "Xbox / Gaming", "Entertainment", "Communication", "Productivity", "System Extras"];
 
     // ================================================================
     // Firewall Rules
@@ -126,6 +121,33 @@ public partial class AdminViewModel : ObservableObject
     [ObservableProperty] private string _exportStatusText = "";
 
     // ================================================================
+    // BSOD Crash History
+    // ================================================================
+
+    [ObservableProperty] private bool _isLoadingBsod;
+    public ObservableCollection<BsodCrashEntry> BsodCrashes { get; } = new();
+
+    // ================================================================
+    // AV Health Scanner
+    // ================================================================
+
+    [ObservableProperty] private bool _isScanningAv;
+    [ObservableProperty] private AntivirusProduct? _selectedAvProduct;
+    public ObservableCollection<AntivirusProduct> AntivirusProducts { get; } = new();
+
+    // ================================================================
+    // Password Generator
+    // ================================================================
+
+    [ObservableProperty] private int _passwordLength = 16;
+    [ObservableProperty] private bool _includeUppercase = true;
+    [ObservableProperty] private bool _includeLowercase = true;
+    [ObservableProperty] private bool _includeNumbers = true;
+    [ObservableProperty] private bool _includeSymbols = true;
+    [ObservableProperty] private bool _excludeAmbiguous;
+    [ObservableProperty] private string _generatedPassword = "";
+
+    // ================================================================
     // Constructor
     // ================================================================
 
@@ -136,10 +158,12 @@ public partial class AdminViewModel : ObservableObject
         ISystemRepairService repairService,
         IPrinterService printerService,
         IHostsFileService hostsFileService,
-        IDebloatService debloatService,
         IFirewallService firewallService,
         IEnvironmentService environmentService,
-        IReportService reportService)
+        IReportService reportService,
+        IBsodViewerService bsodViewerService,
+        IAntivirusService antivirusService,
+        IPasswordGeneratorService passwordGenerator)
     {
         _startupService = startupService;
         _servicesManager = servicesManager;
@@ -147,15 +171,16 @@ public partial class AdminViewModel : ObservableObject
         _repairService = repairService;
         _printerService = printerService;
         _hostsFileService = hostsFileService;
-        _debloatService = debloatService;
         _firewallService = firewallService;
         _environmentService = environmentService;
         _reportService = reportService;
+        _bsodViewerService = bsodViewerService;
+        _antivirusService = antivirusService;
+        _passwordGenerator = passwordGenerator;
     }
 
     partial void OnHideMicrosoftEntriesChanged(bool value) => ApplyStartupFilter();
     partial void OnServiceFilterChanged(string value) => ApplyServiceFilter();
-    partial void OnDebloatCategoryFilterChanged(string value) => ApplyBloatwareFilter();
     partial void OnFirewallFilterChanged(string value) => ApplyFirewallFilter();
     partial void OnFirewallDirectionFilterChanged(string value) => ApplyFirewallFilter();
     partial void OnEnvVarFilterChanged(string value) => ApplyEnvVarFilter();
@@ -355,15 +380,31 @@ public partial class AdminViewModel : ObservableObject
     [RelayCommand]
     private async Task RunSfcScanAsync()
     {
-        await RunRepairOperationAsync("SFC Scan",
-            () => _repairService.RunSfcScanAsync(new Progress<string>(AppendRepairOutput)));
+        IsSfcRunning = true;
+        try
+        {
+            await RunRepairOperationAsync("SFC Scan",
+                () => _repairService.RunSfcScanAsync(new Progress<string>(AppendRepairOutput)));
+        }
+        finally
+        {
+            IsSfcRunning = false;
+        }
     }
 
     [RelayCommand]
     private async Task RunDismRepairAsync()
     {
-        await RunRepairOperationAsync("DISM Restore Health",
-            () => _repairService.RunDismRestoreHealthAsync(new Progress<string>(AppendRepairOutput)));
+        IsDismRunning = true;
+        try
+        {
+            await RunRepairOperationAsync("DISM Restore Health",
+                () => _repairService.RunDismRestoreHealthAsync(new Progress<string>(AppendRepairOutput)));
+        }
+        finally
+        {
+            IsDismRunning = false;
+        }
     }
 
     [RelayCommand]
@@ -372,22 +413,46 @@ public partial class AdminViewModel : ObservableObject
         if (!DialogHelper.Confirm("Reset the network stack?\nThis will reset Winsock, TCP/IP, DNS cache, and may require a reboot."))
             return;
 
-        await RunRepairOperationAsync("Network Stack Reset",
-            () => _repairService.ResetNetworkStackAsync(new Progress<string>(AppendRepairOutput)));
+        IsNetworkResetRunning = true;
+        try
+        {
+            await RunRepairOperationAsync("Network Stack Reset",
+                () => _repairService.ResetNetworkStackAsync(new Progress<string>(AppendRepairOutput)));
+        }
+        finally
+        {
+            IsNetworkResetRunning = false;
+        }
     }
 
     [RelayCommand]
     private async Task RunDnsFlushAsync()
     {
-        await RunRepairOperationAsync("DNS Cache Flush",
-            () => _repairService.FlushDnsAsync());
+        IsDnsFlushRunning = true;
+        try
+        {
+            await RunRepairOperationAsync("DNS Cache Flush",
+                () => _repairService.FlushDnsAsync());
+        }
+        finally
+        {
+            IsDnsFlushRunning = false;
+        }
     }
 
     [RelayCommand]
     private async Task RunWindowsUpdateResetAsync()
     {
-        await RunRepairOperationAsync("Windows Update Reset",
-            () => _repairService.ResetWindowsUpdateAsync(new Progress<string>(AppendRepairOutput)));
+        IsWuResetRunning = true;
+        try
+        {
+            await RunRepairOperationAsync("Windows Update Reset",
+                () => _repairService.ResetWindowsUpdateAsync(new Progress<string>(AppendRepairOutput)));
+        }
+        finally
+        {
+            IsWuResetRunning = false;
+        }
     }
 
     private async Task RunRepairOperationAsync(string name, Func<Task<SystemRepairResult>> operation)
@@ -420,7 +485,7 @@ public partial class AdminViewModel : ObservableObject
 
     private void AppendRepairOutput(string line)
     {
-        _repairOutputBuilder.AppendLine(line);
+        _repairOutputBuilder.AppendLine(line.TrimEnd());
         RepairOutput = _repairOutputBuilder.ToString();
     }
 
@@ -619,195 +684,6 @@ public partial class AdminViewModel : ObservableObject
         {
             StatusText = $"Error: {ex.Message}";
         }
-    }
-
-    // ================================================================
-    // Debloat / Bloatware Removal Commands
-    // ================================================================
-
-    [RelayCommand]
-    private async Task ScanBloatwareAsync()
-    {
-        IsLoadingBloatware = true;
-        DebloatOutput = "";
-        StatusText = "Scanning for bloatware...";
-
-        try
-        {
-            var packages = await _debloatService.GetBloatwareListAsync();
-            BloatwarePackages.Clear();
-            foreach (var pkg in packages)
-                BloatwarePackages.Add(pkg);
-
-            ApplyBloatwareFilter();
-
-            var installed = packages.Count(p => p.IsInstalled);
-            StatusText = $"{installed} bloatware package(s) found installed out of {packages.Count} known";
-        }
-        catch (Exception ex)
-        {
-            StatusText = $"Error scanning: {ex.Message}";
-        }
-        finally
-        {
-            IsLoadingBloatware = false;
-        }
-    }
-
-    [RelayCommand]
-    private async Task RemoveSelectedBloatwareAsync()
-    {
-        var selected = BloatwarePackages.Where(p => p.IsSelected && p.IsInstalled).ToList();
-        if (selected.Count == 0)
-        {
-            StatusText = "No packages selected for removal";
-            return;
-        }
-
-        if (!DialogHelper.Confirm($"Remove {selected.Count} selected package(s)?\nThis will remove them for all users."))
-            return;
-
-        IsLoadingBloatware = true;
-        _debloatOutputBuilder.Clear();
-        DebloatOutput = "";
-        StatusText = $"Removing {selected.Count} package(s)...";
-
-        try
-        {
-            var result = await _debloatService.RemovePackagesAsync(selected,
-                new Progress<string>(AppendDebloatOutput));
-
-            StatusText = $"Removed {result.Removed}/{result.TotalSelected} — " +
-                         $"{result.Failed} failed, {result.NotFound} not found";
-
-            await ScanBloatwareAsync();
-        }
-        catch (Exception ex)
-        {
-            StatusText = $"Error: {ex.Message}";
-        }
-        finally
-        {
-            IsLoadingBloatware = false;
-        }
-    }
-
-    [RelayCommand]
-    private async Task DisableCopilotAsync()
-    {
-        if (!DialogHelper.Confirm("Disable Microsoft Copilot?\nThis removes the Copilot package and applies registry policies."))
-            return;
-
-        IsLoadingBloatware = true;
-        _debloatOutputBuilder.Clear();
-        DebloatOutput = "";
-        StatusText = "Disabling Microsoft Copilot...";
-
-        try
-        {
-            var success = await _debloatService.DisableCopilotAsync(
-                new Progress<string>(AppendDebloatOutput));
-            StatusText = success ? "Copilot disabled successfully" : "Copilot disable completed with warnings";
-        }
-        catch (Exception ex)
-        {
-            StatusText = $"Error: {ex.Message}";
-        }
-        finally
-        {
-            IsLoadingBloatware = false;
-        }
-    }
-
-    [RelayCommand]
-    private async Task DisableRecallAsync()
-    {
-        if (!DialogHelper.Confirm("Disable Windows Recall?\nThis applies registry policies to prevent Recall on 24H2 Copilot+ PCs."))
-            return;
-
-        IsLoadingBloatware = true;
-        _debloatOutputBuilder.Clear();
-        DebloatOutput = "";
-        StatusText = "Disabling Windows Recall...";
-
-        try
-        {
-            var success = await _debloatService.DisableRecallAsync(
-                new Progress<string>(AppendDebloatOutput));
-            StatusText = success ? "Recall disabled successfully" : "Recall disable completed with warnings";
-        }
-        catch (Exception ex)
-        {
-            StatusText = $"Error: {ex.Message}";
-        }
-        finally
-        {
-            IsLoadingBloatware = false;
-        }
-    }
-
-    [RelayCommand]
-    private async Task ApplyPrivacyTweaksAsync()
-    {
-        if (!DialogHelper.Confirm("Apply privacy tweaks?\nThis disables telemetry, advertising ID, Start suggestions, Bing search, and lock screen ads."))
-            return;
-
-        IsLoadingBloatware = true;
-        _debloatOutputBuilder.Clear();
-        DebloatOutput = "";
-        StatusText = "Applying privacy tweaks...";
-
-        try
-        {
-            var success = await _debloatService.ApplyPrivacyTweaksAsync(
-                new Progress<string>(AppendDebloatOutput));
-            StatusText = success ? "Privacy tweaks applied" : "Privacy tweaks completed with warnings";
-        }
-        catch (Exception ex)
-        {
-            StatusText = $"Error: {ex.Message}";
-        }
-        finally
-        {
-            IsLoadingBloatware = false;
-        }
-    }
-
-    [RelayCommand]
-    private void SelectAllSafeBloatware()
-    {
-        foreach (var pkg in BloatwarePackages.Where(p => p.IsInstalled && p.Safety == DebloatSafety.Safe))
-            pkg.IsSelected = true;
-        ApplyBloatwareFilter();
-        StatusText = $"Selected {BloatwarePackages.Count(p => p.IsSelected)} safe package(s)";
-    }
-
-    [RelayCommand]
-    private void DeselectAllBloatware()
-    {
-        foreach (var pkg in BloatwarePackages)
-            pkg.IsSelected = false;
-        ApplyBloatwareFilter();
-        StatusText = "Selection cleared";
-    }
-
-    private void ApplyBloatwareFilter()
-    {
-        FilteredBloatwarePackages.Clear();
-        foreach (var pkg in BloatwarePackages)
-        {
-            if (DebloatCategoryFilter != "All" && pkg.CategoryDisplay != DebloatCategoryFilter)
-                continue;
-            FilteredBloatwarePackages.Add(pkg);
-        }
-    }
-
-    private readonly System.Text.StringBuilder _debloatOutputBuilder = new();
-
-    private void AppendDebloatOutput(string line)
-    {
-        _debloatOutputBuilder.AppendLine(line);
-        DebloatOutput = _debloatOutputBuilder.ToString();
     }
 
     // ================================================================
@@ -1034,7 +910,6 @@ public partial class AdminViewModel : ObservableObject
                 ExportStatusText = $"Report saved to {dialog.FileName}";
                 StatusText = "System summary report exported successfully";
 
-                // Open the report in the default browser
                 try
                 {
                     Process.Start(new ProcessStartInfo
@@ -1063,5 +938,97 @@ public partial class AdminViewModel : ObservableObject
         {
             IsExportingReport = false;
         }
+    }
+
+    // ================================================================
+    // BSOD Crash History Commands
+    // ================================================================
+
+    [RelayCommand]
+    private async Task LoadBsodCrashesAsync()
+    {
+        IsLoadingBsod = true;
+        StatusText = "Parsing crash dump files...";
+
+        try
+        {
+            var crashes = await _bsodViewerService.GetCrashEntriesAsync();
+            BsodCrashes.Clear();
+            foreach (var crash in crashes)
+                BsodCrashes.Add(crash);
+
+            StatusText = crashes.Count > 0
+                ? $"{crashes.Count} crash dump(s) found"
+                : "No crash dumps found — system appears stable";
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Error reading crash dumps: {ex.Message}";
+        }
+        finally
+        {
+            IsLoadingBsod = false;
+        }
+    }
+
+    // ================================================================
+    // AV Health Scanner Commands
+    // ================================================================
+
+    [RelayCommand]
+    private async Task ScanAntivirusAsync()
+    {
+        IsScanningAv = true;
+        AntivirusProducts.Clear();
+        SelectedAvProduct = null;
+        StatusText = "Scanning for antivirus products...";
+
+        try
+        {
+            var products = await _antivirusService.ScanAsync(new Progress<string>(msg => StatusText = msg));
+            foreach (var product in products)
+                AntivirusProducts.Add(product);
+
+            var active = products.Count(p => p.IsEnabled);
+            var upToDate = products.Count(p => p.IsUpToDate);
+            StatusText = $"{products.Count} AV product(s) found — {active} active, {upToDate} up to date";
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"AV scan error: {ex.Message}";
+        }
+        finally
+        {
+            IsScanningAv = false;
+        }
+    }
+
+    // ================================================================
+    // Password Generator Commands
+    // ================================================================
+
+    [RelayCommand]
+    private void GeneratePassword()
+    {
+        var options = new PasswordOptions
+        {
+            Length = PasswordLength,
+            IncludeUppercase = IncludeUppercase,
+            IncludeLowercase = IncludeLowercase,
+            IncludeNumbers = IncludeNumbers,
+            IncludeSymbols = IncludeSymbols,
+            ExcludeAmbiguous = ExcludeAmbiguous
+        };
+
+        GeneratedPassword = _passwordGenerator.Generate(options);
+        StatusText = $"Generated {PasswordLength}-character password";
+    }
+
+    [RelayCommand]
+    private void CopyPassword()
+    {
+        if (string.IsNullOrEmpty(GeneratedPassword)) return;
+        System.Windows.Clipboard.SetText(GeneratedPassword);
+        StatusText = "Password copied to clipboard";
     }
 }

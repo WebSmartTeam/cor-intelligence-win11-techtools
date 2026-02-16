@@ -23,6 +23,7 @@
             <converters:IntGreaterThanZeroToVisibilityConverter x:Key="IntGreaterThanZeroToVis" />
             <converters:ActionStatusToBrushConverter x:Key="ActionStatusToBrush" />
             <converters:RiskLevelToBrushConverter x:Key="RiskLevelToBrush" />
+            <converters:BoolToAppearanceConverter x:Key="BoolToAppearance" />
 
             <!-- Compact DataGrid — tight rows, no gridlines -->
             <Style TargetType="DataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">

@@ -26,7 +26,6 @@ public partial class App : Application
             services.AddTransient<HomePage>();
             services.AddTransient<NetworkPage>();
             services.AddTransient<CleanupPage>();
-            services.AddTransient<RegistryPage>();
             services.AddTransient<UninstallerPage>();
             services.AddTransient<HardwarePage>();
             services.AddTransient<ToolsPage>();
@@ -37,7 +36,6 @@ public partial class App : Application
             services.AddTransient<HomeViewModel>();
             services.AddTransient<NetworkViewModel>();
             services.AddTransient<CleanupViewModel>();
-            services.AddTransient<RegistryViewModel>();
             services.AddTransient<UninstallerViewModel>();
             services.AddTransient<HardwareViewModel>();
             services.AddTransient<ToolsViewModel>();

@@ -57,5 +57,13 @@ public sealed record DiskHealthInfo
         ? $"{TemperatureCelsius}°C"
         : "—";
 
+    public string PowerOnDisplay => PowerOnHours.HasValue
+        ? $"{PowerOnHours:N0}"
+        : "—";
+
+    public string WearDisplay => WearLevellingPercent.HasValue
+        ? $"{WearLevellingPercent}%"
+        : "—";
+
     public string HealthDisplay => OverallHealth.ToString();
 }
