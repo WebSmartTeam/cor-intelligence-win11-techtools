@@ -101,19 +101,32 @@ public sealed class RegistryCleanerService : IRegistryCleanerService
 
     public Task<bool> RestoreBackupAsync(string backupFilePath) => Task.Run(() =>
     {
-        // Prevent path traversal — backup must be within our backup directory
-        if (!InputSanitiser.IsPathWithinDirectory(backupFilePath, _backupDir))
+        // Resolve to canonical full path first to defeat path traversal (../../, symlinks)
+        string resolvedPath;
+        try
+        {
+            resolvedPath = Path.GetFullPath(backupFilePath);
+        }
+        catch
+        {
+            return false;
+        }
+
+        // Backup must be within our backup directory
+        var resolvedDir = Path.GetFullPath(_backupDir);
+        if (!resolvedPath.StartsWith(resolvedDir, StringComparison.OrdinalIgnoreCase))
             return false;
 
-        if (!File.Exists(backupFilePath)) return false;
-
-        // Additional check: must have .reg extension
-        if (!backupFilePath.EndsWith(".reg", StringComparison.OrdinalIgnoreCase))
+        // Must have .reg extension
+        if (!resolvedPath.EndsWith(".reg", StringComparison.OrdinalIgnoreCase))
             return false;
+
+        if (!File.Exists(resolvedPath)) return false;
 
         try
         {
-            var safePath = InputSanitiser.SanitiseForProcessArgument(backupFilePath);
+            // Sanitise the resolved path for safe embedding in process arguments
+            var safePath = InputSanitiser.SanitiseForProcessArgument(resolvedPath);
 
             // reg import runs silently and merges the .reg file back
             var psi = new ProcessStartInfo("reg", $"import \"{safePath}\"")

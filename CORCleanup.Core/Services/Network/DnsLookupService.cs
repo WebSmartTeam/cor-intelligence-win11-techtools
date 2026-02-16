@@ -160,7 +160,13 @@ public sealed partial class DnsLookupService : IDnsLookupService
         catch (OperationCanceledException)
         {
             sw.Stop();
-            try { proc.Kill(entireProcessTree: true); } catch { }
+            try
+            {
+                proc.Kill(entireProcessTree: true);
+                // Wait briefly for the process to actually terminate to prevent zombie processes
+                proc.WaitForExit(TimeSpan.FromSeconds(5));
+            }
+            catch { }
             return new DnsLookupResult
             {
                 Domain = domain,

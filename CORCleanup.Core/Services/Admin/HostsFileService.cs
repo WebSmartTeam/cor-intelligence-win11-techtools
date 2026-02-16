@@ -115,6 +115,15 @@ public sealed partial class HostsFileService : IHostsFileService
         if (!InputSanitiser.IsValidHostsHostname(hostname))
             throw new ArgumentException("Invalid hostname. Use alphanumeric characters, hyphens, and dots only.", nameof(hostname));
 
+        // Sanitise comment: strip newlines/carriage returns to prevent hosts file line injection.
+        // A malicious comment like "legit\n0.0.0.0 google.com" would inject a new entry.
+        var safeComment = comment?
+            .Replace("\r", "")
+            .Replace("\n", " ")
+            .Trim();
+        if (string.IsNullOrWhiteSpace(safeComment))
+            safeComment = null;
+
         var entries = await ReadHostsFileAsync();
 
         // Check for duplicate hostname
@@ -125,7 +134,7 @@ public sealed partial class HostsFileService : IHostsFileService
         {
             IpAddress = ipAddress,
             Hostname = hostname,
-            Comment = comment,
+            Comment = safeComment,
             IsEnabled = true,
             LineNumber = 0
         });

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Runtime.Versioning;
 using CORCleanup.Core.Interfaces;
 using CORCleanup.Core.Models;
+using CORCleanup.Core.Security;
 
 namespace CORCleanup.Core.Services.Admin;
 
@@ -103,13 +104,19 @@ public sealed class DebloatService : IDebloatService
         {
             progress?.Report($"Removing {pkg.FriendlyName}...");
 
+            // Escape package name for PowerShell single-quoted strings (defense-in-depth:
+            // values are from static KnownBloatware array, but escaping prevents injection
+            // if dynamic values are ever introduced)
+            var safeName = InputSanitiser.EscapeForPowerShell(pkg.PackageName);
+
             // Remove for all users
             var removeResult = await RunPowerShellAsync(
-                $"Get-AppxPackage -AllUsers -Name '{pkg.PackageName}' | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue");
+                $"Get-AppxPackage -AllUsers -Name '{safeName}' | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue");
 
-            // Deprovision to prevent reinstallation on new user profiles
+            // Deprovision to prevent reinstallation on new user profiles.
+            // Use -eq exact match instead of -like wildcard to prevent wildcard injection.
             await RunPowerShellAsync(
-                $"Get-AppxProvisionedPackage -Online | Where-Object {{ $_.DisplayName -like '*{pkg.PackageName}*' }} | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue");
+                $"Get-AppxProvisionedPackage -Online | Where-Object {{ $_.DisplayName -eq '{safeName}' }} | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue");
 
             if (removeResult == 0)
             {
@@ -121,7 +128,7 @@ public sealed class DebloatService : IDebloatService
             {
                 // Check if package was already gone
                 var checkResult = await RunPowerShellAsync(
-                    $"if (Get-AppxPackage -AllUsers -Name '{pkg.PackageName}') {{ exit 1 }} else {{ exit 0 }}");
+                    $"if (Get-AppxPackage -AllUsers -Name '{safeName}') {{ exit 1 }} else {{ exit 0 }}");
 
                 if (checkResult == 0)
                 {
@@ -161,9 +168,10 @@ public sealed class DebloatService : IDebloatService
         await RunPowerShellAsync(
             "Get-AppxPackage -AllUsers -Name 'Microsoft.Windows.Copilot' | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue");
 
-        // Deprovision to prevent reinstallation
+        // Deprovision both Copilot packages to prevent reinstallation.
+        // Use -eq exact match instead of -like wildcard to prevent unintended matches.
         await RunPowerShellAsync(
-            "Get-AppxProvisionedPackage -Online | Where-Object { $_.DisplayName -like '*Copilot*' } | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue");
+            "Get-AppxProvisionedPackage -Online | Where-Object { $_.DisplayName -eq 'Microsoft.Copilot' -or $_.DisplayName -eq 'Microsoft.Windows.Copilot' } | Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue");
 
         // 2. Registry policy — disable Windows Copilot (machine-level)
         progress?.Report("Applying Copilot registry policies...");
@@ -302,6 +310,14 @@ public sealed class DebloatService : IDebloatService
         return result;
     }
 
+    /// <summary>
+    /// Runs a PowerShell script via Windows PowerShell 5.1.
+    /// -ExecutionPolicy Bypass is required because the system's execution policy may be
+    /// Restricted or AllSigned, which would block our inline commands. This is standard
+    /// practice for admin tools (PowerToys, winget, DISM GUI wrappers all do the same).
+    /// The tool already runs elevated (requireAdministrator manifest), so this does not
+    /// grant any additional privileges beyond what the process already has.
+    /// </summary>
     private static async Task<int> RunPowerShellAsync(string script, int timeoutSeconds = 120)
     {
         return await RunProcessAsync(GetWindowsPowerShellPath(),
